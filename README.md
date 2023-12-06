@@ -1,6 +1,6 @@
-# Titulo del proyecto
+# XSQL
 
-_Este es un proyecto universitario del curso de Organización de Lenguajes y Compiladores 2_
+_Este es un proyecto universitario del curso de Organización de Lenguajes y Compiladores 2, el cual un sistema administrador de base de datos, capaz de manejar las instrucciones básicas de un DBMS relacional convencional_
 
 ## 🚀 Comenzando
 
@@ -11,7 +11,7 @@ _Este es un proyecto universitario del curso de Organización de Lenguajes y Com
 python --version
 ```
 
-### ⚙️ Ejecucion 
+### ⚙️ Ejecucion
 
 Instalar las dependencias del proyecto
 
