@@ -1,6 +1,6 @@
 # Para la construccion de la interfaz
 import tkinter as tk
-from tkinter import Button, PhotoImage, Label, PanedWindow, ttk
+from tkinter import PanedWindow, PhotoImage, ttk
 
 # Para el formato del editor de codigo
 import pygments.lexers
@@ -9,7 +9,9 @@ from chlorophyll import CodeView
 # Para obtener las imagenes
 import os
 thisdir = os.path.dirname(__file__)
-path_icon_execute = os.path.join(thisdir, 'images', 'icon_execute.png')
+IMG_BASE_DE_DATOS = None
+IMG_BASE_DE_DATO = None
+IMG_CARPETA = None
 
 # Para atajos del teclado
 import keyboard
@@ -75,6 +77,25 @@ def setear_salida(texto):
     # Deshabilitar el widget Text nuevamente
     text_widget.config(state="disabled")
 
+def mostrar_componentes_del_lenguaje():
+
+    global IMG_BASE_DE_DATOS, IMG_BASE_DE_DATO, IMG_CARPETA
+
+    # Se eliminan los items actuales
+    for item in treeview.get_children():
+        treeview.delete(item)
+
+    # Se crean nuevamente los items
+    IMG_BASE_DE_DATOS = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bds.png'))
+    treeview.insert('', '0', 'item1', text='  Bases de datos', tags=('estilo_negrita'), image=IMG_BASE_DE_DATOS)
+
+    IMG_BASE_DE_DATO = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bd.png'))
+    treeview.insert('item1', 'end', 'Base 1', text='Base 1', image=IMG_BASE_DE_DATO)
+    treeview.insert('item1', 'end', 'Base 2', text='Base 2', image=IMG_BASE_DE_DATO)
+
+    IMG_CARPETA = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
+    treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
+
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
 
@@ -117,6 +138,8 @@ submenu_bd.add_command(label="Crear nuevo")
 submenu_bd.add_command(label="Eliminar")
 submenu_bd.add_command(label="Crear DUMP")
 submenu_bd.add_command(label="Seleccionar uno")
+submenu_bd.add_separator()
+submenu_bd.add_command(label="Actualizar", command=mostrar_componentes_del_lenguaje)
 tool_menu.add_cascade(label="Base de datos", menu=submenu_bd)
 
 submenu_sql = tk.Menu(tool_menu)
@@ -136,13 +159,16 @@ root.config(menu=menubar)
 panel_1 = PanedWindow(bd=4, relief="raised", bg="red")
 panel_1.pack(fill="both", expand=1)
 
+# -------------------------------------------
 # Panel izquierdo dentro del panel principal
-left_label = Label(panel_1, text="Left Panel")
-panel_1.add(left_label)
-
+treeview = ttk.Treeview()
+treeview.tag_configure('estilo_negrita', font=('TkDefaultFont', 10, 'bold'))
+treeview.pack()
+panel_1.add(treeview)
 # Se agrega un sub panel dentro del panel principal
 panel_2 = PanedWindow(panel_1, orient="vertical", bd=4, relief="raised", bg="blue")
 panel_1.add(panel_2)
+# -------------------------------------------
 
 # -------------------------------------------
 # Panel central dentro del sub panel
