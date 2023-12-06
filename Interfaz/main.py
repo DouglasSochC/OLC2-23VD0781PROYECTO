@@ -16,6 +16,8 @@ IMG_CARPETA = None
 # Para atajos del teclado
 import keyboard
 
+# Variables generales
+TEMA_EDITOR="monokai"
 NOMBRE_TAB = 'query'
 TABS_ACTUALES = []
 ANCHO_VENTANA = 1000
@@ -93,45 +95,82 @@ def mostrar_componentes_del_lenguaje():
 
 # OPCIONES PARA EL MENU DE ARCHIVOS
 
-def crear_tab_nuevo():
+def crear_tab_nuevo(nombre_archivo=None, path_archivo=None):
 
-    indice_nuevo_tab = (TABS_ACTUALES[-1] + 1) if len(TABS_ACTUALES) > 0 else 1
-    nuevo_tab = ttk.Frame(notebook_central)
-    TABS_ACTUALES.append(indice_nuevo_tab)
-    notebook_central.add(nuevo_tab, text=NOMBRE_TAB + str(indice_nuevo_tab) + '.sql')
+    crear_archivo = True
+    if nombre_archivo:
 
-    # Panel del codigo dentro del panel central
-    codeview = CodeView(nuevo_tab, lexer=pygments.lexers.SqlLexer, color_scheme="monokai")
-    codeview.pack(fill="both", expand=True)
+        for tab in TABS_ACTUALES:
+            if tab["path"] is not None and tab["path"] == path_archivo:
+                crear_archivo = False
+                break
 
-    # Seleciona notebok
-    notebook_central.select(nuevo_tab)
+        if crear_archivo:
+            TABS_ACTUALES.append({
+                "nativo": False,
+                "indice": -1,
+                "nombre": nombre_archivo,
+                "path": path_archivo
+            })
+    else:
+        indice = 0
+        for tab in reversed(TABS_ACTUALES):
+            if tab["nativo"]:
+                indice = tab["indice"] + 1
+                nombre_archivo = NOMBRE_TAB + str(indice) + '.sql'
+                break
+
+        if indice <= 0:
+            nombre_archivo = NOMBRE_TAB + str(1) + '.sql'
+            indice = 1
+
+        TABS_ACTUALES.append({
+            "nativo": True,
+            "indice": indice,
+            "nombre": nombre_archivo,
+            "path": None
+        })
+
+    if crear_archivo:
+        # Agrega un nuevo tab con el nombre del archivo
+        nuevo_tab = ttk.Frame(notebook_central)
+        notebook_central.add(nuevo_tab, text=nombre_archivo)
+
+        # Panel del codigo dentro del nuevo tab
+        codeview = CodeView(nuevo_tab, lexer=pygments.lexers.SqlLexer, color_scheme=TEMA_EDITOR)
+        codeview.pack(fill="both", expand=True)
+
+        # Selecciona el tab recien creado
+        notebook_central.select(nuevo_tab)
+
+    return crear_archivo
 
 def abrir_archivo():
-    if len(TABS_ACTUALES) <= 0:
-        return
-    
+
     file_path = filedialog.askopenfilename(filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
     if file_path:
         ruta_archivo = file_path
+        nombre_archivo = os.path.basename(ruta_archivo)
         with open(ruta_archivo, 'r') as archivo:
-            indice_actual = notebook_central.index(notebook_central.select())
-            contenido = archivo.read()
-            setear_contenido_nuevo_tab(indice_actual, contenido)
+            se_creo_archivo = crear_tab_nuevo(nombre_archivo, ruta_archivo)
+            if se_creo_archivo:
+                contenido = archivo.read()
+                indice_actual = notebook_central.index(notebook_central.select())
+                setear_contenido_nuevo_tab(indice_actual, contenido)
 
-def guardar_como():
+# def guardar_como():
 
-    if len(TABS_ACTUALES) <= 0:
-        return
+#     if len(TABS_ACTUALES) <= 0:
+#         return
 
-    # Se obtiene el nombre actual del tab
-    indice_actual = notebook_central.index(notebook_central.select())
-    nombre_tab_actual = notebook_central.tab(indice_actual, "text")
+#     # Se obtiene el nombre actual del tab
+#     indice_actual = notebook_central.index(notebook_central.select())
+#     nombre_tab_actual = notebook_central.tab(indice_actual, "text")
 
-    file_path = filedialog.asksaveasfilename(defaultextension=".sql", initialfile=nombre_tab_actual, filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
-    if file_path:
-        with open(file_path, 'w') as archivo:
-            archivo.write(obtener_contenido_tab(indice_actual))
+#     file_path = filedialog.asksaveasfilename(defaultextension=".sql", initialfile=nombre_tab_actual, filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+#     if file_path:
+#         with open(file_path, 'w') as archivo:
+#             archivo.write(obtener_contenido_tab(indice_actual))
 
 def cerrar_tab_actual():
 
@@ -142,12 +181,18 @@ def cerrar_tab_actual():
     TABS_ACTUALES.pop(indice_actual)
     notebook_central.forget(indice_actual)
 
+    # Obtener el widget Frame del tab seleccionado
+    tab_frame = notebook_central.winfo_children()[indice_actual]
+
+    # Destruir el frame para liberar recursos
+    tab_frame.destroy()
+
 def salir():
     root.destroy()
 
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
-
+keyboard.add_hotkey('ctrl+o', abrir_archivo)
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
@@ -171,9 +216,9 @@ menubar = tk.Menu(root)
 # Menu de archivos
 file_menu = tk.Menu(menubar)
 file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
-file_menu.add_command(label="Abrir", command=abrir_archivo)
-file_menu.add_command(label="Guardar")
-file_menu.add_command(label="Guardar como", command=guardar_como)
+file_menu.add_command(label="Abrir (Ctrl+O)", command=abrir_archivo)
+# file_menu.add_command(label="Guardar")
+# file_menu.add_command(label="Guardar como", command=guardar_como)
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
 file_menu.add_command(label="Salir", command=salir)
