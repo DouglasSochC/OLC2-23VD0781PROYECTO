@@ -1,6 +1,6 @@
 # Para la construccion de la interfaz
 import tkinter as tk
-from tkinter import PanedWindow, PhotoImage, ttk
+from tkinter import PanedWindow, PhotoImage, filedialog, ttk
 
 # Para el formato del editor de codigo
 import pygments.lexers
@@ -20,6 +20,19 @@ NOMBRE_TAB = 'query'
 TABS_ACTUALES = []
 ANCHO_VENTANA = 1000
 ALTURA_VENTANA = 700
+
+def obtener_contenido_tab(indice_actual):
+    # Obtener el widget CodeView del tab seleccionado
+    tab_seleccionado = notebook_central.winfo_children()[indice_actual]
+    codeview = tab_seleccionado.winfo_children()[0]  # CodeView es el primer widget dentro del tab
+
+    # Obtener el widget Text dentro de CodeView
+    text_widget = codeview.winfo_children()[0]  # Text es el primer widget dentro de CodeView
+
+    # Obtener el texto del widget Text
+    texto = text_widget.get(1.0, tk.END)
+
+    return texto
 
 def crear_tab_nuevo():
 
@@ -50,16 +63,7 @@ def ejecutar_query():
         return
 
     indice_actual = notebook_central.index(notebook_central.select())
-
-    # Obtener el widget CodeView del tab seleccionado
-    tab_seleccionado = notebook_central.winfo_children()[indice_actual]
-    codeview = tab_seleccionado.winfo_children()[0]  # CodeView es el primer widget dentro del tab
-
-    # Obtener el widget Text dentro de CodeView
-    text_widget = codeview.winfo_children()[0]  # Text es el primer widget dentro de CodeView
-
-    # Obtener el texto del widget Text
-    texto = text_widget.get(1.0, tk.END)
+    texto = obtener_contenido_tab(indice_actual)
 
     # Se analiza el query
     print(texto)
@@ -86,15 +90,29 @@ def mostrar_componentes_del_lenguaje():
         treeview.delete(item)
 
     # Se crean nuevamente los items
-    IMG_BASE_DE_DATOS = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bds.png'))
+    IMG_BASE_DE_DATOS = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bds.png'))
     treeview.insert('', '0', 'item1', text='  Bases de datos', tags=('estilo_negrita'), image=IMG_BASE_DE_DATOS)
 
-    IMG_BASE_DE_DATO = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bd.png'))
+    IMG_BASE_DE_DATO = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bd.png'))
     treeview.insert('item1', 'end', 'Base 1', text='Base 1', image=IMG_BASE_DE_DATO)
     treeview.insert('item1', 'end', 'Base 2', text='Base 2', image=IMG_BASE_DE_DATO)
 
-    IMG_CARPETA = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
+    IMG_CARPETA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
     treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
+
+def guardar_como():
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    # Se obtiene el nombre actual del tab
+    indice_actual = notebook_central.index(notebook_central.select())
+    nombre_tab_actual = notebook_central.tab(indice_actual, "text")
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".sql", initialfile=nombre_tab_actual, filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+    if file_path:
+        with open(file_path, 'w') as archivo:
+            archivo.write(obtener_contenido_tab(indice_actual))
 
 def salir():
     root.destroy()
@@ -127,7 +145,7 @@ file_menu = tk.Menu(menubar)
 file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
 file_menu.add_command(label="Abrir")
 file_menu.add_command(label="Guardar")
-file_menu.add_command(label="Guardar como")
+file_menu.add_command(label="Guardar como", command=guardar_como)
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
 file_menu.add_command(label="Salir", command=salir)
