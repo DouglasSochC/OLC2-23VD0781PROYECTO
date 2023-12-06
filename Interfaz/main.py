@@ -34,6 +34,20 @@ def obtener_contenido_tab(indice_actual):
 
     return texto
 
+def setear_contenido_nuevo_tab(indice_actual, contenido):
+    # Obtener el widget CodeView del tab seleccionado
+    tab_seleccionado = notebook_central.winfo_children()[indice_actual]
+    codeview = tab_seleccionado.winfo_children()[0]  # CodeView es el primer widget dentro del tab
+
+    # Obtener el widget Text dentro de CodeView
+    text_widget = codeview.winfo_children()[0]  # Text es el primer widget dentro de CodeView
+
+    # Borrar contenido existente
+    text_widget.delete(1.0, tk.END)
+
+    # Insertar nuevo contenido
+    text_widget.insert(1.0, contenido)
+
 def ejecutar_query():
 
     if len(TABS_ACTUALES) <= 0:
@@ -93,6 +107,18 @@ def crear_tab_nuevo():
     # Seleciona notebok
     notebook_central.select(nuevo_tab)
 
+def abrir_archivo():
+    if len(TABS_ACTUALES) <= 0:
+        return
+    
+    file_path = filedialog.askopenfilename(filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+    if file_path:
+        ruta_archivo = file_path
+        with open(ruta_archivo, 'r') as archivo:
+            indice_actual = notebook_central.index(notebook_central.select())
+            contenido = archivo.read()
+            setear_contenido_nuevo_tab(indice_actual, contenido)
+
 def guardar_como():
 
     if len(TABS_ACTUALES) <= 0:
@@ -145,7 +171,7 @@ menubar = tk.Menu(root)
 # Menu de archivos
 file_menu = tk.Menu(menubar)
 file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
-file_menu.add_command(label="Abrir")
+file_menu.add_command(label="Abrir", command=abrir_archivo)
 file_menu.add_command(label="Guardar")
 file_menu.add_command(label="Guardar como", command=guardar_como)
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
