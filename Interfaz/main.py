@@ -4,32 +4,55 @@ from tkinter import Label, PanedWindow, ttk
 import pygments.lexers
 from chlorophyll import CodeView
 
-NAME_TAB = 'query'
-CURRENT_TABS = []
+NOMBRE_TAB = 'query'
+TABS_ACTUALES = []
+ANCHO_VENTANA = 1000
+ALTURA_VENTANA = 700
 
 def crear_tab_nuevo():
-    
-    indice_nuevo_tab = (CURRENT_TABS[-1] + 1) if len(CURRENT_TABS) > 0 else 1
-    nuevo_tab = ttk.Frame(notebook)
-    CURRENT_TABS.append(indice_nuevo_tab)
-    notebook.add(nuevo_tab, text=NAME_TAB + str(indice_nuevo_tab) + '.sql')
+
+    indice_nuevo_tab = (TABS_ACTUALES[-1] + 1) if len(TABS_ACTUALES) > 0 else 1
+    nuevo_tab = ttk.Frame(notebook_central)
+    TABS_ACTUALES.append(indice_nuevo_tab)
+    notebook_central.add(nuevo_tab, text=NOMBRE_TAB + str(indice_nuevo_tab) + '.sql')
 
     # Panel del codigo dentro del panel central
     codeview = CodeView(nuevo_tab, lexer=pygments.lexers.SqlLexer, color_scheme="monokai")
     codeview.pack(fill="both", expand=True)
 
     # Seleciona notebok
-    notebook.select(nuevo_tab)
+    notebook_central.select(nuevo_tab)
 
 def cerrar_tab_actual():
-    current_tab = notebook.index(notebook.select())
-    CURRENT_TABS.pop(current_tab)
-    notebook.forget(current_tab)
+    current_tab = notebook_central.index(notebook_central.select())
+    TABS_ACTUALES.pop(current_tab)
+    notebook_central.forget(current_tab)
+
+def setear_salida(texto):
+    # Habilitar el widget Text temporalmente
+    text_widget.config(state="normal")
+    # Borrar el contenido anterior
+    text_widget.delete(1.0, tk.END)
+    # Insertar texto al final
+    text_widget.insert(tk.END, texto)
+    # Deshabilitar el widget Text nuevamente
+    text_widget.config(state="disabled")
 
 root = tk.Tk()
 root.title("MiSQL")
-root.geometry("1000x800")
+root.geometry(str(ANCHO_VENTANA) + "x" + str(ALTURA_VENTANA))
 root.option_add("*tearOff", 0)
+
+#  Obtenemos el largo y  ancho de la pantalla
+wtotal = root.winfo_screenwidth()
+htotal = root.winfo_screenheight()
+
+#  Aplicamos la siguiente formula para calcular donde debería posicionarse
+pwidth = round(wtotal/2-ANCHO_VENTANA/2)
+pheight = round(htotal/2-ALTURA_VENTANA/2)
+
+#  Se lo aplicamos a la geometría de la ventana
+root.geometry(str(ANCHO_VENTANA)+"x"+str(ALTURA_VENTANA)+"+"+str(pwidth)+"+"+str(pheight))
 
 menubar = tk.Menu(root)
 
@@ -70,13 +93,20 @@ top = Label(panel_2, text="Top Panel", height=2)
 panel_2.add(top)
 
 # Panel central dentro del sub panel
-notebook = ttk.Notebook(panel_2, height=600)
-notebook.pack(fill="both", expand=True)
-panel_2.add(notebook)
+notebook_central = ttk.Notebook(panel_2, height=550)
+notebook_central.pack(fill="both", expand=True)
+panel_2.add(notebook_central)
 
 # Panel inferior dentro del sub panel
-bottom = Label(panel_2, text="Bottom panel")
-panel_2.add(bottom)
+notebook_inferior = ttk.Notebook(panel_2)
+tab_salida = ttk.Frame(notebook_inferior)
+notebook_inferior.add(tab_salida, text="Salida de datos")
+notebook_inferior.pack(fill="both", expand=True)
+panel_2.add(notebook_inferior)
+
+# Agregar un widget Text al tab para mostrar texto
+text_widget = tk.Text(tab_salida, wrap="word", height=10, width=50, state="disabled")
+text_widget.pack(fill="both", expand=True)
 
 root.update()
 root.mainloop()
