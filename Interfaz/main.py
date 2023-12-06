@@ -11,6 +11,9 @@ import os
 thisdir = os.path.dirname(__file__)
 path_icon_execute = os.path.join(thisdir, 'images', 'icon_execute.png')
 
+# Para atajos del teclado
+import keyboard
+
 NOMBRE_TAB = 'query'
 TABS_ACTUALES = []
 ANCHO_VENTANA = 1000
@@ -72,6 +75,10 @@ def setear_salida(texto):
     # Deshabilitar el widget Text nuevamente
     text_widget.config(state="disabled")
 
+keyboard.add_hotkey('F6', ejecutar_query)
+keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
+
+# Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
 root.geometry(str(ANCHO_VENTANA) + "x" + str(ALTURA_VENTANA))
@@ -88,10 +95,12 @@ pheight = round(htotal/2-ALTURA_VENTANA/2)
 #  Se lo aplicamos a la geometría de la ventana
 root.geometry(str(ANCHO_VENTANA)+"x"+str(ALTURA_VENTANA)+"+"+str(pwidth)+"+"+str(pheight))
 
+# Menu en barra
 menubar = tk.Menu(root)
 
+# Menu de archivos
 file_menu = tk.Menu(menubar)
-file_menu.add_command(label="Nuevo", command=crear_tab_nuevo)
+file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
 file_menu.add_command(label="Abrir")
 file_menu.add_command(label="Guardar")
 file_menu.add_command(label="Guardar como")
@@ -99,11 +108,24 @@ file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
 file_menu.add_command(label="Salir")
 
+# Menu de herramientas
 tool_menu = tk.Menu(menubar)
-tool_menu.add_command(label="Crear BD")
-tool_menu.add_command(label="Eliminar BD")
-tool_menu.add_command(label="Crear DUMP")
-tool_menu.add_command(label="Seleccionar BD")
+
+# Submenu 'Bases de datos'
+submenu_bd = tk.Menu(tool_menu)
+submenu_bd.add_command(label="Crear nuevo")
+submenu_bd.add_command(label="Eliminar")
+submenu_bd.add_command(label="Crear DUMP")
+submenu_bd.add_command(label="Seleccionar uno")
+tool_menu.add_cascade(label="Base de datos", menu=submenu_bd)
+
+submenu_sql = tk.Menu(tool_menu)
+submenu_sql.add_command(label="Nuevo query", command=crear_tab_nuevo)
+submenu_sql.add_command(label="Ejecutar query (F6)", command=ejecutar_query)
+tool_menu.add_cascade(label="SQL", menu=submenu_sql)
+
+tool_menu.add_command(label="Exportar")
+tool_menu.add_command(label="Importar")
 
 menubar.add_cascade(menu=file_menu, label="Archivo")
 menubar.add_cascade(menu=tool_menu, label="Herramientas")
@@ -121,17 +143,6 @@ panel_1.add(left_label)
 # Se agrega un sub panel dentro del panel principal
 panel_2 = PanedWindow(panel_1, orient="vertical", bd=4, relief="raised", bg="blue")
 panel_1.add(panel_2)
-
-# -------------------------------------------
-# Panel superior dentro del sub panel
-top = Label(panel_2, height=2)
-
-# Boton del panel superior
-imagen = PhotoImage(file=path_icon_execute)
-btn_execute = Button(top, relief="flat", compound="left", image=imagen, command=ejecutar_query)
-btn_execute.pack(side="left", fill="y", padx=0, pady=0)
-panel_2.add(top)
-# -------------------------------------------
 
 # -------------------------------------------
 # Panel central dentro del sub panel
