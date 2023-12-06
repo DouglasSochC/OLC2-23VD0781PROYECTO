@@ -96,6 +96,9 @@ def mostrar_componentes_del_lenguaje():
     IMG_CARPETA = tk.PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
     treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
 
+def salir():
+    root.destroy()
+
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
 
@@ -127,7 +130,7 @@ file_menu.add_command(label="Guardar")
 file_menu.add_command(label="Guardar como")
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
-file_menu.add_command(label="Salir")
+file_menu.add_command(label="Salir", command=salir)
 
 # Menu de herramientas
 tool_menu = tk.Menu(menubar)
