@@ -34,29 +34,6 @@ def obtener_contenido_tab(indice_actual):
 
     return texto
 
-def crear_tab_nuevo():
-
-    indice_nuevo_tab = (TABS_ACTUALES[-1] + 1) if len(TABS_ACTUALES) > 0 else 1
-    nuevo_tab = ttk.Frame(notebook_central)
-    TABS_ACTUALES.append(indice_nuevo_tab)
-    notebook_central.add(nuevo_tab, text=NOMBRE_TAB + str(indice_nuevo_tab) + '.sql')
-
-    # Panel del codigo dentro del panel central
-    codeview = CodeView(nuevo_tab, lexer=pygments.lexers.SqlLexer, color_scheme="monokai")
-    codeview.pack(fill="both", expand=True)
-
-    # Seleciona notebok
-    notebook_central.select(nuevo_tab)
-
-def cerrar_tab_actual():
-
-    if len(TABS_ACTUALES) <= 0:
-        return
-
-    indice_actual = notebook_central.index(notebook_central.select())
-    TABS_ACTUALES.pop(indice_actual)
-    notebook_central.forget(indice_actual)
-
 def ejecutar_query():
 
     if len(TABS_ACTUALES) <= 0:
@@ -100,6 +77,22 @@ def mostrar_componentes_del_lenguaje():
     IMG_CARPETA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
     treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
 
+# OPCIONES PARA EL MENU DE ARCHIVOS
+
+def crear_tab_nuevo():
+
+    indice_nuevo_tab = (TABS_ACTUALES[-1] + 1) if len(TABS_ACTUALES) > 0 else 1
+    nuevo_tab = ttk.Frame(notebook_central)
+    TABS_ACTUALES.append(indice_nuevo_tab)
+    notebook_central.add(nuevo_tab, text=NOMBRE_TAB + str(indice_nuevo_tab) + '.sql')
+
+    # Panel del codigo dentro del panel central
+    codeview = CodeView(nuevo_tab, lexer=pygments.lexers.SqlLexer, color_scheme="monokai")
+    codeview.pack(fill="both", expand=True)
+
+    # Seleciona notebok
+    notebook_central.select(nuevo_tab)
+
 def guardar_como():
 
     if len(TABS_ACTUALES) <= 0:
@@ -113,6 +106,15 @@ def guardar_como():
     if file_path:
         with open(file_path, 'w') as archivo:
             archivo.write(obtener_contenido_tab(indice_actual))
+
+def cerrar_tab_actual():
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    indice_actual = notebook_central.index(notebook_central.select())
+    TABS_ACTUALES.pop(indice_actual)
+    notebook_central.forget(indice_actual)
 
 def salir():
     root.destroy()
