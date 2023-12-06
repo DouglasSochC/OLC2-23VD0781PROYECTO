@@ -1,8 +1,15 @@
+# Para la construccion de la interfaz
 import tkinter as tk
-from tkinter import Label, PanedWindow, ttk
+from tkinter import Button, PhotoImage, Label, PanedWindow, ttk
 
+# Para el formato del editor de codigo
 import pygments.lexers
 from chlorophyll import CodeView
+
+# Para obtener las imagenes
+import os
+thisdir = os.path.dirname(__file__)
+path_icon_execute = os.path.join(thisdir, 'images', 'icon_execute.png')
 
 NOMBRE_TAB = 'query'
 TABS_ACTUALES = []
@@ -24,9 +31,36 @@ def crear_tab_nuevo():
     notebook_central.select(nuevo_tab)
 
 def cerrar_tab_actual():
-    current_tab = notebook_central.index(notebook_central.select())
-    TABS_ACTUALES.pop(current_tab)
-    notebook_central.forget(current_tab)
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    indice_actual = notebook_central.index(notebook_central.select())
+    TABS_ACTUALES.pop(indice_actual)
+    notebook_central.forget(indice_actual)
+
+def ejecutar_query():
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    indice_actual = notebook_central.index(notebook_central.select())
+
+    # Obtener el widget CodeView del tab seleccionado
+    tab_seleccionado = notebook_central.winfo_children()[indice_actual]
+    codeview = tab_seleccionado.winfo_children()[0]  # CodeView es el primer widget dentro del tab
+
+    # Obtener el widget Text dentro de CodeView
+    text_widget = codeview.winfo_children()[0]  # Text es el primer widget dentro de CodeView
+
+    # Obtener el texto del widget Text
+    texto = text_widget.get(1.0, tk.END)
+
+    # Se analiza el query
+    print(texto)
+
+    # Se setea la salida
+    setear_salida("Texto del tab " + str((indice_actual + 1)) + " analizado correctamente")
 
 def setear_salida(texto):
     # Habilitar el widget Text temporalmente
@@ -88,15 +122,25 @@ panel_1.add(left_label)
 panel_2 = PanedWindow(panel_1, orient="vertical", bd=4, relief="raised", bg="blue")
 panel_1.add(panel_2)
 
+# -------------------------------------------
 # Panel superior dentro del sub panel
-top = Label(panel_2, text="Top Panel", height=2)
-panel_2.add(top)
+top = Label(panel_2, height=2)
 
+# Boton del panel superior
+imagen = PhotoImage(file=path_icon_execute)
+btn_execute = Button(top, relief="flat", compound="left", image=imagen, command=ejecutar_query)
+btn_execute.pack(side="left", fill="y", padx=0, pady=0)
+panel_2.add(top)
+# -------------------------------------------
+
+# -------------------------------------------
 # Panel central dentro del sub panel
 notebook_central = ttk.Notebook(panel_2, height=550)
 notebook_central.pack(fill="both", expand=True)
 panel_2.add(notebook_central)
+# -------------------------------------------
 
+# -------------------------------------------
 # Panel inferior dentro del sub panel
 notebook_inferior = ttk.Notebook(panel_2)
 tab_salida = ttk.Frame(notebook_inferior)
@@ -107,6 +151,7 @@ panel_2.add(notebook_inferior)
 # Agregar un widget Text al tab para mostrar texto
 text_widget = tk.Text(tab_salida, wrap="word", height=10, width=50, state="disabled")
 text_widget.pack(fill="both", expand=True)
+# -------------------------------------------
 
 root.update()
 root.mainloop()
