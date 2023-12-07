@@ -130,6 +130,7 @@ def crear_tab_nuevo(nombre_archivo=None, path_archivo=None):
             "nombre": nombre_archivo,
             "path": None
         })
+        nombre_archivo = '*' + nombre_archivo
 
     if crear_archivo:
         # Agrega un nuevo tab con el nombre del archivo
@@ -145,7 +146,7 @@ def crear_tab_nuevo(nombre_archivo=None, path_archivo=None):
 
     return crear_archivo
 
-def abrir_archivo():
+def abrir():
 
     file_path = filedialog.askopenfilename(filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
     if file_path:
@@ -157,6 +158,31 @@ def abrir_archivo():
                 contenido = archivo.read()
                 indice_actual = notebook_central.index(notebook_central.select())
                 setear_contenido_nuevo_tab(indice_actual, contenido)
+
+def guardar():
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    # Nombre del archivo
+    nombre_archivo = ""
+
+    # Se obtiene el indice actual
+    indice_actual = notebook_central.index(notebook_central.select())
+    if TABS_ACTUALES[indice_actual]["path"] is None:
+        file_path = filedialog.asksaveasfilename(defaultextension=".sql", initialfile=TABS_ACTUALES[indice_actual]["nombre"], filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+        if file_path:
+            nombre_archivo = os.path.basename(file_path)
+            with open(file_path, 'w') as archivo:
+                archivo.write(obtener_contenido_tab(indice_actual))
+                TABS_ACTUALES[indice_actual]["path"] = file_path
+    else:
+        nombre_archivo = TABS_ACTUALES[indice_actual]["nombre"]
+        with open(TABS_ACTUALES[indice_actual]["path"], 'w') as archivo:
+                archivo.write(obtener_contenido_tab(indice_actual))
+
+    if len(nombre_archivo) > 0:
+        notebook_central.tab(indice_actual, text=nombre_archivo)
 
 # def guardar_como():
 
@@ -192,7 +218,8 @@ def salir():
 
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
-keyboard.add_hotkey('ctrl+o', abrir_archivo)
+keyboard.add_hotkey('ctrl+o', abrir)
+keyboard.add_hotkey('ctrl+s', guardar)
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
@@ -216,8 +243,8 @@ menubar = tk.Menu(root)
 # Menu de archivos
 file_menu = tk.Menu(menubar)
 file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
-file_menu.add_command(label="Abrir (Ctrl+O)", command=abrir_archivo)
-# file_menu.add_command(label="Guardar")
+file_menu.add_command(label="Abrir (Ctrl+O)", command=abrir)
+file_menu.add_command(label="Guardar", command=guardar)
 # file_menu.add_command(label="Guardar como", command=guardar_como)
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
