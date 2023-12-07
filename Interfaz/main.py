@@ -93,6 +93,33 @@ def mostrar_componentes_del_lenguaje():
     IMG_CARPETA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
     treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
 
+def oyente_cambio_texto_tab(codeview, indice_actual, event):
+    # Obtener el código de la tecla presionada
+    keycode = event.keycode
+
+    # Evitar teclas especiales como FIN, INICIO, REPAG, AVEPAG, etc.
+    if event.keysym in ['End', 'Home', 'Next', 'Prior']:
+        return
+
+    # Evitar las teclas de flechas, Mayúsculas, Shift y Alt
+    if event.keysym in ['Up', 'Down', 'Left', 'Right', 'Shift_L', 'Shift_R', 'Control_L', 'Control_R', 'Alt_L', 'Alt_R']:
+        return
+
+    # Evita reconocer la combinacion ctrl+s
+    if (event.keysym.lower() == 's' or event.keysym.lower() == 'n' or event.keysym.lower() == 'o') and event.state & 0x4:
+        return
+
+    # Evita reconocer una tecla de funcion (F1, F2, ..., F12)
+    if 112 <= keycode <= 123:
+        return  # No hacer nada si es una tecla de funcion
+
+    # Se obtiene el nombre del archivo
+    nombre_archivo = notebook_central.tab(indice_actual, "text")
+
+    # Se setea el nombre y se elimina un listener
+    notebook_central.tab(indice_actual, text="*" + nombre_archivo)
+    codeview.unbind("<KeyRelease>")
+
 # OPCIONES PARA EL MENU DE ARCHIVOS
 
 def crear_tab_nuevo(nombre_archivo=None, path_archivo=None):
@@ -159,6 +186,11 @@ def abrir():
                 indice_actual = notebook_central.index(notebook_central.select())
                 setear_contenido_nuevo_tab(indice_actual, contenido)
 
+                # Se agrega un escucha para verificar si ha modificado o no el archivo
+                tab_actual = notebook_central.winfo_children()[indice_actual].winfo_children()[0]
+                codeview = tab_actual.winfo_children()[0]
+                codeview.bind("<KeyRelease>", lambda e: oyente_cambio_texto_tab(codeview, indice_actual, e))
+
 def guardar():
 
     if len(TABS_ACTUALES) <= 0:
@@ -184,19 +216,38 @@ def guardar():
     if len(nombre_archivo) > 0:
         notebook_central.tab(indice_actual, text=nombre_archivo)
 
-# def guardar_como():
+        # Se agrega un escucha para verificar si a modificado o no el archivo
+        tab_actual = notebook_central.winfo_children()[indice_actual].winfo_children()[0]
+        codeview = tab_actual.winfo_children()[0]
+        codeview.bind("<KeyRelease>", lambda e: oyente_cambio_texto_tab(codeview, indice_actual, e))
 
-#     if len(TABS_ACTUALES) <= 0:
-#         return
+def guardar_como():
 
-#     # Se obtiene el nombre actual del tab
-#     indice_actual = notebook_central.index(notebook_central.select())
-#     nombre_tab_actual = notebook_central.tab(indice_actual, "text")
+    if len(TABS_ACTUALES) <= 0:
+        return
 
-#     file_path = filedialog.asksaveasfilename(defaultextension=".sql", initialfile=nombre_tab_actual, filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
-#     if file_path:
-#         with open(file_path, 'w') as archivo:
-#             archivo.write(obtener_contenido_tab(indice_actual))
+    # Se obtiene el indice actual del tab
+    indice_actual = notebook_central.index(notebook_central.select())
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".sql", filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+    if file_path:
+        nombre_archivo = os.path.basename(file_path)
+        with open(file_path, 'w') as archivo:
+            archivo.write(obtener_contenido_tab(indice_actual))
+
+            # Se actualiza la metada del archivo
+            TABS_ACTUALES[indice_actual]["nativo"] = False
+            TABS_ACTUALES[indice_actual]["indice"] = -1
+            TABS_ACTUALES[indice_actual]["nombre"] = nombre_archivo
+            TABS_ACTUALES[indice_actual]["path"] = file_path
+
+            # Se actualiza el nombre del tab
+            notebook_central.tab(indice_actual, text=nombre_archivo)
+
+            # Se agrega un escucha para verificar si a modificado o no el archivo
+            tab_actual = notebook_central.winfo_children()[indice_actual].winfo_children()[0]
+            codeview = tab_actual.winfo_children()[0]
+            codeview.bind("<KeyRelease>", lambda e: oyente_cambio_texto_tab(codeview, indice_actual, e))
 
 def cerrar_tab_actual():
 
@@ -242,10 +293,10 @@ menubar = tk.Menu(root)
 
 # Menu de archivos
 file_menu = tk.Menu(menubar)
-file_menu.add_command(label="Nuevo (Ctrl+N)", command=crear_tab_nuevo)
-file_menu.add_command(label="Abrir (Ctrl+O)", command=abrir)
-file_menu.add_command(label="Guardar", command=guardar)
-# file_menu.add_command(label="Guardar como", command=guardar_como)
+file_menu.add_command(label="Nuevo (Ctrl+n)", command=crear_tab_nuevo)
+file_menu.add_command(label="Abrir (Ctrl+o)", command=abrir)
+file_menu.add_command(label="Guardar (Ctrl+s)", command=guardar)
+file_menu.add_command(label="Guardar como", command=guardar_como)
 file_menu.add_command(label="Cerrar", command=cerrar_tab_actual)
 file_menu.add_separator()
 file_menu.add_command(label="Salir", command=salir)
