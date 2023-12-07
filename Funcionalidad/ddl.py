@@ -1,7 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 
-CARPETA_PARA_BASES_DE_DATOS='databases/'
+__CARPETA_PARA_BASES_DE_DATOS='databases/'
 
 def crear_base_de_datos(nombre_bd: str):
     '''
@@ -19,7 +19,7 @@ def crear_base_de_datos(nombre_bd: str):
         return "Por favor, indique el nombre de la base de datos"
 
     # Se valida la existencia de la base de datos
-    path_tabla = CARPETA_PARA_BASES_DE_DATOS + nombre_bd
+    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd
     if not os.path.exists(path_tabla):
         os.makedirs(path_tabla)
         return "La base de datos creada correctamente."
@@ -33,7 +33,7 @@ def crear_tabla(nombre_bd:str, nombre_tabla: str, parametros: list):
     Parameters:
         nombre_bd (str): Nombre de la base de datos en la que realizara alguna funcionalidad
         nombre_tabla (str): Nombre de la tabla
-        parametros (list): Este es un diccionario que debe llevar la siguiente estructura [{name, type, length, nullable: true|false, primary_key}]
+        parametros (list): Este es un diccionario que debe llevar la siguiente estructura [{name (*), type (*), length (o), nullable (*): true|false, primary_key (o)}]
 
     Returns:
         respuesta (str)
@@ -41,10 +41,12 @@ def crear_tabla(nombre_bd:str, nombre_tabla: str, parametros: list):
 
     if nombre_bd is None: # Se valida que haya seleccionado una base de datos
         return "No ha seleccionado una base de datos para realizar la transaccion"
-    elif not os.path.exists(CARPETA_PARA_BASES_DE_DATOS + nombre_bd): # Se valida que exista la base de datos
+    elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+        return "Por favor, indique el nombre de la tabla"
+    elif not os.path.exists(__CARPETA_PARA_BASES_DE_DATOS + nombre_bd): # Se valida que exista la base de datos
         return "No existe la base de datos seleccionada"
 
-    path_tabla = CARPETA_PARA_BASES_DE_DATOS + nombre_bd + "/" + nombre_tabla + ".xml"
+    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + "/" + nombre_tabla + ".xml"
     if os.path.exists(path_tabla): # Se valida que no exista la tabla
         return "La tabla ya existe."
     else:
@@ -59,9 +61,20 @@ def crear_tabla(nombre_bd:str, nombre_tabla: str, parametros: list):
 
         # Se agrega los campos que lleva la tabla
         for param in parametros:
+            # Se valida que el nchar y nvarchar cumplan con la cantidad de caracteres valida segun la longitud restringida
+            if param['type'] == 'nchar':
+                if int(param['length']) <= 0:
+                    return "El nchar del campo " + param['name'] + " debe de ser mayor a 1"
+                elif int(param['length']) > 4000:
+                    return "El nchar del campo " + param['name'] + " debe de ser menor a 4000"
+            elif param['type'] == 'nvarchar':
+                if int(param['length']) <= 0:
+                    return "El nchar del campo " + param['name'] + " debe de ser mayor a 1"
+                elif int(param['length']) > 2000000:
+                    return "El nchar del campo " + param['name'] + " debe de ser menor a 2000000"
             ET.SubElement(estructura, "campo", attrib=param)
 
-        # Crea el árbol XML
+        # Crea el arbol XML
         tree = ET.ElementTree(root)
 
         # Escribe el árbol XML en un archivo
@@ -85,7 +98,7 @@ def eliminar_base_de_datos(nombre_bd: str):
         return "Por favor, indique el nombre de la base de datos"
 
     # Se valida la existencia de la base de datos
-    path_tabla = CARPETA_PARA_BASES_DE_DATOS + nombre_bd
+    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd
     if not os.path.exists(path_tabla):
         return "La base de datos que desea eliminar no existe."
     else:
