@@ -165,6 +165,13 @@ def oyente_cambio_texto_tab(codeview, indice_actual, event):
     notebook_central.tab(indice_actual, text="*" + nombre_archivo)
     codeview.unbind("<KeyRelease>")
 
+def comando_eliminar_bd(variable, ventana_eliminar):
+    seleccion = variable.get()
+    respuesta = eliminar_base_de_datos(seleccion)
+    messagebox.showinfo("Informacion", respuesta)
+    mostrar_componentes_del_lenguaje()
+    ventana_eliminar.destroy()
+
 # OPCIONES PARA EL MENU DE ARCHIVOS
 
 def crear_tab_nuevo(nombre_archivo=None, path_archivo=None):
@@ -319,10 +326,47 @@ def crear_bd():
 
     if nombre:
         if re.match(r'^[a-zA-Z0-9_]+$', nombre) is not None:
-            crear_base_de_datos(nombre)
+            respuesta = crear_base_de_datos(nombre)
+            messagebox.showinfo("Informacion", respuesta)
             mostrar_componentes_del_lenguaje()
         else:
             messagebox.showerror("Error", "Nombre no valido.")
+
+def eliminar_bd():
+
+    if os.path.exists(CARPETA_PARA_BASES_DE_DATOS): # Se valida que exista la base de datos
+
+        # Crear la ventana_eliminar
+        ventana_eliminar = tk.Toplevel(root)
+        ventana_eliminar.title("Eliminar BD")
+
+        # Obtiene todas las bases de datos
+        opciones = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
+
+        # Variable para almacenar la opción seleccionada
+        variable = tk.StringVar(ventana_eliminar)
+        variable.set(opciones[0])  # Establecer el valor predeterminado
+
+        # Crear el DropDown List
+        dropdown = ttk.Combobox(ventana_eliminar, values=opciones, textvariable=variable)
+        dropdown.pack(pady=10)
+
+        # Crear el botón OK
+        boton_ok = tk.Button(ventana_eliminar, text="OK", command=lambda: comando_eliminar_bd(variable, ventana_eliminar))
+        boton_ok.pack()
+
+        # Ajustar el tamaño de la ventana_eliminar
+        ventana_eliminar.geometry("300x80")  # Ajusta según tus necesidades
+
+        # Centrar la ventana_eliminar en la pantalla
+        ancho_ventana = ventana_eliminar.winfo_reqwidth()
+        alto_ventana = ventana_eliminar.winfo_reqheight()
+        posicion_x = int((ventana_eliminar.winfo_screenwidth() - ancho_ventana) / 2)
+        posicion_y = int((ventana_eliminar.winfo_screenheight() - alto_ventana) / 2)
+        ventana_eliminar.geometry(f"+{posicion_x}+{posicion_y}")
+
+        # Iniciar el bucle principal
+        ventana_eliminar.mainloop()
 
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
@@ -364,7 +408,7 @@ tool_menu = tk.Menu(menubar)
 # Submenu 'Bases de datos'
 submenu_bd = tk.Menu(tool_menu)
 submenu_bd.add_command(label="Crear nuevo", command=crear_bd)
-submenu_bd.add_command(label="Eliminar")
+submenu_bd.add_command(label="Eliminar", command=eliminar_bd)
 submenu_bd.add_command(label="Crear DUMP")
 submenu_bd.add_command(label="Seleccionar uno")
 submenu_bd.add_separator()
