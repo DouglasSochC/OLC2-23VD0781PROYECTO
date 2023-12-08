@@ -1,7 +1,13 @@
 import os
+import shutil
 import xml.etree.ElementTree as ET
+from dotenv import load_dotenv
 
-__CARPETA_PARA_BASES_DE_DATOS='databases/'
+load_dotenv()
+__CARPETA_PARA_BASES_DE_DATOS = str(os.environ.get("CARPETA_PARA_BASES_DE_DATOS"))
+__CARPETA_PARA_TABLAS = str(os.environ.get("CARPETA_PARA_TABLAS"))
+__CARPETA_PARA_FUNCIONES = str(os.environ.get("CARPETA_PARA_FUNCIONES"))
+__CARPETA_PARA_PROCEDIMIENTOS = str(os.environ.get("CARPETA_PARA_PROCEDIMIENTOS"))
 
 def crear_base_de_datos(nombre_bd: str):
     '''
@@ -19,9 +25,15 @@ def crear_base_de_datos(nombre_bd: str):
         return "Por favor, indique el nombre de la base de datos"
 
     # Se valida la existencia de la base de datos
-    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd
-    if not os.path.exists(path_tabla):
-        os.makedirs(path_tabla)
+    path_bd = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd
+    if not os.path.exists(path_bd):
+        os.makedirs(path_bd)
+        path_tablas = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + __CARPETA_PARA_TABLAS
+        os.makedirs(path_tablas)
+        path_funciones = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + __CARPETA_PARA_FUNCIONES
+        os.makedirs(path_funciones)
+        path_procedimiento = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + __CARPETA_PARA_PROCEDIMIENTOS
+        os.makedirs(path_procedimiento)
         return "La base de datos creada correctamente."
     else:
         return "La base de datos ya existe."
@@ -46,7 +58,7 @@ def crear_tabla(nombre_bd:str, nombre_tabla: str, parametros: list):
     elif not os.path.exists(__CARPETA_PARA_BASES_DE_DATOS + nombre_bd): # Se valida que exista la base de datos
         return "No existe la base de datos seleccionada"
 
-    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + "/" + nombre_tabla + ".xml"
+    path_tabla = __CARPETA_PARA_BASES_DE_DATOS + nombre_bd + __CARPETA_PARA_TABLAS + nombre_tabla + ".xml"
     if os.path.exists(path_tabla): # Se valida que no exista la tabla
         return "La tabla ya existe."
     else:
@@ -102,5 +114,5 @@ def eliminar_base_de_datos(nombre_bd: str):
     if not os.path.exists(path_tabla):
         return "La base de datos que desea eliminar no existe."
     else:
-        os.rmdir(path_tabla)
+        shutil.rmtree(path_tabla)
         return "La base de datos ha sido eliminada correctamente."

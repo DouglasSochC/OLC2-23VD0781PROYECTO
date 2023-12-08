@@ -1,3 +1,4 @@
 ply==3.11
 chlorophyll==0.4.1
 keyboard==0.13.5
+python-dotenv==1.0.0
