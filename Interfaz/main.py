@@ -25,7 +25,7 @@ load_dotenv()
 
 # Funciones DDL
 import re
-from Funcionalidad.ddl import crear_base_de_datos, crear_tabla, eliminar_base_de_datos
+from Funcionalidad.ddl import crear_base_de_datos, eliminar_base_de_datos
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -37,6 +37,7 @@ CARPETA_PARA_BASES_DE_DATOS = str(os.environ.get("CARPETA_PARA_BASES_DE_DATOS"))
 CARPETA_PARA_TABLAS = str(os.environ.get("CARPETA_PARA_TABLAS"))
 CARPETA_PARA_FUNCIONES = str(os.environ.get("CARPETA_PARA_FUNCIONES"))
 CARPETA_PARA_PROCEDIMIENTOS = str(os.environ.get("CARPETA_PARA_PROCEDIMIENTOS"))
+BD_SELECCIONADA=""
 
 def obtener_contenido_tab(indice_actual):
     # Obtener el widget CodeView del tab seleccionado
@@ -73,6 +74,9 @@ def ejecutar_query():
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
 
+    # Base de datos seleccionada
+    print(BD_SELECCIONADA)
+
     # Se analiza el query
     print(texto)
 
@@ -91,7 +95,7 @@ def setear_salida(texto):
 
 def mostrar_componentes_del_lenguaje():
 
-    global IMG_BASE_DE_DATOS, IMG_BASE_DE_DATO, IMG_CARPETA, IMG_TABLA, IMG_PROCEDIMIENTO, IMG_FUNCION
+    global IMG_BASE_DE_DATOS, IMG_BASE_DE_DATO, IMG_CARPETA, IMG_TABLA, IMG_PROCEDIMIENTO, IMG_FUNCION, BD_SELECCIONADA
 
     if os.path.exists(CARPETA_PARA_BASES_DE_DATOS): # Se valida que exista la base de datos
 
@@ -108,14 +112,14 @@ def mostrar_componentes_del_lenguaje():
         IMG_FUNCION = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_function.png'))
 
         # Se crea el item principal que contiene todas las bases de datos
-        treeview.insert('', '0', 'principal', text='  Bases de datos', image=IMG_BASE_DE_DATOS, open=True)
+        treeview.insert('', '0', 'principal', text='  Bases de datos', image=IMG_BASE_DE_DATOS, open=True, tags=('estilo_titulos' if len(BD_SELECCIONADA) > 0 else ''))
 
         # Obtiene las bases de datos
         bases_de_datos = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
 
         # Dibuja cada base de datos
         for nombre_bd in bases_de_datos:
-            treeview.insert('principal', 'end', nombre_bd, text=nombre_bd, image=IMG_BASE_DE_DATO)
+            treeview.insert('principal', 'end', nombre_bd, text=nombre_bd, image=IMG_BASE_DE_DATO, open= (True if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else False), tags=('estilo_titulos' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
 
             # Obtiene las carpetas de esa base de datos
             carpetas = os.listdir(CARPETA_PARA_BASES_DE_DATOS + nombre_bd)
@@ -123,20 +127,20 @@ def mostrar_componentes_del_lenguaje():
             # Dibuja cada carpeta de esa base de datos
             for nombre_carpeta in carpetas:
 
-                treeview.insert(nombre_bd, 'end', nombre_bd + nombre_carpeta, text=nombre_carpeta, image=IMG_CARPETA)
+                treeview.insert(nombre_bd, 'end', nombre_bd + nombre_carpeta, text=nombre_carpeta, image=IMG_CARPETA, tags=('estilo_carpetas' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
 
                 # Obtiene cada archivo de esa carpeta
                 contenido_carpeta = os.listdir(CARPETA_PARA_BASES_DE_DATOS + nombre_bd + "/" + nombre_carpeta)
 
                 if ("/" + nombre_carpeta + "/") == CARPETA_PARA_TABLAS:
                     for nombre_archivo in contenido_carpeta:
-                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_TABLA)
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_TABLA, tags=('estilo_carpetas' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
                 elif ("/" + nombre_carpeta + "/") == CARPETA_PARA_FUNCIONES:
                     for nombre_archivo in contenido_carpeta:
-                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_FUNCION)
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_FUNCION, tags=('estilo_carpetas' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
                 elif ("/" + nombre_carpeta + "/") == CARPETA_PARA_PROCEDIMIENTOS:
                     for nombre_archivo in contenido_carpeta:
-                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_PROCEDIMIENTO)
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_PROCEDIMIENTO, tags=('estilo_carpetas' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
 
 def oyente_cambio_texto_tab(codeview, indice_actual, event):
     # Obtener el código de la tecla presionada
@@ -171,6 +175,16 @@ def comando_eliminar_bd(variable, ventana_eliminar):
     messagebox.showinfo("Informacion", respuesta)
     mostrar_componentes_del_lenguaje()
     ventana_eliminar.destroy()
+
+def comando_seleccionar_bd(variable, ventana_seleccionar):
+
+    global BD_SELECCIONADA
+
+    seleccion = variable.get()
+    BD_SELECCIONADA = seleccion
+    messagebox.showinfo("Informacion", "Base de datos seleccionada correctamente")
+    mostrar_componentes_del_lenguaje()
+    ventana_seleccionar.destroy()
 
 # OPCIONES PARA EL MENU DE ARCHIVOS
 
@@ -368,6 +382,42 @@ def eliminar_bd():
         # Iniciar el bucle principal
         ventana_eliminar.mainloop()
 
+def seleccionar_bd():
+
+    if os.path.exists(CARPETA_PARA_BASES_DE_DATOS): # Se valida que exista la base de datos
+
+        # Crear la ventana_seleccionar
+        ventana_seleccionar = tk.Toplevel(root)
+        ventana_seleccionar.title("Seleccionar BD")
+
+        # Obtiene todas las bases de datos
+        opciones = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
+
+        # Variable para almacenar la opción seleccionada
+        variable = tk.StringVar(ventana_seleccionar)
+        variable.set(opciones[0])  # Establecer el valor predeterminado
+
+        # Crear el DropDown List
+        dropdown = ttk.Combobox(ventana_seleccionar, values=opciones, textvariable=variable)
+        dropdown.pack(pady=10)
+
+        # Crear el botón OK
+        boton_ok = tk.Button(ventana_seleccionar, text="OK", command=lambda: comando_seleccionar_bd(variable, ventana_seleccionar))
+        boton_ok.pack()
+
+        # Ajustar el tamaño de la ventana_seleccionar
+        ventana_seleccionar.geometry("300x80")  # Ajusta según tus necesidades
+
+        # Centrar la ventana_seleccionar en la pantalla
+        ancho_ventana = ventana_seleccionar.winfo_reqwidth()
+        alto_ventana = ventana_seleccionar.winfo_reqheight()
+        posicion_x = int((ventana_seleccionar.winfo_screenwidth() - ancho_ventana) / 2)
+        posicion_y = int((ventana_seleccionar.winfo_screenheight() - alto_ventana) / 2)
+        ventana_seleccionar.geometry(f"+{posicion_x}+{posicion_y}")
+
+        # Iniciar el bucle principal
+        ventana_seleccionar.mainloop()
+
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
 keyboard.add_hotkey('ctrl+o', abrir)
@@ -410,7 +460,7 @@ submenu_bd = tk.Menu(tool_menu)
 submenu_bd.add_command(label="Crear nuevo", command=crear_bd)
 submenu_bd.add_command(label="Eliminar", command=eliminar_bd)
 submenu_bd.add_command(label="Crear DUMP")
-submenu_bd.add_command(label="Seleccionar uno")
+submenu_bd.add_command(label="Seleccionar", command=seleccionar_bd)
 submenu_bd.add_separator()
 submenu_bd.add_command(label="Actualizar", command=mostrar_componentes_del_lenguaje)
 tool_menu.add_cascade(label="Base de datos", menu=submenu_bd)
@@ -435,7 +485,8 @@ panel_1.pack(fill="both", expand=1)
 # -------------------------------------------
 # Panel izquierdo dentro del panel principal
 treeview = ttk.Treeview()
-treeview.tag_configure('estilo_negrita', font=('TkDefaultFont', 10, 'bold'))
+treeview.tag_configure('estilo_titulos', font=('TkDefaultFont', 10, 'bold'))
+treeview.tag_configure('estilo_carpetas', font=('TkDefaultFont', 8, 'bold'))
 treeview.pack()
 panel_1.add(treeview)
 # Se agrega un sub panel dentro del panel principal
