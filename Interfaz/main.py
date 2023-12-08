@@ -1,6 +1,6 @@
 # Para la construccion de la interfaz
 import tkinter as tk
-from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, ttk
+from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebox, ttk
 
 # Para el formato del editor de codigo
 import pygments.lexers
@@ -22,6 +22,10 @@ import keyboard
 # Para variables de entorno
 from dotenv import load_dotenv
 load_dotenv()
+
+# Funciones DDL
+import re
+from Funcionalidad.ddl import crear_base_de_datos, crear_tabla, eliminar_base_de_datos
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -104,7 +108,7 @@ def mostrar_componentes_del_lenguaje():
         IMG_FUNCION = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_function.png'))
 
         # Se crea el item principal que contiene todas las bases de datos
-        treeview.insert('', '0', 'principal', text='  Bases de datos', image=IMG_BASE_DE_DATOS)
+        treeview.insert('', '0', 'principal', text='  Bases de datos', image=IMG_BASE_DE_DATOS, open=True)
 
         # Obtiene las bases de datos
         bases_de_datos = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
@@ -311,11 +315,14 @@ def salir():
 # OPCIONES PARA EL MENU DE HERRAMIENTAS
 
 def crear_bd():
-    nombre = simpledialog.askstring("Input", "Ingresa tu nombre:")
+    nombre = simpledialog.askstring("Nueva BD", "Ingresa el nombre de la nueva base de datos")
+
     if nombre:
-        print("Nombre ingresado:", nombre)
-    else:
-        print("No se ingresó un nombre.")
+        if re.match(r'^[a-zA-Z0-9_]+$', nombre) is not None:
+            crear_base_de_datos(nombre)
+            mostrar_componentes_del_lenguaje()
+        else:
+            messagebox.showerror("Error", "Nombre no valido.")
 
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
