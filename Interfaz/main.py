@@ -1,6 +1,6 @@
 # Para la construccion de la interfaz
 import tkinter as tk
-from tkinter import PanedWindow, PhotoImage, filedialog, ttk
+from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, ttk
 
 # Para el formato del editor de codigo
 import pygments.lexers
@@ -11,10 +11,17 @@ import os
 thisdir = os.path.dirname(__file__)
 IMG_BASE_DE_DATOS = None
 IMG_BASE_DE_DATO = None
+IMG_PROCEDIMIENTO = None
+IMG_FUNCION = None
 IMG_CARPETA = None
+IMG_TABLA = None
 
 # Para atajos del teclado
 import keyboard
+
+# Para variables de entorno
+from dotenv import load_dotenv
+load_dotenv()
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -22,6 +29,10 @@ NOMBRE_TAB = 'query'
 TABS_ACTUALES = []
 ANCHO_VENTANA = 1000
 ALTURA_VENTANA = 700
+CARPETA_PARA_BASES_DE_DATOS = str(os.environ.get("CARPETA_PARA_BASES_DE_DATOS"))
+CARPETA_PARA_TABLAS = str(os.environ.get("CARPETA_PARA_TABLAS"))
+CARPETA_PARA_FUNCIONES = str(os.environ.get("CARPETA_PARA_FUNCIONES"))
+CARPETA_PARA_PROCEDIMIENTOS = str(os.environ.get("CARPETA_PARA_PROCEDIMIENTOS"))
 
 def obtener_contenido_tab(indice_actual):
     # Obtener el widget CodeView del tab seleccionado
@@ -76,22 +87,52 @@ def setear_salida(texto):
 
 def mostrar_componentes_del_lenguaje():
 
-    global IMG_BASE_DE_DATOS, IMG_BASE_DE_DATO, IMG_CARPETA
+    global IMG_BASE_DE_DATOS, IMG_BASE_DE_DATO, IMG_CARPETA, IMG_TABLA, IMG_PROCEDIMIENTO, IMG_FUNCION
 
-    # Se eliminan los items actuales
-    for item in treeview.get_children():
-        treeview.delete(item)
+    if os.path.exists(CARPETA_PARA_BASES_DE_DATOS): # Se valida que exista la base de datos
 
-    # Se crean nuevamente los items
-    IMG_BASE_DE_DATOS = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bds.png'))
-    treeview.insert('', '0', 'item1', text='  Bases de datos', tags=('estilo_negrita'), image=IMG_BASE_DE_DATOS)
+        # Se eliminan los items actuales del treeview
+        for item in treeview.get_children():
+            treeview.delete(item)
 
-    IMG_BASE_DE_DATO = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bd.png'))
-    treeview.insert('item1', 'end', 'Base 1', text='Base 1', image=IMG_BASE_DE_DATO)
-    treeview.insert('item1', 'end', 'Base 2', text='Base 2', image=IMG_BASE_DE_DATO)
+        # Se definen las rutas de los iconos
+        IMG_BASE_DE_DATOS = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bds.png'))
+        IMG_BASE_DE_DATO = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_bd.png'))
+        IMG_CARPETA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
+        IMG_TABLA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_table.png'))
+        IMG_PROCEDIMIENTO = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_procedure.png'))
+        IMG_FUNCION = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_function.png'))
 
-    IMG_CARPETA = PhotoImage(file=os.path.join(thisdir, 'images', 'icon_folder.png'))
-    treeview.insert('Base 1', 'end', '  Tablas', text='Tablas', image=IMG_CARPETA)
+        # Se crea el item principal que contiene todas las bases de datos
+        treeview.insert('', '0', 'principal', text='  Bases de datos', image=IMG_BASE_DE_DATOS)
+
+        # Obtiene las bases de datos
+        bases_de_datos = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
+
+        # Dibuja cada base de datos
+        for nombre_bd in bases_de_datos:
+            treeview.insert('principal', 'end', nombre_bd, text=nombre_bd, image=IMG_BASE_DE_DATO)
+
+            # Obtiene las carpetas de esa base de datos
+            carpetas = os.listdir(CARPETA_PARA_BASES_DE_DATOS + nombre_bd)
+
+            # Dibuja cada carpeta de esa base de datos
+            for nombre_carpeta in carpetas:
+
+                treeview.insert(nombre_bd, 'end', nombre_bd + nombre_carpeta, text=nombre_carpeta, image=IMG_CARPETA)
+
+                # Obtiene cada archivo de esa carpeta
+                contenido_carpeta = os.listdir(CARPETA_PARA_BASES_DE_DATOS + nombre_bd + "/" + nombre_carpeta)
+
+                if ("/" + nombre_carpeta + "/") == CARPETA_PARA_TABLAS:
+                    for nombre_archivo in contenido_carpeta:
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_TABLA)
+                elif ("/" + nombre_carpeta + "/") == CARPETA_PARA_FUNCIONES:
+                    for nombre_archivo in contenido_carpeta:
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_FUNCION)
+                elif ("/" + nombre_carpeta + "/") == CARPETA_PARA_PROCEDIMIENTOS:
+                    for nombre_archivo in contenido_carpeta:
+                        treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_PROCEDIMIENTO)
 
 def oyente_cambio_texto_tab(codeview, indice_actual, event):
     # Obtener el código de la tecla presionada
@@ -267,6 +308,15 @@ def cerrar_tab_actual():
 def salir():
     root.destroy()
 
+# OPCIONES PARA EL MENU DE HERRAMIENTAS
+
+def crear_bd():
+    nombre = simpledialog.askstring("Input", "Ingresa tu nombre:")
+    if nombre:
+        print("Nombre ingresado:", nombre)
+    else:
+        print("No se ingresó un nombre.")
+
 keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
 keyboard.add_hotkey('ctrl+o', abrir)
@@ -306,7 +356,7 @@ tool_menu = tk.Menu(menubar)
 
 # Submenu 'Bases de datos'
 submenu_bd = tk.Menu(tool_menu)
-submenu_bd.add_command(label="Crear nuevo")
+submenu_bd.add_command(label="Crear nuevo", command=crear_bd)
 submenu_bd.add_command(label="Eliminar")
 submenu_bd.add_command(label="Crear DUMP")
 submenu_bd.add_command(label="Seleccionar uno")
@@ -340,6 +390,7 @@ panel_1.add(treeview)
 # Se agrega un sub panel dentro del panel principal
 panel_2 = PanedWindow(panel_1, orient="vertical", bd=4, relief="raised", bg="blue")
 panel_1.add(panel_2)
+mostrar_componentes_del_lenguaje()
 # -------------------------------------------
 
 # -------------------------------------------
