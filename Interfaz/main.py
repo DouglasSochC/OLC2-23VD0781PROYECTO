@@ -81,17 +81,14 @@ def ejecutar_query():
     print(texto)
 
     # Se setea la salida
-    setear_salida("Texto del tab " + str((indice_actual + 1)) + " analizado correctamente")
+    mostrar_salida_como_texto("Texto del tab " + str((indice_actual + 1)) + " analizado correctamente")
 
-def setear_salida(texto):
-    # Habilitar el widget Text temporalmente
-    text_widget.config(state="normal")
-    # Borrar el contenido anterior
-    text_widget.delete(1.0, tk.END)
-    # Insertar texto al final
-    text_widget.insert(tk.END, texto)
-    # Deshabilitar el widget Text nuevamente
-    text_widget.config(state="disabled")
+    # data = [
+    #     {"id": 1, "nombre": "Nombre1", "apellido": "Apellido1", "edad":15},
+    #     {"id": 2, "nombre": "Nombre2", "apellido": "Apellido2", "edad":16},
+    #     {"id": 3, "nombre": "Nombre3", "apellido": "Apellido3", "edad":17},
+    # ]
+    # mostrar_salida_como_tabla(data)
 
 def mostrar_componentes_del_lenguaje():
 
@@ -185,6 +182,65 @@ def comando_seleccionar_bd(variable, ventana_seleccionar):
     messagebox.showinfo("Informacion", "Base de datos seleccionada correctamente")
     mostrar_componentes_del_lenguaje()
     ventana_seleccionar.destroy()
+
+def mostrar_salida_como_texto(texto):
+    # Destruir todos los elementos del tab_salida
+    for widget in tab_salida.winfo_children():
+        widget.destroy()
+
+    # Crea un widget Text y lo agrega al panel para mostrar texto
+    text_widget = tk.Text(tab_salida, wrap="word", height=10, width=50, state="disabled")
+    text_widget.pack(fill="both", expand=True)
+
+    # Habilitar el widget Text temporalmente
+    text_widget.config(state="normal")
+    # Insertar texto al final
+    text_widget.insert(tk.END, texto)
+    # Deshabilitar el widget Text nuevamente
+    text_widget.config(state="disabled")
+
+def mostrar_salida_como_tabla(data: dict):
+
+    if len(data) <= 0:
+        mostrar_salida_como_texto("No hay registros por mostrar")
+        return
+
+    # Destruir todos los elementos del tab_salida
+    for widget in tab_salida.winfo_children():
+        widget.destroy()
+
+    encabezados = list(data[0].keys())
+    columnas = encabezados.copy()
+    columnas.pop()
+
+    # Crear el Treeview (tabla) y lo agrega al tab_salida
+    tree = ttk.Treeview(tab_salida, columns=(columnas))
+
+    # Configurar las columnas
+    for indice, encabezado in enumerate(encabezados):
+        tree.heading("#" + str(indice), text=encabezado)
+
+    # Agregar datos
+    for d in data:
+        # Obtener la primera posición
+        primera_posicion = next(iter(d.values()))
+        # Obtener el resto de los valores
+        resto_valores = list(d.values())[1:]
+        # Se agrega la linea a la tabla
+        tree.insert("", "end", text=primera_posicion, values=resto_valores)
+
+    # Configurar Scrollbar vertical
+    yscrollbar = ttk.Scrollbar(tab_salida, orient="vertical", command=tree.yview)
+    tree.configure(yscroll=yscrollbar.set)
+    yscrollbar.pack(side="right", fill="y")
+
+    # Configurar Scrollbar horizontal
+    xscrollbar = ttk.Scrollbar(tab_salida, orient="horizontal", command=tree.xview)
+    tree.configure(xscroll=xscrollbar.set)
+    xscrollbar.pack(side="bottom", fill="x")
+
+    # Empaquetar la tabla
+    tree.pack(expand=True, fill="both")
 
 # OPCIONES PARA EL MENU DE ARCHIVOS
 
@@ -422,11 +478,15 @@ keyboard.add_hotkey('F6', ejecutar_query)
 keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
 keyboard.add_hotkey('ctrl+o', abrir)
 keyboard.add_hotkey('ctrl+s', guardar)
+
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
 root.geometry(str(ANCHO_VENTANA) + "x" + str(ALTURA_VENTANA))
 root.option_add("*tearOff", 0)
+
+style = ttk.Style()
+style.theme_use("default")
 
 #  Obtenemos el largo y  ancho de la pantalla
 wtotal = root.winfo_screenwidth()
@@ -479,7 +539,7 @@ menubar.add_cascade(menu=tool_menu, label="Herramientas")
 root.config(menu=menubar)
 
 # Panel principal
-panel_1 = PanedWindow(bd=4, relief="raised", bg="red")
+panel_1 = PanedWindow(bd=2, relief="flat", bg="#5D6D7E")
 panel_1.pack(fill="both", expand=1)
 
 # -------------------------------------------
@@ -490,7 +550,7 @@ treeview.tag_configure('estilo_carpetas', font=('TkDefaultFont', 8, 'bold'))
 treeview.pack()
 panel_1.add(treeview)
 # Se agrega un sub panel dentro del panel principal
-panel_2 = PanedWindow(panel_1, orient="vertical", bd=4, relief="raised", bg="blue")
+panel_2 = PanedWindow(panel_1, orient="vertical", bd=1, relief="flat", bg="#5D6D7E")
 panel_1.add(panel_2)
 mostrar_componentes_del_lenguaje()
 # -------------------------------------------
@@ -510,9 +570,7 @@ notebook_inferior.add(tab_salida, text="Salida de datos")
 notebook_inferior.pack(fill="both", expand=True)
 panel_2.add(notebook_inferior)
 
-# Agregar un widget Text al tab para mostrar texto
-text_widget = tk.Text(tab_salida, wrap="word", height=10, width=50, state="disabled")
-text_widget.pack(fill="both", expand=True)
+mostrar_salida_como_texto("")
 # -------------------------------------------
 
 root.update()
