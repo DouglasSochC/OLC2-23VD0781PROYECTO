@@ -14,9 +14,26 @@ precedence = (
 # Gramatica
 def p_inicio(p):
     '''
-    instrucciones : instruccion
+    inicio : instrucciones
     '''
     p[0] = p[1]
+
+def p_instrucciones_lista(p):
+    '''
+    instrucciones : instrucciones instruccion
+    '''
+    if p[2] == "":
+        p[1].append(p[2])
+    p[0] = p[1]
+
+def p_instrucciones_lista2(p):
+    '''
+    instrucciones : instruccion
+    '''
+    if p[1] == "":
+        p[0] = []
+    else:
+        p[0] = [p[1]]
 
 def p_instruccion(p):
     '''
