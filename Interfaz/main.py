@@ -28,7 +28,7 @@ load_dotenv()
 
 # Funciones DDL
 import re
-from Funcionalidad.ddl import crear_base_de_datos, eliminar_base_de_datos
+from Funcionalidad.ddl import DDL
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -165,7 +165,8 @@ def oyente_cambio_texto_tab(codeview, indice_actual, event):
 
 def comando_eliminar_bd(variable, ventana_eliminar):
     seleccion = variable.get()
-    respuesta = eliminar_base_de_datos(seleccion)
+    ddl = DDL()
+    respuesta = ddl.eliminar_base_de_datos(seleccion)
     messagebox.showinfo("Informacion", respuesta)
     mostrar_componentes_del_lenguaje()
     ventana_eliminar.destroy()
@@ -393,7 +394,8 @@ def crear_bd():
 
     if nombre:
         if re.match(r'^[a-zA-Z0-9_]+$', nombre) is not None:
-            respuesta = crear_base_de_datos(nombre)
+            ddl = DDL()
+            respuesta = ddl.crear_base_de_datos(nombre)
             messagebox.showinfo("Informacion", respuesta)
             mostrar_componentes_del_lenguaje()
         else:

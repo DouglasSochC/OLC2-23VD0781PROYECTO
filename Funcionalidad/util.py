@@ -1,6 +1,11 @@
 import re
 from datetime import datetime
 
+class Respuesta:
+    def __init__(self, success: bool, msg: str):
+        self.success = success
+        self.msg = msg
+
 def es_entero(str):
     try:
         int(str)
