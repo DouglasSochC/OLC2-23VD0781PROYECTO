@@ -43,14 +43,14 @@ reservadas = {
     'delete': 'DELETE',
     'from': 'FROM',
     'where': 'WHERE',
-    
+
     # Funciones nativas
     'concatena': 'CONCATENA',
     'substraer': 'SUBSTRAER',
     'hoy': 'HOY',
     'contar': 'CONTAR',
     'suma': 'SUMA',
-    'cast': 'CAST',    
+    'cast': 'CAST',
 }
 
 tokens = [
@@ -137,7 +137,7 @@ def t_LNUMERO(t):
 
 def t_ID(t):
     r'[A-Za-z_][A-Za-z0-9_]*'
-    t.type = reservadas.get(t.value, 'ID') 
+    t.type = reservadas.get(t.value.lower(), 'ID')
     return t
 
 # Ignored token with an action associated with it
