@@ -2,28 +2,25 @@ from ply.lex import lex
 
 errors = ()
 
-reserved = {
-    # Sentences
-    'select': 'SELECT',
-    
-    # User functions
+reservadas = {
+    # Sentencias DDL
     'create': 'CREATE',
-    'function': 'FUNCTION',
-    'returns': 'RETURNS',
+    'alter': 'ALTER',
+    'drop': 'DROP',
+    'truncate': 'TRUNCATE',
     'as': 'AS',
-    'begin': 'BEGIN',
     'return': 'RETURN',
+    'begin': 'BEGIN',
     'end': 'END',
-    
-    # Native functions
-    'concatena': 'CONCATENA',
-    'substraer': 'SUBSTRAER',
-    'hoy': 'HOY',
-    'contar': 'CONTAR',
-    'suma': 'SUMA',
-    'cast': 'CAST',
+    'add': 'ADD',
 
-    # Data types
+    # Tipos de objeto
+    'database': 'DATABASE',
+    'table': 'TABLE',
+    'procedure': 'PROCEDURE',
+    'function': 'FUNCTION',
+
+    # Tipos de dato
     'int': 'INT',
     'bit': 'BIT',
     'decimal': 'DECIMAL',
@@ -31,48 +28,116 @@ reserved = {
     'date': 'DATE',
     'nchar': 'NCHAR',
     'nvarchar': 'NVARCHAR',
+
+    # Constraint
+    'primary': 'PRIMARY',
+    'null': 'NULL',
+    'foreing': 'FOREING',
+    'key': 'KEY',
+    'reference': 'REFERENCE',
+
+    # Sentencia DML
+    'select': 'SELECT',
+    'insert': 'INSERT',
+    'update': 'UPDATE',
+    'delete': 'DELETE',
+    'from': 'FROM',
+    'where': 'WHERE',
+    
+    # Funciones nativas
+    'concatena': 'CONCATENA',
+    'substraer': 'SUBSTRAER',
+    'hoy': 'HOY',
+    'contar': 'CONTAR',
+    'suma': 'SUMA',
+    'cast': 'CAST',    
 }
 
-tokens = (
-    # Arithmetic Expressions
-    'PLUS',
-    'MINUS',
-    'TIMES',
-    'DIVIDE',
+tokens = [
+    # Expresiones aritmeticas
+    'MAS',
+    'MENOS',
+    'POR',
+    'DIVIDIDO',
 
-    # Comparison Operators
-    'IGUAL',
+    # Expresiones relacionales
+    'IGUALIGUAL',
     'DIFERENTE',
-    'MAYOR',
-    'MENOR',
     'MENORIGUAL',
     'MAYORIGUAL',
+    'MAYOR',
+    'MENOR',
 
-    # Logical Expressions
+    # Expresiones logicas
     'OR',
     'AND',
+    'NOT',
     'IZQPAREN',
     'DERPAREN',
-)
 
-# Ignored characters
+    # Literal
+    'LNUMERO',
+    'LDECIMAL',
+    'LFECHA',
+    'LFECHAHORA',
+    'LVARCHAR',
+
+    # Otros
+    'ID',
+    'COMA',
+    'PUNTO',
+    'ARROBA',
+    'IGUAL',
+    'PUNTOYCOMA'
+] + list(reservadas.values())
+
+# Caracteres ignorados
 t_ignore = ' \t'
 
-# Token matching rules are written as regexs
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIVIDE = r'/'
-t_IGUAL = r'\='
+# Expresiones aritmeticas
+t_MAS = r'\+'
+t_MENOS = r'-'
+t_POR = r'\*'
+t_DIVIDIDO = r'/'
+
+# Expresiones relacionales
+t_IGUALIGUAL = r'\=\='
+t_DIFERENTE = r'!='
+t_MENORIGUAL = r'<='
+t_MAYORIGUAL = r'>='
+t_MAYOR = r'>'
+t_MENOR = r'<'
+
+# Expresiones logicas
+t_OR = r'\|\|'
+t_AND = r'&&'
+t_NOT = r'!'
 t_IZQPAREN = r'\('
 t_DERPAREN = r'\)'
-# t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+# Literal
+t_LDECIMAL = r'\d+\.\d+'
+t_LFECHA = r'\d{2}-\d{2}-\d{4}'
+t_LFECHAHORA = r'\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}'
+t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
+
+# Otros
+t_IGUAL = r'\='
+t_COMA = r','
+t_PUNTO = r'.'
+t_ARROBA = r'@'
+t_PUNTOYCOMA = r'\;'
 
 # A function can be used if there is an associated action.
 # Write the matching regex in the docstring.
-def t_NUMBER(t):
+def t_LNUMERO(t):
     r'\d+'
     t.value = int(t.value)
+    return t
+
+def t_ID(t):
+    r'[A-Za-z_][A-Za-z0-9_]*'
+    t.type = reservadas.get(t.value, 'ID') 
     return t
 
 # Ignored token with an action associated with it

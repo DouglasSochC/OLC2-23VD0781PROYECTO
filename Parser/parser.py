@@ -1,74 +1,43 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errors
 
-# Operator Precedence
+# Operadores de precedencia
 precedence = (
     ('left', 'MAS', 'MENOS'),
-    ('left', 'POR', 'DIVISION'),
-
-
+    ('left', 'POR', 'DIVIDIDO'),
+    ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
     ('left', 'OR'),
     ('left', 'AND'),
-
-    ('left', 'IGUAL', 'DIFERENTE'),
-    ('left', 'IGUAL', 'DIFERENTE', 'MENORQUE', 'MENORIGUAL', 'MAYORQUE', 'MAYORIGUAL'),
-    ('left', 'POTENCIA', 'MODULO')
+    ('left', 'IZQPAREN', 'DERPAREN')
 )
 
-# Parser rules
-def p_expression(p):
+# Gramatica
+def p_inicio(p):
     '''
-    expression : term PLUS term
-               | term MINUS term
-    '''
-    p[0] = ('binop', p[2], p[1], p[3])
-
-def p_expression_term(p):
-    '''
-    expression : term
+    instrucciones : instruccion
     '''
     p[0] = p[1]
 
-def p_term(p):
+def p_instruccion(p):
     '''
-    term : factor TIMES factor
-         | factor DIVIDE factor
-    '''
-    p[0] = ('binop', p[2], p[1], p[3])
-
-def p_term_factor(p):
-    '''
-    term : factor
+    instruccion : sentencia_ddl
     '''
     p[0] = p[1]
 
-def p_factor_number(p):
+def p_sentencia_ddl(p):
     '''
-    factor : NUMBER
+    sentencia_ddl : create
     '''
-    p[0] = ('number', p[1])
+    p[0] = p[1]
 
-def p_factor_name(p):
+def p_create(p):
     '''
-    factor : NAME
+    create : CREATE DATABASE ID PUNTOYCOMA
     '''
-    p[0] = ('name', p[1])
-
-def p_factor_unary(p):
-    '''
-    factor : PLUS factor
-           | MINUS factor
-    '''
-    p[0] = ('unary', p[1], p[2])
-
-def p_factor_grouped(p):
-    '''
-    factor : LPAREN expression RPAREN
-    '''
-    p[0] = ('grouped', p[2])
+    p[0] = "Base de datos creada correctamente"
 
 def p_error(p):
     print(f'Syntax error at {p.value!r}')
 
-# Build parser
+# Construir el parser
 parser = yacc()

@@ -1,3 +1,6 @@
+# Para realizar el analisis
+from Parser.parser import parser
+
 # Para la construccion de la interfaz
 import tkinter as tk
 from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebox, ttk
@@ -74,21 +77,15 @@ def ejecutar_query():
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
 
-    # Base de datos seleccionada
-    print(BD_SELECCIONADA)
-
-    # Se analiza el query
-    print(texto)
+    # Parse an expression
+    salida = parser.parse(texto)
 
     # Se setea la salida
-    mostrar_salida_como_texto("Texto del tab " + str((indice_actual + 1)) + " analizado correctamente")
-
-    # data = [
-    #     {"id": 1, "nombre": "Nombre1", "apellido": "Apellido1", "edad":15},
-    #     {"id": 2, "nombre": "Nombre2", "apellido": "Apellido2", "edad":16},
-    #     {"id": 3, "nombre": "Nombre3", "apellido": "Apellido3", "edad":17},
-    # ]
-    # mostrar_salida_como_tabla(data)
+    if salida is not None:        
+        if isinstance(salida, list):
+            mostrar_salida_como_tabla(salida)
+        else:
+            mostrar_salida_como_texto(salida)
 
 def mostrar_componentes_del_lenguaje():
 
