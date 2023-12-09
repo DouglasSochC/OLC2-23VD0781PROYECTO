@@ -37,7 +37,7 @@ class DDL:
             os.makedirs(self.__path_tablas.format(nombre_bd))
             os.makedirs(self.__path_funciones.format(nombre_bd))
             os.makedirs(self.__path_procedimiento.format(nombre_bd))
-            return Respuesta(True, "La base de datos ha sido creada correctamente.")
+            return Respuesta(True, "La base de datos '{}' ha sido creada correctamente.".format(nombre_bd))
         else:
             return Respuesta(False, "Ya existe una base de datos con el mismo nombre.")
 
@@ -95,7 +95,7 @@ class DDL:
             with open(path_tabla, "wb") as archivo:
                 tree.write(archivo)
 
-            return Respuesta(True, "La tabla ha sido creada correctamente")
+            return Respuesta(True, "La tabla '{}' ha sido creada correctamente".format(nombre_tabla))
 
     ##############################################
     ################ SECCION DROP ################
@@ -122,7 +122,47 @@ class DDL:
             return Respuesta(False, "La base de datos que desea eliminar no existe.")
         else:
             shutil.rmtree(path_bd)
-            return Respuesta(True, "La base de datos ha sido eliminada correctamente.")
+            return Respuesta(True, "La base de datos '{}' ha sido eliminada correctamente.".format(nombre_bd))
+
+    def eliminar_tabla(self, nombre_bd: str, nombre_tabla:str):
+        '''
+        Elimina una tabla de una base de datos
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_tabla (str): Nombre de la tabla a eliminar
+
+        Returns:
+            Respuesta
+        '''
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+
+        # Se obtienen todas las tablas existentes de la base de datos
+        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+
+        # Se evalua tabla por tabla para verificar que la tabla que se desee eliminar no este referenciada a otra tabla
+        for tabla in tablas:
+
+            # Se obtiene la raiz del XML de la tabla
+            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root = tree.getroot()
+
+            # Se obtiene los campos que son una llave foranea
+            campos_con_llave_foranea = root.findall(".//estructura/campo/[@fk_table]")
+
+            # Se valida que no se haga referencia
+            for campo in campos_con_llave_foranea:
+                if campo.attrib['fk_table'] == nombre_tabla:
+                    return Respuesta(False, "No es posible eliminar la tabla '{}' porque está referenciada por el campo '{}' en la tabla '{}'.".format(nombre_tabla, campo.attrib['name'], tabla.rsplit('.', 1)[0]))
+
+        os.remove(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml")
+        return Respuesta(True, "La tabla '{}' ha sido eliminada correctamente.".format(nombre_tabla))
 
     ##############################################
     ########### SECCION VALIDACIONES #############
