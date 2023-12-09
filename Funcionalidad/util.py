@@ -20,7 +20,7 @@ def es_decimal(str):
     except ValueError:
         return False
 
-def validar_tipo_dato(campo, valor, tipo, longitud = None):
+def validar_tipo_dato(campo: str, valor: str, tipo: str, longitud: int = None):
 
     if tipo == 'int':
 

@@ -138,8 +138,8 @@ class DDL:
                 'type' (str): Tipo de dato
                 'length' (str) = Longitud del tipo de dato (Este parametro existe unicamente si se es nchar y nvarchar)
             }
-            nombre_tabla_referencia (str): abc
-            campo_tabla_referencia (str):
+            nombre_tabla_referencia (str): Nombre de la tabla a la que se hara la referencia
+            campo_tabla_referencia (str): Campo que pertenece a la tabla que se hara la referencia
 
         Returns:
             Respuesta
