@@ -78,6 +78,29 @@ class DML:
 
         return tupla_respuesta
 
+    def __validar_campos(self, path_tabla: str, campos: list) -> str | dict:
+
+        if len(campos) <= 0:
+            return "Debe de seleccionar por lo menos una columna"
+
+        # Se crea una variable que devolvera una lista de los campos validos
+        campos_respuesta = []
+
+        # Se obtiene la raiz del XML
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        for campo in campos:
+
+            existe_el_campo = len(root.findall(".//estructura/campo/[@name='" + campo + "']")) > 0
+
+            if existe_el_campo:
+                campos_respuesta.append(campo)
+            else:
+                return "La columna '{}' es invalida".format(campo)
+
+        return campos_respuesta
+
     ##############################################
     ############### SECCION INSERT ###############
     ##############################################
@@ -101,6 +124,8 @@ class DML:
             return Respuesta(False, "Por favor, indique el nombre de la tabla")
         elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
             return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
 
         path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
 
@@ -133,3 +158,47 @@ class DML:
         # Este es el caso que la estructura de la tupla es valida
         else:
             return Respuesta(False, val_estructura_tupla)
+
+    ##############################################
+    ############### SECCION SELECT ###############
+    ##############################################
+
+    def seleccionar_registro_tabla(self, nombre_bd:str, nombre_tabla: str, campos: list, condiciones: list):
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+        respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se validan los campos
+        val_campos = self.__validar_campos(path_tabla, campos)
+        if isinstance(val_campos, str):
+            return Respuesta(False, val_campos)
+
+        # Se obtiene la raiz del XML
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        # Se obtiene la definicion de los registros
+        filas = root.findall(".//registros/fila")
+
+        # Se recorre fila por fila
+        for fila in filas:
+
+            # Se almacena la informacion de forma ordenada
+            resultado_fila = {}
+            for campo in val_campos:
+
+                valor = fila.find(campo)
+                resultado_fila[campo] = valor.text if valor is not None else None
+
+            respuesta_datos.append(resultado_fila)
+
+        return Respuesta(True, respuesta_datos)
