@@ -76,6 +76,33 @@ print(respuesta.success, respuesta.msg)
 respuesta = ddl.verificar_referencia_llave_foranea("bd1", {'type':'int'}, "tipo_producto", "id")
 print(respuesta.success, respuesta.msg)
 
+print()
+# ERROR | Error por referencia
+respuesta = ddl.eliminar_tabla("bd1", "tipo_producto")
+print(respuesta.success, respuesta.msg)
+# Correcto
+respuesta = ddl.eliminar_tabla("bd1", "producto")
+print(respuesta.success, respuesta.msg)
+# Correcto
+respuesta = ddl.eliminar_tabla("bd1", "tipo_producto")
+print(respuesta.success, respuesta.msg)
+
+ddl.crear_tabla("bd1", "producto", [
+    {'name':'id', 'type':'int', 'pk':''},
+    {'name':'esta_bueno', 'type':'bit', 'nullable':''},
+    {'name':'total', 'type':'decimal', 'nullable':''},
+    {'name':'fecha', 'type':'date', 'nullable':''},
+    {'name':'fecha_hora', 'type':'datetime', 'nullable':''},
+    {'name':'nombre', 'type':'nchar', 'length': '20', 'nullable':''},
+    {'name':'descripcion', 'type':'nvarchar', 'length': '100', 'nullable':''},
+    {'name':'id_tipo_producto', 'type':'int', 'nullable':'', 'fk_table':'tipo_producto', 'fk_attribute':'id'},
+])
+ddl.crear_tabla("bd1", "tipo_producto", [
+    {'name':'id', 'type':'int', 'nullable':'', 'pk':''},
+    {'name':'nombre', 'type':'nchar', 'length': '20', 'nullable':''},
+    {'name':'descripcion', 'type':'nvarchar', 'length': '100', 'nullable':''}
+])
+
 dml = DML()
 print()
 # ERROR | 'id' no es nuleable
@@ -190,9 +217,10 @@ dml.insertar_registro_tabla("bd1", "producto", {'id': '143', 'esta_bueno': '0', 
 dml.insertar_registro_tabla("bd1", "producto", {'id': '144', 'esta_bueno': '1', 'total': '80.2', 'fecha': '15-02-2024', 'fecha_hora': '07-01-2024 15:00:00', 'nombre': 'nombre44', 'descripcion': 'descripcion44'})
 dml.insertar_registro_tabla("bd1", "producto", {'id': '145', 'esta_bueno': '0', 'total': '125.9', 'fecha': '16-02-2024', 'fecha_hora': '07-01-2024 18:00:00', 'nombre': 'nombre45', 'descripcion': 'descripcion45'})
 
-# # Crea la base de datos
-# respuesta = crear_base_de_datos("bd2")
-# print(respuesta.success, respuesta.msg)
-# # Crea la base de datos
-# respuesta = crear_base_de_datos("bd3")
-# print(respuesta.success, respuesta.msg)
+print()
+# ERROR | No existe un campo
+respuesta = dml.seleccionar_registro_tabla("bd1","producto",["id", "nombre", "descripcion", "camponuevo"], None)
+print(respuesta.success, respuesta.msg)
+# Se obtienen todos los registros
+respuesta = dml.seleccionar_registro_tabla("bd1","producto",["id", "nombre", "descripcion", "id_tipo_producto"], None)
+print(respuesta.success, respuesta.msg)
