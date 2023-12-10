@@ -40,6 +40,7 @@ def p_instruccion(p):
     '''
     instruccion : sentencia_ddl 
                 | declaracion
+                | sentencia_dml
     '''
     p[0] = p[1]
 
@@ -162,6 +163,92 @@ def p_truncate(p):
     '''
     p[0] = f"Truncamiento de tabla '{p[3]}' realizada."
 
+
+def p_sentencia_dml(p):
+    '''
+    sentencia_dml : delete
+                 
+    '''
+    p[0] = p[1]
+
+
+def p_delete(p):
+    '''
+    delete : DELETE FROM expresion WHERE expresion PUNTOYCOMA
+    '''
+    p[0] = f"Eliminación de tuplas de tabla '{p[3]}' realizada."
+
+
+def p_lista_expresiones(p):
+    '''
+        lista_expresiones : lista_expresiones COMA expresion
+                         | expresion
+    '''
+    if len(p) == 4:
+        p[0] = p[1]
+        p[0].append(p[3])
+    elif len(p) == 2:
+        p[0] = [p[1]]
+
+
+def p_expresion(p):
+    '''
+        expresion : aritmeticos
+                | relacionales
+                | logicos
+                | literal
+                | identificador
+
+    '''
+    p[0] = p[1]
+
+def p_aritmeticos(p):
+    '''
+        aritmeticos : expresion MAS expresion
+                    | expresion MENOS expresion
+                    | expresion POR expresion
+                    | expresion DIVIDIDO expresion
+    '''
+    if p[2] == '+'  : p[0] = p[1] + p[3]
+    elif p[2] == '-': p[0] = p[1] - p[3]
+    elif p[2] == '*': p[0] = p[1] * p[3]
+    elif p[2] == '/': p[0] = p[1] / p[3]
+
+def p_relacionales(p):
+    '''
+        relacionales : expresion IGUALIGUAL expresion
+                    | expresion DIFERENTE expresion
+                    | expresion MENOR expresion
+                    | expresion MAYOR expresion
+                    | expresion MENORIGUAL expresion
+                    | expresion MAYORIGUAL expresion
+    '''
+    if p[2] == '==': p[0] = p[1] == p[3]
+    elif p[2] == '!=': p[0] = p[1] != p[3]
+    elif p[2] == '<': p[0] = p[1] < p[3]
+    elif p[2] == '>': p[0] = p[1] > p[3]
+    elif p[2] == '<=': p[0] = p[1] <= p[3]
+    elif p[2] == '>=': p[0] = p[1] >= p[3]
+
+def p_logicos(p):
+    '''
+        logicos : expresion AND expresion
+                | expresion OR expresion
+                | NOT expresion
+    '''
+    if p[1] == '&&': p[0] = p[1] and p[3]
+    elif p[1] == '||': p[0] = p[1] or p[3]
+    elif p[1] == '!': p[0] = not p[2]
+
+def p_literal(p):
+    '''
+        literal : LNUMERO
+                | LDECIMAL
+                | LFECHA
+                | LFECHAHORA
+                | LVARCHAR
+    '''
+    p[0] = p[1]
 
 def p_identificador(p):
     '''
