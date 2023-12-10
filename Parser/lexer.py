@@ -42,7 +42,6 @@ reservadas = {
     'foreign': 'FOREIGN',
     'key': 'KEY',
     'references': 'REFERENCES',
-    'constraint': 'CONSTRAINT',
 
     # Sentencia DML
     'select': 'SELECT',

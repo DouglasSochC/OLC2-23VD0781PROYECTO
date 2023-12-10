@@ -54,13 +54,30 @@ def p_create(p):
     '''
         create : CREATE tipo_objeto identificador PUNTOYCOMA
                | CREATE tipo_objeto identificador IZQPAREN parametros DERPAREN PUNTOYCOMA
+               | CREATE tipo_objeto ID IZQPAREN parametros DERPAREN AS lista_sentencias_dml
+               | CREATE tipo_objeto ID AS lista_sentencias_dml
+               | CREATE tipo_objeto ID IZQPAREN parametros DERPAREN RETURN tipo AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+               | CREATE tipo_objeto ID  RETURN tipo AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+               | CREATE tipo_objeto ID  AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
+    if len(p) == 5:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
+    elif len(p) == 8:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5]}
+    elif len(p) == 10:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5], 'sentencias': p[8]}
+    elif len(p) == 7:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'sentencias': p[5]}
+    elif len(p) == 13:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5], 'tipo_retorno': p[7], 'sentencias': p[10]}
+    else:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'tipo_retorno': p[5], 'sentencias': p[8]}
 
 def p_parametros(p):
     '''
-    parametros : parametros COMA identificador tipo CONSTRAINT
+    parametros : parametros COMA identificador tipo constrain
                 | parametros COMA identificador tipo
-                | identificador tipo CONSTRAINT
+                | identificador tipo constrain
                 | identificador tipo
     '''
     if len(p) == 6:
@@ -72,6 +89,16 @@ def p_parametros(p):
     else:
         p[0] = {'identificador': p[2], 'tipo': p[3]}
 
+def p_constrain(p):
+    '''
+    constrain : PRIMARY KEY
+              | NOT NULL
+              | REFERENCES ID IZQPAREN ID DERPAREN
+    '''
+    if len(p) == 3:
+        p[0] = {'constrain': p[1], 'tipo': p[2]}
+    else:
+        p[0] = {'constrain': p[1], 'tipo': p[2], 'tabla': p[3], 'columna': p[5]}
 
 def p_tipo_objeto(p):
     '''
@@ -111,11 +138,23 @@ def p_truncate(p):
     '''
     p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
 
+
 def p_llamar_procedure(p):
     '''
     llamar_procedure : EXEC lista_expresiones PUNTOYCOMA
     '''
-    p[0] = {'accion': p[1], 'parametros': p[2]}
+    p[0] = {'accion': p[1], 'parametros': p[3]}
+
+def p_lista_sentencias_dml(p):
+    '''
+    lista_sentencias_dml : lista_sentencias_dml sentencia_dml
+                         | sentencia_dml
+    '''
+    if len(p) == 3:
+        p[1].append(p[2])
+        p[0] = p[1]
+    else:
+        p[0] = [p[1]]
 
 def p_sentencia_dml(p):
     '''
