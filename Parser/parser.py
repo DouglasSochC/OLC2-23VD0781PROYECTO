@@ -76,14 +76,17 @@ def p_seg_date(p):
 
 def p_seg_string(p):
     '''
-    seg_string : NCHAR
-                | NVARCHAR
+    seg_string : NCHAR IZQPAREN LNUMERO DERPAREN
+                | NVARCHAR IZQPAREN LNUMERO DERPAREN
     '''
     p[0] = p[1]
 
 def p_sentencia_ddl(p):
     '''
     sentencia_ddl : create
+                  | drop
+                  | alter
+                  | truncate
     '''
     p[0] = p[1]
 
@@ -133,6 +136,31 @@ def p_tipo_objeto(p):
                 | FUNCTION
     '''
     p[0] = p[1]
+
+def p_alter(p):
+    '''
+    alter : ALTER tipo_objeto identificador accion PUNTOYCOMA
+    '''
+    p[0] = f"Alteración de objeto '{p[2]}' con nombre '{p[3]}' realizada '{p[4]}'."
+
+def p_accion(p):
+    '''
+        accion : ADD identificador tipo
+                | DROP identificador
+    '''
+    p[0] = p[1]
+
+def p_drop(p):
+    '''
+    drop : DROP tipo_objeto identificador PUNTOYCOMA
+    '''
+    p[0] = f"Eliminación de objeto '{p[2]}' con nombre '{p[3]}' realizada."
+
+def p_truncate(p):
+    '''
+    truncate : TRUNCATE identificador PUNTOYCOMA
+    '''
+    p[0] = f"Truncamiento de tabla '{p[3]}' realizada."
 
 
 def p_identificador(p):
