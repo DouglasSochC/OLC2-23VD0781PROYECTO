@@ -37,6 +37,7 @@ def p_instruccion(p):
     instruccion : declaracion_variable
                 | sentencia_ddl
                 | sentencia_dml
+                | llamar_procedure
     '''
     p[0] = p[1]
 
@@ -110,9 +111,19 @@ def p_truncate(p):
     '''
     p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
 
+def p_llamar_procedure(p):
+    '''
+    llamar_procedure : EXEC lista_expresiones PUNTOYCOMA
+    '''
+    p[0] = {'accion': p[1], 'parametros': p[2]}
+
 def p_sentencia_dml(p):
     '''
     sentencia_dml : insert
+                | delete
+                | update
+                | RETURN expresion PUNTOYCOMA
+                | expresion
     '''
     p[0] = p[1]
 
@@ -125,6 +136,22 @@ def p_insert(p):
         p[0] = {'accion': p[1], 'tipo': p[2], 'columnas': p[3], 'valores': p[6]}
     else:
         p[0] = {'accion': p[1], 'tipo': p[2], 'columnas': p[3], 'valores': p[9]}
+
+def p_delete(p):
+    '''
+    delete : DELETE FROM lista_expresiones WHERE lista_expresiones PUNTOYCOMA
+    '''
+    p[0] = {'accion': p[1], 'tipo': p[2], 'tabla': p[3], 'condicion': p[5]}
+
+def p_update(p):
+    '''
+    update : UPDATE lista_expresiones SET lista_expresiones WHERE lista_expresiones PUNTOYCOMA
+            | UPDATE IZQPAREN lista_expresiones DERPAREN SET IZQPAREN lista_expresiones DERPAREN WHERE lista_expresiones PUNTOYCOMA
+    '''
+    if len(p) == 8:
+        p[0] = {'accion': p[1], 'expresion': p[2], 'accion': p[3], 'valores': p[4], 'condicion': p[6]}
+    else:
+        p[0] = {'accion': p[1], 'expresiones': p[3], 'accion': p[5], 'valores': p[7], 'condicion': p[10]}
 
 def p_lista_expresiones(p):
     '''

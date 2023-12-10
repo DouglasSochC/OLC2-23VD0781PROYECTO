@@ -18,6 +18,7 @@ reservadas = {
     'begin': 'BEGIN',
     'end': 'END',
     'add': 'ADD',
+    'exec': 'EXEC',
 
     # Tipos de objeto
     'database': 'DATABASE',
