@@ -83,6 +83,8 @@ def ejecutar_query():
     
     # TODO: BORRAR PRINT Y DESCOMENTAR SETEO DE SALIDA
     print(salida)
+    print("se termina ejecucion")
+    texto=""
     
     # Se setea la salida
     '''if salida is not None:        

@@ -9,6 +9,7 @@ reservadas = {
     'drop': 'DROP',
     'declare': 'DECLARE',
     'set': 'SET',
+    'between': 'BETWEEN',
     'truncate': 'TRUNCATE',
     'as': 'AS',
     'return': 'RETURN',
@@ -127,7 +128,7 @@ t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
 t_IGUAL = r'\='
 t_COMA = r','
 t_PUNTO = r'.'
-t_ARROBA = r'@'
+t_ARROBA = r'\@'
 t_PUNTOYCOMA = r'\;'
 
 # A function can be used if there is an associated action.
