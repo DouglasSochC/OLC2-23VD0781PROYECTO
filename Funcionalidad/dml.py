@@ -18,6 +18,9 @@ class DML:
         # Se crea una variable que almacenara toda la informacion de los campos a registrar
         tupla_respuesta = {}
 
+        # Todos los valores de la tupla se castean a 'str' para que no haya problemas
+        tupla = {clave: str(valor) for clave, valor in tupla.items()}
+
         # Se obtiene la raiz del XML
         tree = ET.parse(path_tabla)
         root = tree.getroot()
@@ -35,7 +38,7 @@ class DML:
 
                 # Debido a que el campo no viene, se debe validar si puede ser NULL o no
                 if 'nullable' not in campo.attrib:
-                    return "El campo '" + campo_nombre + "' no puede de ser NULL"
+                    return "El campo '{}' no puede de ser NULL".format(campo_nombre)
 
             # Debido a que el campo viene, hay que validar su restriccion segun el tipo de dato
             else:
@@ -63,7 +66,7 @@ class DML:
                     # Se busca y se valida que exista el valor
                     campos = root.findall(".//registros/fila[" + campo.attrib['fk_attribute'] + "='" + tupla[campo_nombre] + "']")
                     if len(campos) <= 0:
-                        return "La clave " + tupla[campo_nombre] + " no se encuentra en la tabla " + campo.attrib['fk_table']
+                        return "La clave '{}' no se encuentra en la tabla '{}'.".format(tupla[campo_nombre], campo.attrib['fk_table'])
 
                 # Se almacena el dato en la tupla de respuesta
                 tupla_respuesta[campo_nombre] = tupla[campo_nombre]
@@ -74,7 +77,7 @@ class DML:
         # Debido a que puede ir parametros desconocidos en la tupla, se valida que no vengan demas
         if len(tupla) > 0:
             campos_invalidos = ", ".join(list(tupla.keys()))
-            return "Los siguientes campos son invalidas: " + campos_invalidos
+            return "Los siguientes campos son invalidas: {}".format(campos_invalidos)
 
         return tupla_respuesta
 
@@ -164,6 +167,15 @@ class DML:
     ##############################################
 
     def seleccionar_registro_tabla(self, nombre_bd:str, nombre_tabla: str, campos: list, condiciones: list):
+        '''
+        Obtiene la informacion de una tabla.
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_tabla (str): Nombre de la tabla
+            campos (list): Campos existentes en la tabla que seran mostrados
+            condiciones ():
+        '''
 
         if nombre_bd is None: # Se valida que haya seleccionado una base de datos
             return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")

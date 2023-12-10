@@ -84,9 +84,12 @@ class DDL:
 
             # Se agrega los campos que lleva la tabla
             for param in parametros:
+                
+                # Se castean todos los atributos a 'str' para que puedan ser almacenados
+                atributos = {clave: str(valor) for clave, valor in param.items()}
 
-                # Se verificara que las llaves foraneas esten debidamente validadas
-                ET.SubElement(estructura, "campo", attrib=param)
+                # Se almacena cada campo que tendra la tabla
+                ET.SubElement(estructura, "campo", attrib=atributos)
 
             # Crea el arbol XML
             tree = ET.ElementTree(root)
