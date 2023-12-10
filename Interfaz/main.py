@@ -79,7 +79,6 @@ def ejecutar_query():
 
     # Parse an expression
     print("Texto a parsear: " + texto)
-    print(parser.parse(texto))
     salida = parser.parse(texto)
     
     # TODO: BORRAR PRINT Y DESCOMENTAR SETEO DE SALIDA

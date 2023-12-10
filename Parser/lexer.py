@@ -7,6 +7,7 @@ reservadas = {
     'create': 'CREATE',
     'alter': 'ALTER',
     'drop': 'DROP',
+    'declare': 'DECLARE',
     'truncate': 'TRUNCATE',
     'as': 'AS',
     'return': 'RETURN',
@@ -32,9 +33,9 @@ reservadas = {
     # Constraint
     'primary': 'PRIMARY',
     'null': 'NULL',
-    'foreing': 'FOREING',
+    'foreign': 'FOREIGN',
     'key': 'KEY',
-    'reference': 'REFERENCE',
+    'references': 'REFERENCES',
 
     # Sentencia DML
     'select': 'SELECT',
