@@ -197,10 +197,45 @@ def p_expresion(p):
                 | relacionales
                 | logicos
                 | literal
+                | funcion_nativa
+                | IZQPAREN expresion DERPAREN
+                | asignacion
                 | identificador
-
     '''
     p[0] = p[1]
+
+def p_asignacion(p):
+    '''
+        asignacion : expresion IGUAL expresion
+                   | SET expresion
+    '''
+    if p[1] == '=':
+        p[0] = f"Asignación de '{p[1]}' a '{p[3]}' realizada."
+    elif p[1] == 'SET':
+        p[0] = f"Asignación de '{p[2]}' realizada."
+
+
+def p_funcion_nativa(p):
+    '''
+        funcion_nativa : CONCATENA IZQPAREN expresion DERPAREN
+                          | SUBSTRAER IZQPAREN expresion COMA expresion COMA expresion DERPAREN
+                          | HOY IZQPAREN DERPAREN
+                          | CONTAR IZQPAREN expresion DERPAREN
+                          | SUMA IZQPAREN expresion DERPAREN
+                          | CAST IZQPAREN expresion DERPAREN 
+    '''
+    if p[1] == 'CONCATENA':
+        p[0] = f"Concatenación de '{p[3]}' realizada."
+    elif p[1] == 'SUBSTRAER':
+        p[0] = f"Substracción de '{p[3]}' realizada."
+    elif p[1] == 'HOY':
+        p[0] = f"Obtención de fecha actual realizada."
+    elif p[1] == 'CONTAR':
+        p[0] = f"Conteo de '{p[3]}' realizada."
+    elif p[1] == 'SUMA':
+        p[0] = f"Suma de '{p[3]}' realizada."
+    elif p[1] == 'CAST':
+        p[0] = f"Casting de '{p[3]}' realizada."
 
 def p_aritmeticos(p):
     '''

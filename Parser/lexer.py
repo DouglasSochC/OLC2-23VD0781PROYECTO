@@ -8,6 +8,7 @@ reservadas = {
     'alter': 'ALTER',
     'drop': 'DROP',
     'declare': 'DECLARE',
+    'set': 'SET',
     'truncate': 'TRUNCATE',
     'as': 'AS',
     'return': 'RETURN',
