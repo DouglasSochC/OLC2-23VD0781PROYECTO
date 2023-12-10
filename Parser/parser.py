@@ -174,37 +174,20 @@ def p_select(p):
                 | SELECT lista_expresiones FROM ID WHERE lista_expresiones PUNTOYCOMA
                 | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
                 | SELECT lista_expresiones PUNTOYCOMA
-                | SELECT ID IZQPAREN DERPAREN PUNTOYCOMA
-                | SELECT ID IZQPAREN lista_expresiones  DERPAREN PUNTOYCOMA
-                | SELECT ID IZQPAREN DERPAREN FROM ID PUNTOYCOMA
-                | SELECT ID IZQPAREN lista_expresiones  DERPAREN FROM ID PUNTOYCOMA
-                | SELECT ID IZQPAREN DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
-                | SELECT ID IZQPAREN lista_expresiones  DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
-    
+                | SELECT identificador IZQPAREN DERPAREN PUNTOYCOMA
+                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN PUNTOYCOMA
+                | SELECT identificador IZQPAREN DERPAREN FROM ID PUNTOYCOMA
+                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN FROM ID PUNTOYCOMA
+                | SELECT identificador IZQPAREN DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
+                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
     '''
     if len(p) == 6:
         p[0] = {'accion': p[1], 'columnas': p[2], 'tabla': p[4]}
-    elif len(p) == 8:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
-    elif len(p) == 9:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5], 'condicion': p[7]}
-    elif len(p) == 5:
-        p[0] = {'accion': p[1], 'columnas': p[2]}
     elif len(p) == 7:
-        p[0] = {'accion': p[1], 'columnas': p[3]}
+        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
     elif len(p) == 8:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
-    elif len(p) == 9:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
-    elif len(p) == 10:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5], 'condicion': p[7]}
-    elif len(p) == 11:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5], 'condicion': p[7]}
-    else:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5], 'condicion': p[7]}
-
-
-
+        p[0] = {'accion': p[1], 'columnas': p[2], 'tabla': p[5], 'condicion': p[7]}
+  
 def p_insert(p):
     '''
     insert : INSERT INTO lista_expresiones VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
