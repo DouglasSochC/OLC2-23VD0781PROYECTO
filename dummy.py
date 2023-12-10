@@ -17,4 +17,6 @@ UPDATE COMPANY SET SALARY = 15000 WHERE ID = 3;
 EXEC SP_CARGA_DATOS;
 
 
+SELECT persona FROM persona where idPersona = 3;
+
 '''
