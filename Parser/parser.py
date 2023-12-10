@@ -35,8 +35,31 @@ def p_instrucciones_lista2(p):
 def p_instruccion(p):
     '''
     instruccion : declaracion_variable
+                | sentencia_ddl
     '''
     p[0] = p[1]
+
+def p_sentencia_ddl(p):
+    '''
+        sentencia_ddl : drop
+    '''
+    p[0] = p[1]
+
+def p_tipo_objeto(p):
+    '''
+    tipo_objeto : DATABASE
+                | TABLE
+                | PROCEDURE
+                | FUNCTION
+    '''
+    p[0] = p[1]
+
+def p_drop(p):
+    '''
+    drop : DROP tipo_objeto identificador PUNTOYCOMA
+    '''
+    p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
+
 
 def p_declaracion_variable(p):
     '''
@@ -87,6 +110,8 @@ def p_identificador(p):
     else:
         p[0] = f'@{p[2]}'
 
+def p_error(p):
+    print(f'Syntax error at {p.value!r}')
 
 # Construir el parser
 parser = yacc()
