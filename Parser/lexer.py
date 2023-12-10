@@ -7,16 +7,23 @@ reservadas = {
     'create': 'CREATE',
     'alter': 'ALTER',
     'drop': 'DROP',
+    'declare': 'DECLARE',
+    'set': 'SET',
+    'into': 'INTO',
+    'between': 'BETWEEN',
     'truncate': 'TRUNCATE',
     'as': 'AS',
+    'values': 'VALUES',
     'return': 'RETURN',
     'begin': 'BEGIN',
     'end': 'END',
     'add': 'ADD',
+    'exec': 'EXEC',
 
     # Tipos de objeto
     'database': 'DATABASE',
     'table': 'TABLE',
+    'column': 'COLUMN',
     'procedure': 'PROCEDURE',
     'function': 'FUNCTION',
 
@@ -32,9 +39,9 @@ reservadas = {
     # Constraint
     'primary': 'PRIMARY',
     'null': 'NULL',
-    'foreing': 'FOREING',
+    'foreign': 'FOREIGN',
     'key': 'KEY',
-    'reference': 'REFERENCE',
+    'references': 'REFERENCES',
 
     # Sentencia DML
     'select': 'SELECT',
@@ -125,7 +132,7 @@ t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
 t_IGUAL = r'\='
 t_COMA = r','
 t_PUNTO = r'.'
-t_ARROBA = r'@'
+t_ARROBA = r'\@'
 t_PUNTOYCOMA = r'\;'
 
 # A function can be used if there is an associated action.
