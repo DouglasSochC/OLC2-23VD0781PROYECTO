@@ -42,6 +42,7 @@ def p_instruccion(p):
 def p_sentencia_ddl(p):
     '''
         sentencia_ddl : drop
+                      | alter
     '''
     p[0] = p[1]
 
@@ -53,6 +54,23 @@ def p_tipo_objeto(p):
                 | FUNCTION
     '''
     p[0] = p[1]
+
+def p_alter(p):
+    '''
+    alter : ALTER tipo_objeto identificador accion PUNTOYCOMA
+    '''
+    p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'accion_alter': p[4]}
+
+def p_accion(p):
+    '''
+    accion : ADD COLUMN identificador tipo
+           | DROP identificador
+    '''
+    if len(p) == 5:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'tipo_dato': p[4]}
+    else:
+        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
+
 
 def p_drop(p):
     '''
@@ -78,10 +96,13 @@ def p_tipo(p):
 def p_seg_num(p):
     '''
     seg_num : INT
-            | DECIMAL
+            | DECIMAL IZQPAREN LNUMERO COMA LNUMERO DERPAREN
             | BIT
     '''
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = {'tipo_dato': p[1], 'precision': p[3], 'escala': p[5]}
 
 def p_seg_date(p):
     '''

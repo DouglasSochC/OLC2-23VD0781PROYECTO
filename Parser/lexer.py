@@ -20,6 +20,7 @@ reservadas = {
     # Tipos de objeto
     'database': 'DATABASE',
     'table': 'TABLE',
+    'column': 'COLUMN',
     'procedure': 'PROCEDURE',
     'function': 'FUNCTION',
 
