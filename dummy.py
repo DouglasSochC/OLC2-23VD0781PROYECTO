@@ -23,13 +23,19 @@ def p_instrucciones_lista(p):
     '''
     instrucciones : instrucciones instruccion
     '''
-    p[0] = p[1] + [p[2]]
+    if p[2] == "":
+        p[1].append(p[2])
+    p[0] = p[1]
 
 def p_instrucciones_lista2(p):
     '''
     instrucciones : instruccion
     '''
-     p[0] = [p[1]]
+    if p[1] == "":
+        p[0] = []
+    else:
+        p[0] = [p[1]]
+
 def p_instruccion(p):
     '''
     instruccion : sentencia_ddl 
@@ -292,3 +298,16 @@ def p_error(p):
 
 # Construir el parser
 parser = yacc()
+
+#ENTRADA DE PRUEBA
+'''
+DROP DATABASE compi2;
+DECLARE @variable INT;
+DECLARE @variable2 DECIMAL(10,2);
+DECLARE @variable2 NVARCHAR(10);
+Alter table products add column inventario decimal(10,2)
+
+CREATE DATABASE julian;
+INSERT INTO links (url, name, last_update)
+VALUES("https://www.google.com","Google","2013-06-01");
+'''

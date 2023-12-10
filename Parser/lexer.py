@@ -9,9 +9,11 @@ reservadas = {
     'drop': 'DROP',
     'declare': 'DECLARE',
     'set': 'SET',
+    'into': 'INTO',
     'between': 'BETWEEN',
     'truncate': 'TRUNCATE',
     'as': 'AS',
+    'values': 'VALUES',
     'return': 'RETURN',
     'begin': 'BEGIN',
     'end': 'END',
@@ -39,6 +41,7 @@ reservadas = {
     'foreign': 'FOREIGN',
     'key': 'KEY',
     'references': 'REFERENCES',
+    'constraint': 'CONSTRAINT',
 
     # Sentencia DML
     'select': 'SELECT',
