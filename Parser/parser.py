@@ -1,5 +1,5 @@
 from ply.yacc import yacc
-from .lexer import tokens, lexer, errors
+from .lexer import tokens, lexer, errores
 
 # Operadores de precedencia
 precedence = (
@@ -11,8 +11,6 @@ precedence = (
     ('right', 'NOT'),
     ('left', 'IZQPAREN', 'DERPAREN'),
 )
-
-
 
 # Gramatica
 def p_inicio(p):
@@ -189,7 +187,7 @@ def p_select(p):
         p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
     elif len(p) == 8:
         p[0] = {'accion': p[1], 'columnas': p[2], 'tabla': p[5], 'condicion': p[7]}
-  
+
 def p_insert(p):
     '''
     insert : INSERT INTO lista_expresiones VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
@@ -261,7 +259,7 @@ def p_funcion_nativa(p):
                           | HOY IZQPAREN DERPAREN
                           | CONTAR IZQPAREN expresion DERPAREN
                           | SUMA IZQPAREN expresion DERPAREN
-                          | CAST IZQPAREN expresion AS tipo DERPAREN 
+                          | CAST IZQPAREN expresion AS tipo DERPAREN
     '''
     if p[1] == 'CONCATENA':
         p[0] = {'accion': p[1], 'valor': p[3], 'valor2': p[5]}
@@ -306,7 +304,7 @@ def p_relacionales(p):
     elif p[2] == '>': p[0] = p[1] > p[3]
     elif p[2] == '<=': p[0] = p[1] <= p[3]
     elif p[2] == '>=': p[0] = p[1] >= p[3]
-    elif p[1] == 'BETWEEN': p[0] = p[1] >= p[3] 
+    elif p[1] == 'BETWEEN': p[0] = p[1] >= p[3]
 
 def p_logicos(p):
     '''
@@ -339,7 +337,7 @@ def p_declaracion_variable(p):
 
 def p_tipo(p):
     '''
-    tipo : seg_num 
+    tipo : seg_num
         | seg_date
         | seg_string
     '''
@@ -366,7 +364,7 @@ def p_seg_date(p):
 def p_seg_string(p):
     '''
     seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
-                | NCHAR IZQPAREN LNUMERO DERPAREN 
+                | NCHAR IZQPAREN LNUMERO DERPAREN
     '''
     p[0] = {'tipo_cadena': p[1], 'longitud': p[3]}
 
@@ -384,7 +382,19 @@ def p_identificador(p):
         p[0] = f'@{p[2]}'
 
 def p_error(p):
-    print(f'Syntax error at {p.value!r}')
+    errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
 
-# Construir el parser
-parser = yacc()
+def parse(input):
+
+    # Construir el parser
+    parser = yacc()
+    lexer.lineno = 1
+    ast = parser.parse(input)
+    resultado = None
+    if len(errores) > 0:
+        resultado = '\n'.join(errores)
+    else:
+        resultado = ast
+    errores.clear()
+
+    return resultado

@@ -1,5 +1,5 @@
 # Para realizar el analisis
-from Parser.parser import parser
+from Parser.parser import parse
 
 # Para la construccion de la interfaz
 import tkinter as tk
@@ -76,22 +76,14 @@ def ejecutar_query():
 
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
+    salida = parse(texto)
 
-    # Parse an expression
-    print("Texto a parsear: " + texto)
-    salida = parser.parse(texto)
-    
-    # TODO: BORRAR PRINT Y DESCOMENTAR SETEO DE SALIDA
-    print(salida)
-    print("se termina ejecucion")
-    texto=""
-    
     # Se setea la salida
-    '''if salida is not None:        
+    if salida is not None:
         if isinstance(salida, list):
             mostrar_salida_como_tabla(salida)
         else:
-            mostrar_salida_como_texto(salida)'''
+            mostrar_salida_como_texto(salida)
 
 def mostrar_componentes_del_lenguaje():
 

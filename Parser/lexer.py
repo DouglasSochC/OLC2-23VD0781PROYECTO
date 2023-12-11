@@ -1,6 +1,6 @@
 from ply.lex import lex
 
-errors = ()
+errores = []
 
 reservadas = {
     # Sentencias DDL
@@ -154,7 +154,9 @@ def t_ignore_newline(t):
 
 # Error handler for illegal characters
 def t_error(t):
-    print(f'Illegal character {t.value[0]!r}')
+    texto = t.value.split('\n')[0]
+    caracter_error = list(texto)[0]
+    errores.append("Caracter ilegal '{}' en '{}', linea {}".format(caracter_error, texto, t.lineno))
     t.lexer.skip(1)
 
 # Build the lexer object
