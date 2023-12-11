@@ -7,7 +7,7 @@ precedence = (
     ('left', 'POR', 'DIVIDIDO'),
     ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
     ('left', 'OR'),
-    ('left', 'AND'),
+    ('left', 'AND_OP'),
     ('left', 'IZQPAREN', 'DERPAREN')
 )
 
@@ -308,7 +308,7 @@ def p_relacionales(p):
 
 def p_logicos(p):
     '''
-        logicos : expresion AND expresion
+        logicos : expresion AND_OP expresion
                 | expresion OR expresion
                 | NOT expresion
     '''

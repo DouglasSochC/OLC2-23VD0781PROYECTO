@@ -19,6 +19,7 @@ reservadas = {
     'end': 'END',
     'add': 'ADD',
     'exec': 'EXEC',
+    'and' : 'AND',
 
     # Tipos de objeto
     'database': 'DATABASE',
@@ -39,7 +40,6 @@ reservadas = {
     # Constraint
     'primary': 'PRIMARY',
     'null': 'NULL',
-    'foreign': 'FOREIGN',
     'key': 'KEY',
     'references': 'REFERENCES',
 
@@ -77,7 +77,7 @@ tokens = [
 
     # Expresiones logicas
     'OR',
-    'AND',
+    'AND_OP',
     'NOT',
     'IZQPAREN',
     'DERPAREN',
@@ -103,22 +103,22 @@ t_ignore = ' \t'
 
 # Expresiones aritmeticas
 t_MAS = r'\+'
-t_MENOS = r'-'
+t_MENOS = r'\-'
 t_POR = r'\*'
-t_DIVIDIDO = r'/'
+t_DIVIDIDO = r'\/'
 
 # Expresiones relacionales
 t_IGUALIGUAL = r'\=\='
-t_DIFERENTE = r'!='
-t_MENORIGUAL = r'<='
-t_MAYORIGUAL = r'>='
-t_MAYOR = r'>'
-t_MENOR = r'<'
+t_DIFERENTE = r'\!\='
+t_MENORIGUAL = r'\<\='
+t_MAYORIGUAL = r'\>\='
+t_MAYOR = r'\>'
+t_MENOR = r'\<'
 
 # Expresiones logicas
 t_OR = r'\|\|'
-t_AND = r'&&'
-t_NOT = r'!'
+t_AND_OP = r'\&\&'
+t_NOT = r'\!'
 t_IZQPAREN = r'\('
 t_DERPAREN = r'\)'
 
@@ -130,8 +130,8 @@ t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
 
 # Otros
 t_IGUAL = r'\='
-t_COMA = r','
-t_PUNTO = r'.'
+t_COMA = r'\,'
+t_PUNTO = r'\.'
 t_ARROBA = r'\@'
 t_PUNTOYCOMA = r'\;'
 
