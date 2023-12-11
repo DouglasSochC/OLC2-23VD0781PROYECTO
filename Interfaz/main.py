@@ -479,11 +479,6 @@ def seleccionar_bd():
         # Iniciar el bucle principal
         ventana_seleccionar.mainloop()
 
-keyboard.add_hotkey('F6', ejecutar_query)
-keyboard.add_hotkey('ctrl+n', crear_tab_nuevo)
-keyboard.add_hotkey('ctrl+o', abrir)
-keyboard.add_hotkey('ctrl+s', guardar)
-
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
@@ -492,6 +487,11 @@ root.option_add("*tearOff", 0)
 
 style = ttk.Style()
 style.theme_use("default")
+
+root.bind('<F6>', lambda event: ejecutar_query())
+root.bind('<Control-n>', lambda event: crear_tab_nuevo())
+root.bind('<Control-o>', lambda event: abrir())
+root.bind('<Control-s>', lambda event: guardar())
 
 #  Obtenemos el largo y  ancho de la pantalla
 wtotal = root.winfo_screenwidth()
