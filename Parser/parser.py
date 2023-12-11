@@ -3,13 +3,15 @@ from .lexer import tokens, lexer, errors
 
 # Operadores de precedencia
 precedence = (
-    ('left', 'MAS', 'MENOS'),
-    ('left', 'POR', 'DIVIDIDO'),
-    ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
     ('left', 'OR'),
     ('left', 'AND_OP'),
-    ('left', 'IZQPAREN', 'DERPAREN')
+    ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
+    ('left', 'MAS', 'MENOS'),
+    ('left', 'POR', 'DIVIDIDO'),
+    ('right', 'NOT'),
+    ('left', 'IZQPAREN', 'DERPAREN'),
 )
+
 
 
 # Gramatica
