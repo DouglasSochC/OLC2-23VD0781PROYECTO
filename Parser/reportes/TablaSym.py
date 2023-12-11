@@ -1,0 +1,3 @@
+TablaSimbolos = []
+TablaErrores = []
+Prints = []

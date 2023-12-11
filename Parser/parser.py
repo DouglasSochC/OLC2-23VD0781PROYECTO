@@ -365,8 +365,8 @@ def p_seg_date(p):
 
 def p_seg_string(p):
     '''
-    seg_string : NCHAR IZQPAREN LNUMERO DERPAREN
-                | NVARCHAR IZQPAREN LNUMERO DERPAREN
+    seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
+                | NCHAR IZQPAREN LNUMERO DERPAREN 
     '''
     p[0] = {'tipo_cadena': p[1], 'longitud': p[3]}
 
