@@ -80,10 +80,18 @@ def ejecutar_query():
 
     # Se setea la salida
     if salida is not None:
-        if isinstance(salida, list):
-            mostrar_salida_como_tabla(salida)
-        else:
+        if isinstance(salida, str):
             mostrar_salida_como_texto(salida)
+        else:
+            print(salida)
+            for elemento in salida:
+                ejec = elemento.Ejecutar(None)
+                if ejec != None:
+                    print(ejec)
+                #     if isinstance(ejec.value, Retorno):
+                #         print("EJECUCION ACTUAL: ", ejec.value.value)
+                #     else:
+                #         print("EJECUCION ACTUAL: ", ejec.value)
 
 def mostrar_componentes_del_lenguaje():
 

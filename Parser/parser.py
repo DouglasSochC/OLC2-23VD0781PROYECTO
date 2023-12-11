@@ -1,6 +1,9 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
 
+# Clases
+from .instrucciones.create import Create
+
 # Operadores de precedencia
 precedence = (
     ('left', 'OR'),
@@ -61,7 +64,7 @@ def p_create(p):
                | CREATE tipo_objeto ID  AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
     if len(p) == 5:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
+        p[0] = Create(p.lineno(1), p.lexpos(1), p[2], p[3])
     elif len(p) == 8:
         p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5]}
     elif len(p) == 10:
