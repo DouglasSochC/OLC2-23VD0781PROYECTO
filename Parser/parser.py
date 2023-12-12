@@ -1,9 +1,6 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
 
-# Clases
-from .instrucciones.create import Create
-
 # Operadores de precedencia
 precedence = (
     ('left', 'OR'),
@@ -44,53 +41,78 @@ def p_instruccion(p):
     '''
     p[0] = p[1]
 
+def p_declaracion_variable(p):
+    '''
+    declaracion_variable : DECLARE ARROBA ID tipo_dato PUNTOYCOMA
+    '''
+    p[0] = {'accion':p[1]}
+
+def p_tipo_dato(p):
+    '''
+    tipo_dato : seg_num
+        | seg_date
+        | seg_string
+    '''
+    p[0] = p[1]
+
+def p_seg_num(p):
+    '''
+    seg_num : INT
+            | DECIMAL IZQPAREN LNUMERO COMA LNUMERO DERPAREN
+            | BIT
+    '''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = {'tipo_dato': p[1], 'precision': p[3], 'escala': p[5]}
+
+def p_seg_date(p):
+    '''
+    seg_date : DATE
+            | DATETIME
+    '''
+    p[0] = p[1]
+
+def p_seg_string(p):
+    '''
+    seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
+                | NCHAR IZQPAREN LNUMERO DERPAREN
+    '''
+    p[0] = {'tipo_cadena': p[1], 'longitud': p[3]}
+
 def p_sentencia_ddl(p):
     '''
-        sentencia_ddl : drop
+        sentencia_ddl : create
                       | alter
                       | truncate
-                      | create
+                      | drop
     '''
     p[0] = p[1]
 
 def p_create(p):
     '''
-        create : CREATE tipo_objeto identificador PUNTOYCOMA
-               | CREATE tipo_objeto identificador IZQPAREN parametros DERPAREN PUNTOYCOMA
-               | CREATE tipo_objeto ID IZQPAREN parametros DERPAREN AS lista_sentencias_dml
-               | CREATE tipo_objeto ID AS lista_sentencias_dml
-               | CREATE tipo_objeto ID IZQPAREN parametros DERPAREN RETURN tipo AS BEGIN lista_sentencias_dml END PUNTOYCOMA
-               | CREATE tipo_objeto ID  RETURN tipo AS BEGIN lista_sentencias_dml END PUNTOYCOMA
-               | CREATE tipo_objeto ID  AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+        create : CREATE DATABASE ID PUNTOYCOMA
+               | CREATE TABLE ID IZQPAREN campos_table DERPAREN PUNTOYCOMA
+               | CREATE PROCEDURE ID IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+               | CREATE FUNCTION ID IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
-    if len(p) == 5:
-        p[0] = Create(p.lineno(1), p.lexpos(1), p[2], p[3])
-    elif len(p) == 8:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5]}
-    elif len(p) == 10:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5], 'sentencias': p[8]}
-    elif len(p) == 7:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'sentencias': p[5]}
-    elif len(p) == 13:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'parametros': p[5], 'tipo_retorno': p[7], 'sentencias': p[10]}
-    else:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'tipo_retorno': p[5], 'sentencias': p[8]}
+    p[0] = p[1]
+
+def p_campos_table(p):
+    '''
+    campos_table : campos_table COMA ID tipo_dato constrain
+                 | campos_table COMA ID tipo_dato
+                 | ID tipo_dato constrain
+                 | ID tipo_dato
+    '''
+    p[0] = p[1]
 
 def p_parametros(p):
     '''
-    parametros : parametros COMA identificador tipo constrain
-                | parametros COMA identificador tipo
-                | identificador tipo constrain
-                | identificador tipo
+    parametros : parametros COMA ARROBA ID tipo_dato
+                | ARROBA ID tipo_dato
     '''
-    if len(p) == 6:
-        p[0] = {'identificador': p[3], 'tipo': p[4], 'constrain': p[5]}
-    elif len(p) == 5:
-        p[0] = {'identificador': p[3], 'tipo': p[4]}
-    elif len(p) == 4:
-        p[0] = {'identificador': p[2], 'tipo': p[3], 'constrain': p[4]}
-    else:
-        p[0] = {'identificador': p[2], 'tipo': p[3]}
+    p[0] = p[1]
 
 def p_constrain(p):
     '''
@@ -98,55 +120,35 @@ def p_constrain(p):
               | NOT NULL
               | REFERENCES ID IZQPAREN ID DERPAREN
     '''
-    if len(p) == 3:
-        p[0] = {'constrain': p[1], 'tipo': p[2]}
-    else:
-        p[0] = {'constrain': p[1], 'tipo': p[2], 'tabla': p[3], 'columna': p[5]}
-
-def p_tipo_objeto(p):
-    '''
-    tipo_objeto : DATABASE
-                | TABLE
-                | PROCEDURE
-                | FUNCTION
-    '''
     p[0] = p[1]
 
 def p_alter(p):
     '''
-    alter : ALTER tipo_objeto identificador accion PUNTOYCOMA
+    alter : ALTER TABLE ID accion PUNTOYCOMA
     '''
-    p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'accion_alter': p[4]}
+    p[0] = p[1]
 
 def p_accion(p):
     '''
-    accion : ADD COLUMN identificador tipo
-           | DROP identificador
+    accion : ADD COLUMN ID tipo_dato
+           | DROP COLUMN ID
     '''
-    if len(p) == 5:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3], 'tipo_dato': p[4]}
-    else:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
-
+    p[0] = p[1]
 
 def p_drop(p):
     '''
-    drop : DROP tipo_objeto identificador PUNTOYCOMA
+    drop : DROP DATABASE ID PUNTOYCOMA
+         | DROP TABLE ID PUNTOYCOMA
+         | DROP PROCEDURE ID PUNTOYCOMA
+         | DROP FUNCTION ID PUNTOYCOMA
     '''
-    p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
+    p[0] = p[1]
 
 def p_truncate(p):
     '''
-    truncate : TRUNCATE tipo_objeto identificador PUNTOYCOMA
+    truncate : TRUNCATE TABLE ID PUNTOYCOMA
     '''
-    p[0] = {'accion': p[1], 'tipo': p[2], 'nombre': p[3]}
-
-
-def p_llamar_procedure(p):
-    '''
-    llamar_procedure : EXEC lista_expresiones PUNTOYCOMA
-    '''
-    p[0] = {'accion': p[1], 'parametros': p[3]}
+    p[0] = p[1]
 
 def p_lista_sentencias_dml(p):
     '''
@@ -159,12 +161,18 @@ def p_lista_sentencias_dml(p):
     else:
         p[0] = [p[1]]
 
+def p_llamar_procedure(p):
+    '''
+    llamar_procedure : EXEC ID lista_expresiones PUNTOYCOMA
+    '''
+    p[0] = p[1]
+
 def p_sentencia_dml(p):
     '''
-    sentencia_dml : insert
-                | delete
+    sentencia_dml : select
+                | insert
                 | update
-                | select
+                | delete
                 | RETURN expresion PUNTOYCOMA
                 | expresion
     '''
@@ -172,55 +180,43 @@ def p_sentencia_dml(p):
 
 def p_select(p):
     '''
-        select : SELECT lista_expresiones FROM ID PUNTOYCOMA
-                | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID PUNTOYCOMA
-                | SELECT lista_expresiones FROM ID WHERE lista_expresiones PUNTOYCOMA
-                | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
-                | SELECT lista_expresiones PUNTOYCOMA
-                | SELECT identificador IZQPAREN DERPAREN PUNTOYCOMA
-                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN PUNTOYCOMA
-                | SELECT identificador IZQPAREN DERPAREN FROM ID PUNTOYCOMA
-                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN FROM ID PUNTOYCOMA
-                | SELECT identificador IZQPAREN DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
-                | SELECT identificador IZQPAREN lista_expresiones  DERPAREN FROM ID WHERE lista_expresiones PUNTOYCOMA
+        select : SELECT POR FROM ID
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID
+               | SELECT lista_expresiones FROM ID
+               | SELECT POR FROM ID WHERE expresion PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID WHERE expresion PUNTOYCOMA
+               | SELECT lista_expresiones FROM ID WHERE expresion PUNTOYCOMA
+               | SELECT lista_expresiones PUNTOYCOMA
+               | SELECT ID IZQPAREN DERPAREN PUNTOYCOMA
+               | SELECT ID IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+               | SELECT ID IZQPAREN DERPAREN FROM ID PUNTOYCOMA
+               | SELECT ID IZQPAREN lista_expresiones DERPAREN FROM ID PUNTOYCOMA
+               | SELECT ID IZQPAREN DERPAREN FROM ID WHERE expresion PUNTOYCOMA
+               | SELECT ID IZQPAREN lista_expresiones DERPAREN FROM ID WHERE expresion PUNTOYCOMA
     '''
-    if len(p) == 6:
-        p[0] = {'accion': p[1], 'columnas': p[2], 'tabla': p[4]}
-    elif len(p) == 7:
-        p[0] = {'accion': p[1], 'columnas': p[3], 'tabla': p[5]}
-    elif len(p) == 8:
-        p[0] = {'accion': p[1], 'columnas': p[2], 'tabla': p[5], 'condicion': p[7]}
+    p[0] = p[1]
 
 def p_insert(p):
     '''
-    insert : INSERT INTO lista_expresiones VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
-            | INSERT INTO lista_expresiones IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+    insert : INSERT INTO ID IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    if len(p) == 9:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'columnas': p[3], 'valores': p[6]}
-    else:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'columnas': p[3], 'valores': p[9]}
-
-def p_delete(p):
-    '''
-    delete : DELETE FROM lista_expresiones WHERE lista_expresiones PUNTOYCOMA
-    '''
-    p[0] = {'accion': p[1], 'tipo': p[2], 'tabla': p[3], 'condicion': p[5]}
+    p[0] = p[1]
 
 def p_update(p):
     '''
-    update : UPDATE lista_expresiones SET lista_expresiones WHERE lista_expresiones PUNTOYCOMA
-            | UPDATE IZQPAREN lista_expresiones DERPAREN SET IZQPAREN lista_expresiones DERPAREN WHERE lista_expresiones PUNTOYCOMA
+    update : UPDATE ID SET lista_expresiones WHERE expresion PUNTOYCOMA
     '''
-    if len(p) == 8:
-        p[0] = {'accion': p[1], 'expresion': p[2], 'accion': p[3], 'valores': p[4], 'condicion': p[6]}
-    else:
-        p[0] = {'accion': p[1], 'expresiones': p[3], 'accion': p[5], 'valores': p[7], 'condicion': p[10]}
+    p[0] = p[1]
+
+def p_delete(p):
+    '''
+    delete : DELETE FROM ID WHERE expresion PUNTOYCOMA
+    '''
+    p[0] = p[1]
 
 def p_lista_expresiones(p):
     '''
         lista_expresiones : lista_expresiones COMA expresion
-                         | lista_expresiones AND expresion
                          | expresion
     '''
     if len(p) == 4:
@@ -251,7 +247,7 @@ def p_asignacion(p):
                    | SET expresion
     '''
     if len(p) == 4:
-        p[0] = {'accion': p[1], 'tipo': p[2], 'valor': p[3]}
+        p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
     else:
         p[0] = {'accion': p[1], 'valor': p[2]}
 
@@ -262,7 +258,7 @@ def p_funcion_nativa(p):
                           | HOY IZQPAREN DERPAREN
                           | CONTAR IZQPAREN expresion DERPAREN
                           | SUMA IZQPAREN expresion DERPAREN
-                          | CAST IZQPAREN expresion AS tipo DERPAREN
+                          | CAST IZQPAREN expresion AS tipo_dato DERPAREN
     '''
     if p[1] == 'CONCATENA':
         p[0] = {'accion': p[1], 'valor': p[3], 'valor2': p[5]}
@@ -275,7 +271,7 @@ def p_funcion_nativa(p):
     elif p[1] == 'SUMA':
         p[0] = {'accion': p[1], 'valor': p[3]}
     elif p[1] == 'CAST':
-        p[0] = {'accion': p[1], 'valor': p[3], 'tipo': p[5]}
+        p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
     else:
         p[0] = {'accion': p[1], 'valor': p[2]}
 
@@ -329,47 +325,6 @@ def p_literal(p):
                 | NULL
     '''
     p[0] = p[1]
-
-
-
-def p_declaracion_variable(p):
-    '''
-    declaracion_variable : DECLARE identificador tipo PUNTOYCOMA
-    '''
-    p[0] = {'accion':p[1], 'tipo': p[3], 'identificador': p[2]}
-
-def p_tipo(p):
-    '''
-    tipo : seg_num
-        | seg_date
-        | seg_string
-    '''
-    p[0] = p[1]
-
-def p_seg_num(p):
-    '''
-    seg_num : INT
-            | DECIMAL IZQPAREN LNUMERO COMA LNUMERO DERPAREN
-            | BIT
-    '''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = {'tipo_dato': p[1], 'precision': p[3], 'escala': p[5]}
-
-def p_seg_date(p):
-    '''
-    seg_date : DATE
-            | DATETIME
-    '''
-    p[0] = p[1]
-
-def p_seg_string(p):
-    '''
-    seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
-                | NCHAR IZQPAREN LNUMERO DERPAREN
-    '''
-    p[0] = {'tipo_cadena': p[1], 'longitud': p[3]}
 
 def p_identificador(p):
     '''
