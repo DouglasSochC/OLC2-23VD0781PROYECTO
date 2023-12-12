@@ -19,8 +19,8 @@ IMG_FUNCION = None
 IMG_CARPETA = None
 IMG_TABLA = None
 
-# Para atajos del teclado
-import keyboard
+# Utilidades
+from Funcionalidad.util import Respuesta
 
 # Para variables de entorno
 from dotenv import load_dotenv
@@ -78,20 +78,21 @@ def ejecutar_query():
     texto = obtener_contenido_tab(indice_actual)
     salida = parse(texto)
 
-    # Se setea la salida
+    # Se revisa que se haya obtenido una salida
     if salida is not None:
+        
+        # Se setea la salida para los errores lexicos y sintacticos
         if isinstance(salida, str):
             mostrar_salida_como_texto(salida)
         else:
-            print(salida)
+            # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
             for elemento in salida:
-                ejec = elemento.Ejecutar(None)
-                if ejec != None:
-                    print(ejec)
-                #     if isinstance(ejec.value, Retorno):
-                #         print("EJECUCION ACTUAL: ", ejec.value.value)
-                #     else:
-                #         print("EJECUCION ACTUAL: ", ejec.value)
+                respuesta = elemento.Ejecutar(None)
+                if respuesta != None and isinstance(respuesta, Respuesta):
+                    mensaje = respuesta.msg if respuesta.success else "ERROR: {}".format(respuesta.msg)
+                    mostrar_salida_como_texto(mensaje)
+                else:
+                    print(respuesta)
 
 def mostrar_componentes_del_lenguaje():
 
