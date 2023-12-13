@@ -6,5 +6,9 @@ class Instruccion(metaclass=ABCMeta):
         pass
 
     @abstractclassmethod
-    def Ejecutar(self, environment):
+    def Ejecutar(self, base_datos, entorno):
+        pass
+
+    @abstractclassmethod
+    def GraficarArbol(self, id_padre):
         pass

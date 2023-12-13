@@ -6,9 +6,9 @@ class Relacional(Expresion):
         self.tipo_relacional = tipo_relacional
         self.valor = valor
 
-    def Ejecutar(self, environment):
+    def Ejecutar(self, base_datos, entorno):
 
-        print(environment.obtener(1).valor)
+        print(entorno.obtener(1).valor)
         if self.tipo_relacional == '==':
             print("IGUAL IGUAL")
         print("RELACIONAL")

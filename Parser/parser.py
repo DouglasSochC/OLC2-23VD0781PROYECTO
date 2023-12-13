@@ -2,8 +2,12 @@ from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
 
 # Clases
-from .instrucciones.select import Select
-from .expresiones.relacional import Relacional
+from .abstract.retorno import TIPO_DATO
+from .expresiones.tipo_dato import Tipo_Dato
+from .expresiones.identificador import Identificador
+from .instrucciones.declare import Declare
+
+contador = 0
 
 # Operadores de precedencia
 precedence = (
@@ -56,7 +60,10 @@ def p_declaracion_variable(p):
     '''
     declaracion_variable : DECLARE identificador tipo_dato PUNTOYCOMA
     '''
-    p[0] = {'accion':p[1]}
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Declare(id_nodo, p[2], p[3])
 
 def p_tipo_dato(p):
     '''
@@ -72,24 +79,47 @@ def p_seg_num(p):
             | DECIMAL IZQPAREN LNUMERO COMA LNUMERO DERPAREN
             | BIT
     '''
-    if len(p) == 2:
-        p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    if p[1] == 'INT':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.INT, -1)
+    elif p[1] == 'DECIMAL':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DECIMAL, -1)
+    elif p[1] == 'BIT':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.BIT, -1)
     else:
-        p[0] = {'tipo_dato': p[1], 'precision': p[3], 'escala': p[5]}
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
 
 def p_seg_date(p):
     '''
     seg_date : DATE
             | DATETIME
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    if p[1] == 'DATE':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATE, -1)
+    elif p[1] == 'DATETIME':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATETIME, -1)
+    else:
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
 
 def p_seg_string(p):
     '''
     seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
                 | NCHAR IZQPAREN LNUMERO DERPAREN
     '''
-    p[0] = {'tipo_cadena': p[1], 'longitud': p[3]}
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    if p[1] == 'NVARCHAR':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NVARCHAR, p[3])
+    elif p[1] == 'NCHAR':
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NCHAR, p[3])
+    else:
+        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
 
 def p_sentencia_ddl(p):
     '''
@@ -211,7 +241,7 @@ def p_select(p):
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
     if len(p) == 8:
-        p[0] = Select(p.lineno(2), p.lexpos(2), p[4], p[6])
+        p[0] = p[0]
     else:
         p[0] = p[1]
 
@@ -340,7 +370,7 @@ def p_relacionales(p):
                     | expresion MAYORIGUAL expresion
                     | BETWEEN expresion AND expresion
     '''
-    if p[2] == '==': p[0] = Relacional(p[0], p[2], 10)
+    if p[2] == '==': p[0] = p[1] == p[3]
     elif p[2] == '!=': p[0] = p[1] != p[3]
     elif p[2] == '<': p[0] = p[1] < p[3]
     elif p[2] == '>': p[0] = p[1] > p[3]
@@ -376,8 +406,11 @@ def p_identificador(p):
                   | ID AS ID
                   | ARROBA ID
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = Identificador(id_nodo, p[1])
     elif len(p) == 4:
         p[0] = f'{p[1]}.{p[3]}'
     else:

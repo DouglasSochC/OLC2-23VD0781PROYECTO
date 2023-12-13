@@ -7,7 +7,7 @@ class Create(Instruccion):
         self.identificador = identificador
         self.tipo_instruccion = tipo_instruccion
 
-    def Ejecutar(self, environment):
+    def Ejecutar(self, base_datos, entorno):
 
         ddl = DDL()
         if self.tipo_instruccion == 'DATABASE':

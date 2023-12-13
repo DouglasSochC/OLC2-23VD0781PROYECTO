@@ -8,11 +8,11 @@ class Select(Instruccion):
         self.identificador = identificador
         self.lista_expresiones = lista_expresiones
 
-    def Ejecutar(self, environment):
+    def Ejecutar(self, base_datos, entorno):
 
         simbolo = Simbolo(1, None, TIPO_TOKEN.SELECT, self.identificador, None)
-        environment.agregar(simbolo)
+        entorno.agregar(simbolo)
 
         for expr in self.lista_expresiones:
-            res = expr.Ejecutar(environment)
+            res = expr.Ejecutar(entorno)
             print(res)

@@ -2,10 +2,10 @@ from abc import ABCMeta, abstractclassmethod
 from ..tablas.tabla_tipos import TablaSuma, TablaResta, TablaMultiplicacion, TablaDivision
 
 class Expresion(metaclass=ABCMeta):
-    
+
     def __init__(self):
         pass
-    
+
     @abstractclassmethod
     def Ejecutar(self):
         pass
