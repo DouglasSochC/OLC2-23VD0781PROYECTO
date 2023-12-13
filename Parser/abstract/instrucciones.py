@@ -2,9 +2,8 @@ from abc import ABCMeta, abstractclassmethod
 
 class Instruccion(metaclass=ABCMeta):
 
-    def __init__(self, linea, columna):
-        self.linea = linea
-        self.columna = columna
+    def __init__(self):
+        pass
 
     @abstractclassmethod
     def Ejecutar(self, environment):

@@ -4,7 +4,7 @@ from ..abstract.retorno import TIPO_DATO, TIPO_TOKEN
 
 class Select(Instruccion):
     def __init__(self, linea: int, columna: int, identificador: str, lista_expresiones: list):
-        super().__init__(linea, columna)
+        pass
         self.identificador = identificador
         self.lista_expresiones = lista_expresiones
 

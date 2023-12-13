@@ -3,9 +3,8 @@ from ..tablas.tabla_tipos import TablaSuma, TablaResta, TablaMultiplicacion, Tab
 
 class Expresion(metaclass=ABCMeta):
     
-    def __init__(self, linea, columna):
-        self.linea = linea
-        self.columna = columna
+    def __init__(self):
+        pass
     
     @abstractclassmethod
     def Ejecutar(self):
