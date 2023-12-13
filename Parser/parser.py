@@ -1,6 +1,10 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
 
+# Clases
+from .instrucciones.select import Select
+from .expresiones.relacional import Relacional
+
 # Operadores de precedencia
 precedence = (
     ('left', 'OR_OP'),
@@ -180,6 +184,8 @@ def p_sentencia_dml(p):
                 | insert
                 | update
                 | delete
+                | if
+                | while
                 | RETURN expresion PUNTOYCOMA
                 | expresion
     '''
@@ -202,7 +208,7 @@ def p_select(p):
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
     if len(p) == 8:
-        p[0] = p[1]
+        p[0] = Select(p.lineno(2), p.lexpos(2), p[4], p[6])
     else:
         p[0] = p[1]
 
@@ -221,6 +227,19 @@ def p_update(p):
 def p_delete(p):
     '''
     delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
+    '''
+    p[0] = p[1]
+
+def p_if(p):
+    '''
+    if : IF expresion THEN sentencia_dml ELSE sentencia_dml END IF PUNTOYCOMA
+       | IF expresion THEN sentencia_dml END IF PUNTOYCOMA
+    '''
+    p[0] = p[1]
+
+def p_while(p):
+    '''
+    while : WHILE expresion BEGIN lista_sentencias_dml END
     '''
     p[0] = p[1]
 
@@ -318,7 +337,7 @@ def p_relacionales(p):
                     | expresion MAYORIGUAL expresion
                     | BETWEEN expresion AND expresion
     '''
-    if p[2] == '==': p[0] = p[1] == p[3]
+    if p[2] == '==': p[0] = Relacional(p[0], p[2], 10)
     elif p[2] == '!=': p[0] = p[1] != p[3]
     elif p[2] == '<': p[0] = p[1] < p[3]
     elif p[2] == '>': p[0] = p[1] > p[3]

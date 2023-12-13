@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractclassmethod
-from .retorno import Retorno
-from ..util.Tabla_tipos import *
+from ..tablas.tabla_tipos import TablaSuma, TablaResta, TablaMultiplicacion, TablaDivision
 
 class Expresion(metaclass=ABCMeta):
     

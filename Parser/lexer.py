@@ -21,6 +21,10 @@ reservadas = {
     'exec': 'EXEC',
     'and' : 'AND',
     'use' : 'USE',
+    'if' : 'IF',
+    'else' : 'ELSE',
+    'while' : 'WHILE',
+    'then' : 'THEN',
 
     # Tipos de objeto
     'database': 'DATABASE',
