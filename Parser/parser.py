@@ -3,7 +3,7 @@ from .lexer import tokens, lexer, errores
 
 # Operadores de precedencia
 precedence = (
-    ('left', 'OR'),
+    ('left', 'OR_OP'),
     ('left', 'AND_OP'),
     ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
     ('left', 'MAS', 'MENOS'),
@@ -38,6 +38,13 @@ def p_instruccion(p):
                 | sentencia_ddl
                 | sentencia_dml
                 | llamar_procedure
+                | usar_db
+    '''
+    p[0] = p[1]
+
+def p_usar_db(p):
+    '''
+    usar_db : USE identificador PUNTOYCOMA
     '''
     p[0] = p[1]
 
@@ -130,7 +137,7 @@ def p_alter(p):
 
 def p_accion(p):
     '''
-    accion : ADD COLUMN identificador tipo_dato
+    accion : ADD COLUMN campos_table
            | DROP COLUMN identificador
     '''
     p[0] = p[1]
@@ -183,18 +190,21 @@ def p_select(p):
         select : SELECT POR FROM identificador
                | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador
                | SELECT lista_expresiones FROM identificador
-               | SELECT POR FROM identificador WHERE expresion PUNTOYCOMA
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
-               | SELECT lista_expresiones FROM identificador WHERE expresion PUNTOYCOMA
+               | SELECT POR FROM identificador WHERE condicion PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
+               | SELECT lista_expresiones FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
                | SELECT identificador IZQPAREN DERPAREN PUNTOYCOMA
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
                | SELECT identificador IZQPAREN DERPAREN FROM identificador PUNTOYCOMA
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
-               | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
-               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
+               | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
+               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
-    p[0] = p[1]
+    if len(p) == 8:
+        p[0] = p[1]
+    else:
+        p[0] = p[1]
 
 def p_insert(p):
     '''
@@ -204,15 +214,26 @@ def p_insert(p):
 
 def p_update(p):
     '''
-    update : UPDATE identificador SET lista_expresiones WHERE expresion PUNTOYCOMA
+    update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_delete(p):
     '''
-    delete : DELETE FROM identificador WHERE expresion PUNTOYCOMA
+    delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
     '''
     p[0] = p[1]
+
+def p_condicion(p):
+    '''
+    condicion : condicion AND expresion
+              | expresion
+    '''
+    if len(p) == 4:
+        p[1].append(p[3])
+        p[0] = p[1]
+    else:
+        p[0] = [p[1]]
 
 def p_lista_expresiones(p):
     '''
@@ -236,7 +257,7 @@ def p_expresion(p):
                 | asignacion
                 | identificador
     '''
-    if(len(p) == 4):
+    if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
@@ -308,7 +329,7 @@ def p_relacionales(p):
 def p_logicos(p):
     '''
         logicos : expresion AND_OP expresion
-                | expresion OR expresion
+                | expresion OR_OP expresion
                 | NOT expresion
     '''
     if p[1] == '&&': p[0] = p[1] and p[3]

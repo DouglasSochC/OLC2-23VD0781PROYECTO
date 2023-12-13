@@ -20,6 +20,7 @@ reservadas = {
     'add': 'ADD',
     'exec': 'EXEC',
     'and' : 'AND',
+    'use' : 'USE',
 
     # Tipos de objeto
     'database': 'DATABASE',
@@ -76,7 +77,7 @@ tokens = [
     'MENOR',
 
     # Expresiones logicas
-    'OR',
+    'OR_OP',
     'AND_OP',
     'NOT',
     'IZQPAREN',
@@ -116,7 +117,7 @@ t_MAYOR = r'\>'
 t_MENOR = r'\<'
 
 # Expresiones logicas
-t_OR = r'\|\|'
+t_OR_OP = r'\|\|'
 t_AND_OP = r'\&\&'
 t_NOT = r'\!'
 t_IZQPAREN = r'\('
