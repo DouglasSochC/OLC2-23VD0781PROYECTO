@@ -189,7 +189,10 @@ def p_sentencia_dml(p):
                 | RETURN expresion PUNTOYCOMA
                 | expresion
     '''
-    p[0] = p[1]
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
 
 def p_select(p):
     '''
@@ -370,6 +373,7 @@ def p_identificador(p):
     '''
     identificador : ID
                   | ID PUNTO ID
+                  | ID AS ID
                   | ARROBA ID
     '''
     if len(p) == 2:
