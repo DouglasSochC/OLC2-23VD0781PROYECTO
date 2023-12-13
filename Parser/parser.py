@@ -43,7 +43,7 @@ def p_instruccion(p):
 
 def p_declaracion_variable(p):
     '''
-    declaracion_variable : DECLARE ARROBA ID tipo_dato PUNTOYCOMA
+    declaracion_variable : DECLARE ARROBA identificador tipo_dato PUNTOYCOMA
     '''
     p[0] = {'accion':p[1]}
 
@@ -91,26 +91,26 @@ def p_sentencia_ddl(p):
 
 def p_create(p):
     '''
-        create : CREATE DATABASE ID PUNTOYCOMA
-               | CREATE TABLE ID IZQPAREN campos_table DERPAREN PUNTOYCOMA
-               | CREATE PROCEDURE ID IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
-               | CREATE FUNCTION ID IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+        create : CREATE DATABASE identificador PUNTOYCOMA
+               | CREATE TABLE identificador IZQPAREN campos_table DERPAREN PUNTOYCOMA
+               | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+               | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_campos_table(p):
     '''
-    campos_table : campos_table COMA ID tipo_dato constrain
-                 | campos_table COMA ID tipo_dato
-                 | ID tipo_dato constrain
-                 | ID tipo_dato
+    campos_table : campos_table COMA identificador tipo_dato constrain
+                 | campos_table COMA identificador tipo_dato
+                 | identificador tipo_dato constrain
+                 | identificador tipo_dato
     '''
     p[0] = p[1]
 
 def p_parametros(p):
     '''
-    parametros : parametros COMA ARROBA ID tipo_dato
-                | ARROBA ID tipo_dato
+    parametros : parametros COMA ARROBA identificador tipo_dato
+                | ARROBA identificador tipo_dato
     '''
     p[0] = p[1]
 
@@ -118,35 +118,35 @@ def p_constrain(p):
     '''
     constrain : PRIMARY KEY
               | NOT NULL
-              | REFERENCES ID IZQPAREN ID DERPAREN
+              | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
     p[0] = p[1]
 
 def p_alter(p):
     '''
-    alter : ALTER TABLE ID accion PUNTOYCOMA
+    alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_accion(p):
     '''
-    accion : ADD COLUMN ID tipo_dato
-           | DROP COLUMN ID
+    accion : ADD COLUMN identificador tipo_dato
+           | DROP COLUMN identificador
     '''
     p[0] = p[1]
 
 def p_drop(p):
     '''
-    drop : DROP DATABASE ID PUNTOYCOMA
-         | DROP TABLE ID PUNTOYCOMA
-         | DROP PROCEDURE ID PUNTOYCOMA
-         | DROP FUNCTION ID PUNTOYCOMA
+    drop : DROP DATABASE identificador PUNTOYCOMA
+         | DROP TABLE identificador PUNTOYCOMA
+         | DROP PROCEDURE identificador PUNTOYCOMA
+         | DROP FUNCTION identificador PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_truncate(p):
     '''
-    truncate : TRUNCATE TABLE ID PUNTOYCOMA
+    truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
     p[0] = p[1]
 
@@ -163,7 +163,7 @@ def p_lista_sentencias_dml(p):
 
 def p_llamar_procedure(p):
     '''
-    llamar_procedure : EXEC ID lista_expresiones PUNTOYCOMA
+    llamar_procedure : EXEC identificador lista_expresiones PUNTOYCOMA
     '''
     p[0] = p[1]
 
@@ -180,37 +180,37 @@ def p_sentencia_dml(p):
 
 def p_select(p):
     '''
-        select : SELECT POR FROM ID
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID
-               | SELECT lista_expresiones FROM ID
-               | SELECT POR FROM ID WHERE expresion PUNTOYCOMA
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM ID WHERE expresion PUNTOYCOMA
-               | SELECT lista_expresiones FROM ID WHERE expresion PUNTOYCOMA
+        select : SELECT POR FROM identificador
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador
+               | SELECT lista_expresiones FROM identificador
+               | SELECT POR FROM identificador WHERE expresion PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
+               | SELECT lista_expresiones FROM identificador WHERE expresion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
-               | SELECT ID IZQPAREN DERPAREN PUNTOYCOMA
-               | SELECT ID IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
-               | SELECT ID IZQPAREN DERPAREN FROM ID PUNTOYCOMA
-               | SELECT ID IZQPAREN lista_expresiones DERPAREN FROM ID PUNTOYCOMA
-               | SELECT ID IZQPAREN DERPAREN FROM ID WHERE expresion PUNTOYCOMA
-               | SELECT ID IZQPAREN lista_expresiones DERPAREN FROM ID WHERE expresion PUNTOYCOMA
+               | SELECT identificador IZQPAREN DERPAREN PUNTOYCOMA
+               | SELECT identificador IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+               | SELECT identificador IZQPAREN DERPAREN FROM identificador PUNTOYCOMA
+               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
+               | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
+               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE expresion PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_insert(p):
     '''
-    insert : INSERT INTO ID IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+    insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_update(p):
     '''
-    update : UPDATE ID SET lista_expresiones WHERE expresion PUNTOYCOMA
+    update : UPDATE identificador SET lista_expresiones WHERE expresion PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_delete(p):
     '''
-    delete : DELETE FROM ID WHERE expresion PUNTOYCOMA
+    delete : DELETE FROM identificador WHERE expresion PUNTOYCOMA
     '''
     p[0] = p[1]
 
