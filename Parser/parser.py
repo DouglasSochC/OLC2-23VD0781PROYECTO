@@ -43,7 +43,7 @@ def p_instruccion(p):
 
 def p_declaracion_variable(p):
     '''
-    declaracion_variable : DECLARE ARROBA identificador tipo_dato PUNTOYCOMA
+    declaracion_variable : DECLARE identificador tipo_dato PUNTOYCOMA
     '''
     p[0] = {'accion':p[1]}
 
@@ -109,8 +109,8 @@ def p_campos_table(p):
 
 def p_parametros(p):
     '''
-    parametros : parametros COMA ARROBA identificador tipo_dato
-                | ARROBA identificador tipo_dato
+    parametros : parametros COMA identificador tipo_dato
+                | identificador tipo_dato
     '''
     p[0] = p[1]
 
