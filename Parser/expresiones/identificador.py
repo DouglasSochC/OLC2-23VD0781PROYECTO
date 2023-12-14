@@ -1,20 +1,28 @@
 from ..abstract.expresiones import Expresion
-from ..tablas.tabla_simbolo import Simbolo
+from ..abstract.retorno import TIPO_TOKEN, RetornoIdentificador
+from Funcionalidad.dml import DML
 
 class Identificador(Expresion):
-    def __init__(self, id_nodo: int, valor: any, nombre_tabla: any = None, alias: any = None):
+
+    def __init__(self, id_nodo: int, valor: any, alias_tabla: any = None, alias_nombre: any = None):
         self.id_nodo = id_nodo
         self.valor = valor
-        self.nombre_tabla = nombre_tabla
-        self.alias = alias
+        self.alias_tabla = alias_tabla
+        self.alias_nombre = alias_nombre
 
     def Ejecutar(self, base_datos, entorno):
 
+        # Debido a que la informacion de la tabla se obtendra desde aqui, es necesario determinar si ya existe el nombre de la tabla en la tabla de simbolos
         tabla = entorno.obtener('nombre_tabla')
-        print(self.valor)
         if tabla is not None:
-            print("NOMBRE_TABLA", tabla.valor)
-        return self.valor
+
+            # Si es un SELECT, se obtendra toda la informacion del campo (self.valor) de la tabla
+            if tabla.tipo_token == TIPO_TOKEN.SELECT:
+                dml = DML()
+                res = dml.seleccionar_columna_tabla(base_datos.valor, tabla.valor, self.valor)
+                return RetornoIdentificador(self.valor, res.msg, self.alias_nombre)
+
+        return RetornoIdentificador(self.valor, [], self.alias_nombre)
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "IDENTIFICADOR")

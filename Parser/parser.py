@@ -8,6 +8,7 @@ from .abstract.retorno import TIPO_DATO
 from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
 from .expresiones.aritmetica import Aritmetica
+from .expresiones.relacional import Relacional
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.declare import Declare
@@ -245,11 +246,31 @@ def p_select(p):
                | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
-    if len(p) == 6 and p[3] == 'from':
-        p[0] = Select(p[4], p[2])
+    if len(p) == 4:
+        p[0] = p[1]
     elif len(p) == 6 and p[2] == '*':
         p[0] = p[1]
-    else:
+    elif len(p) == 6 and p[3] == 'from':
+        p[0] = Select(p[4], p[2], [])
+    elif len(p) == 6 and p[3] == '(':
+        p[0] = p[1]
+    elif len(p) == 7:
+        p[0] = p[1]
+    elif len(p) == 8 and p[2] == '(':
+        p[0] = p[1]
+    elif len(p) == 8 and p[2] == '*':
+        p[0] = p[1]
+    elif len(p) == 8 and p[3] == 'from':
+        p[0] = Select(p[4], p[2], p[6])
+    elif len(p) == 8 and p[3] == '(':
+        p[0] = p[1]
+    elif len(p) == 9:
+        p[0] = p[1]
+    elif len(p) == 10 and p[2] == '(':
+        p[0] = p[1]
+    elif len(p) == 10 and p[3] == '(':
+        p[0] = p[1]
+    elif len(p) == 11:
         p[0] = p[1]
 
 def p_insert(p):
@@ -320,8 +341,6 @@ def p_expresion(p):
     if len(p) == 4:
         p[0] = p[2]
     else:
-        #LEER EL TIPO QUE TRAE LA EXPRESION PARA VALIDAR SI EJECUTA BIEN LAS LITERALES
-        print(p[1].tipado)
         p[0] = p[1]
 
 def p_alias(p):
@@ -384,13 +403,10 @@ def p_relacionales(p):
                     | expresion MAYORIGUAL expresion
                     | BETWEEN expresion AND expresion
     '''
-    if p[2] == '==': p[0] = p[1] == p[3]
-    elif p[2] == '!=': p[0] = p[1] != p[3]
-    elif p[2] == '<': p[0] = p[1] < p[3]
-    elif p[2] == '>': p[0] = p[1] > p[3]
-    elif p[2] == '<=': p[0] = p[1] <= p[3]
-    elif p[2] == '>=': p[0] = p[1] >= p[3]
-    elif p[1] == 'BETWEEN': p[0] = p[1] >= p[3]
+    if len(p) == 4:
+        p[0] = Relacional(p[1], p[2], p[3])
+    elif len(p) == 5:
+        p[0] = Relacional(p[2], p[1], p[4])
 
 def p_logicos(p):
     '''
@@ -428,7 +444,6 @@ def p_literal4(p):
         literal : LFECHAHORA
     '''
     p[0] = Literal(p[1], TIPO_DATO.DATETIME)
-
 
 def p_literal5(p):
     '''

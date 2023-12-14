@@ -2,6 +2,8 @@ import os
 import xml.etree.ElementTree as ET
 from .util import Respuesta, validar_tipo_dato
 from dotenv import load_dotenv
+from datetime import datetime
+import xmltodict
 
 load_dotenv()
 
@@ -81,28 +83,64 @@ class DML:
 
         return tupla_respuesta
 
-    def __validar_campos(self, path_tabla: str, campos: list) -> str | dict:
+    def __tipo_dato_campo(self, path_tabla: str, nombre_tabla: str, nombre_campo: str) -> dict | None:
 
-        if len(campos) <= 0:
-            return "Debe de seleccionar por lo menos una columna"
+        if nombre_campo == "":
+            return "Debe de indicar el campo"
 
-        # Se crea una variable que devolvera una lista de los campos validos
-        campos_respuesta = []
+        # Lee el contenido del archivo XML
+        with open(path_tabla, 'r') as archivo:
+            contenido_xml = archivo.read()
 
-        # Se obtiene la raiz del XML
-        tree = ET.parse(path_tabla)
-        root = tree.getroot()
+        # Se formatea el XML a un diccionario para manejarlo de mejor forma
+        contenido = xmltodict.parse(contenido_xml)
 
-        for campo in campos:
+        # Se verifica que exista el campo y ademas se obtiene el tipo de dato de ese campo
+        for campo in contenido[nombre_tabla]['estructura']['campo']:
 
-            existe_el_campo = len(root.findall(".//estructura/campo/[@name='" + campo + "']")) > 0
+            if campo["@name"] == nombre_campo:
+                return campo["@type"]
 
-            if existe_el_campo:
-                campos_respuesta.append(campo)
+        return None
+
+    def __cumple_condicion(self, diccionario: dict, condiciones: list) -> bool:
+
+        # Cuando no hay condiciones que evaluar se retorna verdadero
+        if len(condiciones) == 0:
+            return True
+
+        cumple_condicion = True
+
+        for condicion in condiciones:
+
+            if isinstance(condicion, tuple):
+
+                # Se obtiene la estructura de la condicion
+                clave = condicion[0]
+                operador = condicion[1]
+                valor = condicion[2]
+
+                # Se verifica que la condicion se cumpla
+                if operador == '=' and diccionario.get(clave) != str(valor):
+                    cumple_condicion = False
+                if operador == '==' and diccionario.get(clave) != str(valor):
+                    cumple_condicion = False
+                elif operador == '>=' and float(diccionario.get(clave, 0)) < float(valor):
+                    cumple_condicion = False
+                elif operador == '>' and float(diccionario.get(clave, 0)) <= float(valor):
+                    cumple_condicion = False
+                elif operador == '<=' and float(diccionario.get(clave, 0)) > float(valor):
+                    cumple_condicion = False
+                elif operador == '<' and float(diccionario.get(clave, 0)) >= float(valor):
+                    cumple_condicion = False
+
             else:
-                return "La columna '{}' es invalida".format(campo)
+                if condicion == 'AND':
+                    pass
+                elif condicion == 'OR':
+                    cumple_condicion = True
 
-        return campos_respuesta
+        return cumple_condicion
 
     ##############################################
     ############### SECCION INSERT ###############
@@ -166,20 +204,21 @@ class DML:
     ############### SECCION SELECT ###############
     ##############################################
 
-    def seleccionar_registro_tabla(self, nombre_bd:str, nombre_tabla: str, campos: list, condiciones: list):
+    def seleccionar_columna_tabla(self, nombre_bd:str, nombre_tabla: str, nombre_columna:str):
         '''
-        Obtiene la informacion de una tabla.
+        Obtiene la informacion de una columna
 
         Parameters:
             nombre_bd (str): Nombre de la base de datos
             nombre_tabla (str): Nombre de la tabla
-            campos (list): Campos existentes en la tabla que seran mostrados
-            condiciones ():
+            nombre_columna (str): Todos los datos que contiene la columna
         '''
 
         if nombre_bd is None: # Se valida que haya seleccionado una base de datos
             return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
         elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif nombre_columna is None:  # Se valida que este el nombre de la columna
             return Respuesta(False, "Por favor, indique el nombre de la tabla")
         elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
             return Respuesta(False, "No existe la base de datos seleccionada")
@@ -189,28 +228,48 @@ class DML:
         respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
         path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
 
-        # Se validan los campos
-        val_campos = self.__validar_campos(path_tabla, campos)
-        if isinstance(val_campos, str):
-            return Respuesta(False, val_campos)
+        # Se obtiene el tipo de dato del campo
+        res_tipo_campo = self.__tipo_dato_campo(path_tabla, nombre_tabla, nombre_columna)
+        if res_tipo_campo is None:
+            return Respuesta(False, "La columna '{}' es invalida".format(nombre_columna))
 
-        # Se obtiene la raiz del XML
-        tree = ET.parse(path_tabla)
-        root = tree.getroot()
+        # Lee el archivo XML
+        with open(path_tabla, 'r') as archivo:
+            contenido_xml = archivo.read()
 
-        # Se obtiene la definicion de los registros
-        filas = root.findall(".//registros/fila")
+        # Se formatea el XML a un diccionario para manejarlo de mejor forma
+        contenido = xmltodict.parse(contenido_xml)
 
         # Se recorre fila por fila
-        for fila in filas:
+        for fila in contenido['producto']['registros']['fila']:
 
-            # Se almacena la informacion de forma ordenada
-            resultado_fila = {}
-            for campo in val_campos:
+            # Se ingresa a la fila la columna que se esta solicitando casteandolo al tipo de dato a utilizar
+            if res_tipo_campo == 'int':
+                fila["temporal"] = int(fila[nombre_columna])
+            elif res_tipo_campo == 'decimal':
+                fila["temporal"] = float(fila[nombre_columna])
+            elif res_tipo_campo == 'bit':
+                fila["temporal"] = int(fila[nombre_columna])
+            elif res_tipo_campo == 'date':
+                fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y')
+            elif res_tipo_campo == 'datetime':
+                fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y %H:%M:%S')
+            else:
+                fila["temporal"] = fila[nombre_columna]
 
-                valor = fila.find(campo)
-                resultado_fila[campo] = valor.text if valor is not None else None
+            respuesta_datos.append(fila)
 
-            respuesta_datos.append(resultado_fila)
+        return Respuesta(True, respuesta_datos)
+
+    def aplicar_condiciones(self, data: list, lista_condiciones: list):
+
+        respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
+
+        for fila in data:
+
+            # Se verifica que cumpla con las condiciones
+            se_cumple_condicion = self.__cumple_condicion(fila, lista_condiciones)
+            if se_cumple_condicion:
+                respuesta_datos.append(fila['temporal'])
 
         return Respuesta(True, respuesta_datos)

@@ -56,7 +56,18 @@ class TIPO_OPERACION(Enum):
     AND_OP = 13
     NOT = 14
 
-class RetornoTipoDato:
-    def __init__(self, value = None, tipado = TIPO_DATO.NULL):
-        self.value = value
+class RetornoLiteral:
+    def __init__(self, valor = None, tipado = TIPO_DATO.NULL):
+        self.valor = valor
         self.tipado = tipado
+
+class RetornoIdentificador:
+
+    def __init__(self, identificador: str, lista: list = [], alias: str = None):
+        self.identificador = identificador
+        self.lista = lista
+        self.alias = alias
+
+class RetornoError:
+    def __init__(self, msg: str):
+        self.msg = msg
