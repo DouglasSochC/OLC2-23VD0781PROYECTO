@@ -5,6 +5,7 @@ from .lexer import tokens, lexer, errores
 from .abstract.retorno import TIPO_DATO
 from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
+from .instrucciones.use import Use
 from .instrucciones.declare import Declare
 
 contador = 0
@@ -54,7 +55,7 @@ def p_usar_db(p):
     '''
     usar_db : USE identificador PUNTOYCOMA
     '''
-    p[0] = p[1]
+    p[0] = Use(p[2])
 
 def p_declaracion_variable(p):
     '''
@@ -411,10 +412,12 @@ def p_identificador(p):
     contador += 1
     if len(p) == 2:
         p[0] = Identificador(id_nodo, p[1])
-    elif len(p) == 4:
-        p[0] = f'{p[1]}.{p[3]}'
-    else:
-        p[0] = f'@{p[2]}'
+    elif len(p) == 3:
+        p[0] = Identificador(id_nodo, p[2])
+    elif len(p) == 4 and p[2] == '.':
+        p[0] = Identificador(id_nodo, p[3], p[1])
+    elif len(p) == 4 and p[2] == 'AS':
+        p[0] = Identificador(id_nodo, p[1], None, p[3])
 
 def p_error(p):
     errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
