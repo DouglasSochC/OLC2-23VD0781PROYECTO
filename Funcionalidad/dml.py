@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from .util import Respuesta, validar_tipo_dato
 from dotenv import load_dotenv
 from datetime import datetime
+from Parser.abstract.retorno import TIPO_DATO
 import xmltodict
 
 load_dotenv()
@@ -239,27 +240,36 @@ class DML:
 
         # Se formatea el XML a un diccionario para manejarlo de mejor forma
         contenido = xmltodict.parse(contenido_xml)
-
+        tipo_dato = None
         # Se recorre fila por fila
         for fila in contenido['producto']['registros']['fila']:
 
             # Se ingresa a la fila la columna que se esta solicitando casteandolo al tipo de dato a utilizar
             if res_tipo_campo == 'int':
                 fila["temporal"] = int(fila[nombre_columna])
+                tipo_dato = TIPO_DATO.INT
             elif res_tipo_campo == 'decimal':
                 fila["temporal"] = float(fila[nombre_columna])
+                tipo_dato = TIPO_DATO.DECIMAL
             elif res_tipo_campo == 'bit':
                 fila["temporal"] = int(fila[nombre_columna])
+                tipo_dato = TIPO_DATO.BIT
             elif res_tipo_campo == 'date':
                 fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y')
+                tipo_dato = TIPO_DATO.DATE
             elif res_tipo_campo == 'datetime':
                 fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y %H:%M:%S')
-            else:
+                tipo_dato = TIPO_DATO.DATETIME
+            elif res_tipo_campo == 'nchar':
                 fila["temporal"] = fila[nombre_columna]
+                tipo_dato = TIPO_DATO.NCHAR
+            elif res_tipo_campo == 'nvarchar':
+                fila["temporal"] = fila[nombre_columna]
+                tipo_dato = TIPO_DATO.NVARCHAR
 
             respuesta_datos.append(fila)
 
-        return Respuesta(True, respuesta_datos)
+        return Respuesta(True, tipo_dato, respuesta_datos)
 
     def aplicar_condiciones(self, data: list, lista_condiciones: list):
 
@@ -272,4 +282,4 @@ class DML:
             if se_cumple_condicion:
                 respuesta_datos.append(fila['temporal'])
 
-        return Respuesta(True, respuesta_datos)
+        return Respuesta(True, None, respuesta_datos)

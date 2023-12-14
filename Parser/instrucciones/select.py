@@ -1,6 +1,6 @@
 from ..abstract.instrucciones import Instruccion
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
-from ..abstract.retorno import TIPO_DATO, TIPO_TOKEN, RetornoError
+from ..abstract.retorno import TIPO_TOKEN, RetornoError
 from Funcionalidad.dml import DML
 
 class Select(Instruccion):
@@ -44,6 +44,9 @@ class Select(Instruccion):
 
             res_ejecutar = expr.Ejecutar(base_datos, nuevo_entorno)
 
+            if isinstance(res_ejecutar, RetornoError):
+                return res_ejecutar.msg
+
             if temp_dimensional == -1:
                 temp_dimensional = len(res_ejecutar.lista)
             elif temp_dimensional != len(res_ejecutar.lista):
@@ -52,11 +55,11 @@ class Select(Instruccion):
             resultado['encabezado'].append(res_ejecutar.identificador)
             res_aplicar_condiciones = dml.aplicar_condiciones(res_ejecutar.lista, listado_condiciones)
             if (len(resultado['data']) == 0):
-                for valor in res_aplicar_condiciones.msg:
+                for valor in res_aplicar_condiciones.lista:
                     resultado['data'].append([valor])
             else:
                 for indice, matriz in enumerate(resultado['data']):
-                    resultado['data'][indice].append(res_aplicar_condiciones.msg[indice])
+                    resultado['data'][indice].append(res_aplicar_condiciones.lista[indice])
 
         return resultado
 

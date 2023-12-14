@@ -63,8 +63,9 @@ class RetornoLiteral:
 
 class RetornoIdentificador:
 
-    def __init__(self, identificador: str, lista: list = [], alias: str = None):
+    def __init__(self, identificador: str, tipado: TIPO_DATO, lista: list = [], alias: str = None):
         self.identificador = identificador
+        self.tipado = tipado
         self.lista = lista
         self.alias = alias
 

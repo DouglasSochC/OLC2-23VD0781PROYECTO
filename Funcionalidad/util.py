@@ -2,9 +2,10 @@ import re
 from datetime import datetime
 
 class Respuesta:
-    def __init__(self, success: bool, msg: str):
+    def __init__(self, success: bool, valor: str, lista: list = []):
         self.success = success
-        self.msg = msg
+        self.valor = valor
+        self.lista = lista
 
 def es_entero(str):
     try:
