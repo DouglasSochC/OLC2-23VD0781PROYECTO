@@ -183,8 +183,14 @@ class DML:
             # Se obtiene la definicion de los registros
             registros = root.find(".//registros")
 
+            ultima_posicion = registros.findall(".//fila")
+            index = '1'
+            if len(ultima_posicion) > 0:
+                acum = registros.findall(".//fila")[-1].get("index")
+                index = str(int(acum) + 1)
+
             # Crear un nuevo elemento fila
-            fila = ET.Element("fila")
+            fila = ET.Element("fila", attrib={'index' : index})
 
             # Se agrega los elementos del registro a la fila
             for llave, valor in val_estructura_tupla.items():
