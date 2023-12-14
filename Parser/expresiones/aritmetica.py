@@ -47,20 +47,28 @@ class Aritmetica(Expresion):
 
                 return RetornoError("ERROR: No se puede realizar la operacion {} * {}".format(exp_izq.valor, exp_der.identificador))
 
+            elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+
+                dominante = self.DominanteMultiplicacion(exp_izq.tipado, exp_der.tipado)
+                if  dominante == TIPO_DATO.NULL:
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} * {}' debido a que no son tipos de datos similares".format(exp_izq.valor, exp_der.valor))
+
+                return RetornoLiteral(exp_izq.valor * exp_der.valor, dominante)
+
         elif self.operador == '/':
 
             if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
 
                 dominante = self.DominanteDivision(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} / {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.identificador))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} / {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.identificador))
 
                 for indice, diccionario in enumerate(exp_izq.lista):
 
                     try:
                         diccionario['temporal'] = diccionario['temporal'] / exp_der.lista[indice]['temporal']
                     except Exception as e:
-                        return RetornoError("ERROR: Ha ocurrido un error con la division '{} / {}' debido a que no son tipos de datos similares".format(diccionario['temporal'], exp_der.lista[indice]['temporal']))
+                        return RetornoError("ERROR: Ha ocurrido un error al realizar la division '{} / {}' ".format(diccionario['temporal'], exp_der.lista[indice]['temporal']))
 
                 return RetornoIdentificador(exp_izq.identificador, dominante, exp_izq.lista)
 
@@ -68,7 +76,7 @@ class Aritmetica(Expresion):
 
                 dominante = self.DominanteDivision(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} / {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.valor))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} / {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.valor))
 
                 for diccionario in exp_izq.lista:
                     diccionario['temporal'] = diccionario['temporal'] / exp_der.valor
@@ -79,13 +87,24 @@ class Aritmetica(Expresion):
 
                 return RetornoError("ERROR: No se puede realizar la operacion {} / {}".format(exp_izq.valor, exp_der.identificador))
 
+            elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+
+                dominante = self.DominanteDivision(exp_izq.tipado, exp_der.tipado)
+                if  dominante == TIPO_DATO.NULL:
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} / {}' debido a que no son tipos de datos similares".format(exp_izq.valor, exp_der.valor))
+
+                try:
+                    return RetornoLiteral(exp_izq.valor / exp_der.valor, dominante)
+                except Exception as e:
+                    return RetornoError("ERROR: Ha ocurrido un error al realizar la division '{} / {}' ".format(exp_izq.valor, exp_der.valor))
+
         elif self.operador == '+':
 
             if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
 
                 dominante = self.DominanteSuma(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} + {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.identificador))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} + {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.identificador))
 
                 for indice, diccionario in enumerate(exp_izq.lista):
 
@@ -97,7 +116,7 @@ class Aritmetica(Expresion):
 
                 dominante = self.DominanteSuma(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} + {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.valor))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} + {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.valor))
 
                 for diccionario in exp_izq.lista:
                     diccionario['temporal'] = diccionario['temporal'] + exp_der.valor
@@ -108,13 +127,21 @@ class Aritmetica(Expresion):
 
                 return RetornoError("ERROR: No se puede realizar la operacion {} + {}".format(exp_izq.valor, exp_der.identificador))
 
+            elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+
+                dominante = self.DominanteSuma(exp_izq.tipado, exp_der.tipado)
+                if  dominante == TIPO_DATO.NULL:
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} + {}' debido a que no son tipos de datos similares.".format(exp_izq.valor, exp_der.valor))
+
+                return RetornoLiteral(exp_izq.valor + exp_der.valor, dominante)
+
         elif self.operador == '-':
 
             if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
 
                 dominante = self.DominanteResta(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} - {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.identificador))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} - {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.identificador))
 
                 for indice, diccionario in enumerate(exp_izq.lista):
 
@@ -126,7 +153,7 @@ class Aritmetica(Expresion):
 
                 dominante = self.DominanteResta(exp_izq.tipado, exp_der.tipado)
                 if  dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} - {}' debido a que no son tipos de datos similares".format(exp_izq.identificador, exp_der.valor))
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} - {}' debido a que no son tipos de datos similares.".format(exp_izq.identificador, exp_der.valor))
 
                 for diccionario in exp_izq.lista:
                     diccionario['temporal'] = diccionario['temporal'] - exp_der.valor
@@ -137,7 +164,15 @@ class Aritmetica(Expresion):
 
                 return RetornoError("ERROR: No se puede realizar la operacion {} - {}".format(exp_izq.valor, exp_der.identificador))
 
-        return RetornoError("ERROR: Ha ocurrido un error al realizar una operación aritmetica")
+            elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+
+                dominante = self.DominanteResta(exp_izq.tipado, exp_der.tipado)
+                if  dominante == TIPO_DATO.NULL:
+                    return RetornoError("ERROR: No se puede realizar la operacion '{} - {}' debido a que no son tipos de datos similares.".format(exp_izq.valor, exp_der.valor))
+
+                return RetornoLiteral(exp_izq.valor - exp_der.valor, dominante)
+
+        return RetornoError("ERROR: Ha ocurrido un error al realizar una operación aritmetica.")
 
     def GraficarArbol(self, id_padre):
         return ""

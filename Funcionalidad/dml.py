@@ -255,10 +255,10 @@ class DML:
                 fila["temporal"] = int(fila[nombre_columna])
                 tipo_dato = TIPO_DATO.BIT
             elif res_tipo_campo == 'date':
-                fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y')
+                fila["temporal"] =str(fila[nombre_columna])
                 tipo_dato = TIPO_DATO.DATE
             elif res_tipo_campo == 'datetime':
-                fila["temporal"] = datetime.strptime(str(fila[nombre_columna]), '%d-%m-%Y %H:%M:%S')
+                fila["temporal"] =str(fila[nombre_columna])
                 tipo_dato = TIPO_DATO.DATETIME
             elif res_tipo_campo == 'nchar':
                 fila["temporal"] = fila[nombre_columna]
