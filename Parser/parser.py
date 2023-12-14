@@ -1,5 +1,7 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
+from .expresiones.literal import *
+from .abstract.retorno import *
 
 # Clases
 from .abstract.retorno import TIPO_DATO
@@ -318,6 +320,8 @@ def p_expresion(p):
     if len(p) == 4:
         p[0] = p[2]
     else:
+        #LEER EL TIPO QUE TRAE LA EXPRESION PARA VALIDAR SI EJECUTA BIEN LAS LITERALES
+        print(p[1].tipado)
         p[0] = p[1]
 
 def p_alias(p):
@@ -398,16 +402,39 @@ def p_logicos(p):
     elif p[1] == '||': p[0] = p[1] or p[3]
     elif p[1] == '!': p[0] = not p[2]
 
-def p_literal(p):
+def p_literal1(p):
     '''
         literal : LNUMERO
-                | LDECIMAL
-                | LFECHA
-                | LFECHAHORA
-                | LVARCHAR
-                | NULL
     '''
-    p[0] = p[1]
+    if((len(str(p[1])) == 1) and(str(p[1]) == "0" or str(p[1]) == "1")):
+        p[0] = Literal(p[1], TIPO_DATO.BIT or TIPO_DATO.INT)
+    else:
+        p[0] = Literal(p[1], TIPO_DATO.INT)
+
+def p_literal2(p):
+    '''
+        literal : LDECIMAL
+    '''
+    p[0] = Literal(p[1], TIPO_DATO.DECIMAL)
+
+def p_literal3(p):
+    '''
+        literal : LFECHA
+    '''
+    p[0] = Literal(p[1], TIPO_DATO.DATE)
+
+def p_literal4(p):
+    '''
+        literal : LFECHAHORA
+    '''
+    p[0] = Literal(p[1], TIPO_DATO.DATETIME)
+
+
+def p_literal5(p):
+    '''
+        literal : LVARCHAR
+    '''
+    p[0] = Literal(p[1], TIPO_DATO.NCHAR or TIPO_DATO.NVARCHAR)
 
 def p_identificador(p):
     '''
