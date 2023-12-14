@@ -1,4 +1,5 @@
 from ..abstract.expresiones import Expresion
+from ..tablas.tabla_simbolo import Simbolo
 
 class Identificador(Expresion):
     def __init__(self, id_nodo: int, valor: any, nombre_tabla: any = None, alias: any = None):
@@ -8,6 +9,11 @@ class Identificador(Expresion):
         self.alias = alias
 
     def Ejecutar(self, base_datos, entorno):
+
+        tabla = entorno.obtener('nombre_tabla')
+        print(self.valor)
+        if tabla is not None:
+            print("NOMBRE_TABLA", tabla.valor)
         return self.valor
 
     def GraficarArbol(self, id_padre):

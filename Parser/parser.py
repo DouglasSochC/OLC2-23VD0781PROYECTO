@@ -5,7 +5,9 @@ from .lexer import tokens, lexer, errores
 from .abstract.retorno import TIPO_DATO
 from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
+from .expresiones.aritmetica import Aritmetica
 from .instrucciones.use import Use
+from .instrucciones.select import Select
 from .instrucciones.declare import Declare
 
 contador = 0
@@ -227,9 +229,9 @@ def p_sentencia_dml(p):
 
 def p_select(p):
     '''
-        select : SELECT POR FROM identificador
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador
-               | SELECT lista_expresiones FROM identificador
+        select : SELECT POR FROM identificador PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
+               | SELECT lista_expresiones FROM identificador PUNTOYCOMA
                | SELECT POR FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones FROM identificador WHERE condicion PUNTOYCOMA
@@ -241,8 +243,10 @@ def p_select(p):
                | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
-    if len(p) == 8:
-        p[0] = p[0]
+    if len(p) == 6 and p[3] == 'from':
+        p[0] = Select(p[4], p[2])
+    elif len(p) == 6 and p[2] == '*':
+        p[0] = p[1]
     else:
         p[0] = p[1]
 
@@ -309,11 +313,19 @@ def p_expresion(p):
                 | IZQPAREN expresion DERPAREN
                 | asignacion
                 | identificador
+                | alias
     '''
     if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1]
+
+def p_alias(p):
+    '''
+        alias : expresion AS ID
+            | expresion ID
+    '''
+    p[0] = p[1]
 
 def p_asignacion(p):
     '''
@@ -356,10 +368,7 @@ def p_aritmeticos(p):
                     | expresion POR expresion
                     | expresion DIVIDIDO expresion
     '''
-    if p[2] == '+'  : p[0] = p[1] + p[3]
-    elif p[2] == '-': p[0] = p[1] - p[3]
-    elif p[2] == '*': p[0] = p[1] * p[3]
-    elif p[2] == '/': p[0] = p[1] / p[3]
+    p[0] = Aritmetica(p[1], p[2], p[3])
 
 def p_relacionales(p):
     '''
@@ -404,7 +413,6 @@ def p_identificador(p):
     '''
     identificador : ID
                   | ID PUNTO ID
-                  | ID AS ID
                   | ARROBA ID
     '''
     global contador
@@ -416,8 +424,6 @@ def p_identificador(p):
         p[0] = Identificador(id_nodo, p[2])
     elif len(p) == 4 and p[2] == '.':
         p[0] = Identificador(id_nodo, p[3], p[1])
-    elif len(p) == 4 and p[2] == 'AS':
-        p[0] = Identificador(id_nodo, p[1], None, p[3])
 
 def p_error(p):
     errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
