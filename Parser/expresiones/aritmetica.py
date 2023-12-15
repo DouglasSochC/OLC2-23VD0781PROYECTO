@@ -176,12 +176,15 @@ class Aritmetica(Expresion):
 
     def GraficarArbol(self, id_padre):
         id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "ARITMETICA")
 
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, self.operador)
         union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
+       
         union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
-
+        
         resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
         resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
-
-        return label_operador + union_hijo_izquierdo + union_hijo_derecho + resultado_izquierda + resultado_derecha
+        
+        return label_encabezado + union_hijo_izquierdo  + resultado_izquierda + label_operador +union_enca_operador +resultado_derecha + union_hijo_derecho

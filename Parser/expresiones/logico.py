@@ -12,8 +12,8 @@ class Logico(Expresion):
 
     def GraficarArbol(self, id_padre):
         id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
-
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, self.operador)
+        
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "LOGICO")
         union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
 
         if self.expresion_derecha is not None:
@@ -22,7 +22,15 @@ class Logico(Expresion):
         else:
             union_hijo_derecho = ""
             resultado_derecha = ""
+        
+        
 
         resultado_izquierda = self.expresion_izquierda.GraficarArbol(id_padre)
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
 
-        return label_operador + union_hijo_izquierdo + union_hijo_derecho + resultado_izquierda + resultado_derecha
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
+
+        return label_encabezado + union_hijo_izquierdo+resultado_izquierda +label_operador+union_enca_operador+ union_hijo_derecho  + resultado_derecha
+    
+
+   
