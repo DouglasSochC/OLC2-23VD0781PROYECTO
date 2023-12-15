@@ -62,12 +62,18 @@ class RetornoLiteral:
         self.tipado = tipado
 
 class RetornoIdentificador:
-
     def __init__(self, identificador: str, tipado: TIPO_DATO, lista: list = [], alias: str = None):
         self.identificador = identificador
         self.tipado = tipado
         self.lista = lista
         self.alias = alias
+
+class RetornoRelacional:
+    def __init__(self, valor: bool, operacion_izquierda: list, operador :str, operacion_derecha: any):
+        self.valor = valor
+        self.operacion_izquierda = operacion_izquierda
+        self.operador = operador
+        self.operacion_derecha = operacion_derecha
 
 class RetornoError:
     def __init__(self, msg: str):

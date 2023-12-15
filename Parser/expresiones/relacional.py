@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoError
+from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoError, RetornoRelacional
 
 class Relacional(Expresion):
 
@@ -14,8 +14,8 @@ class Relacional(Expresion):
         exp_der = self.expresion_derecha.Ejecutar(base_datos, entorno)
 
         if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
-            return (exp_izq.identificador, self.operador, exp_der.identificador)
+            return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.lista)
         elif isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoLiteral):
-            return (exp_izq.identificador, self.operador, exp_der.valor)
+            return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
