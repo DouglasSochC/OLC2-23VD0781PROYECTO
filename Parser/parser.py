@@ -1,7 +1,9 @@
+from Parser.instrucciones.select_print import Select_Print
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
 from .expresiones.literal import *
 from .abstract.retorno import *
+from datetime import datetime
 
 # Clases
 from .abstract.retorno import TIPO_DATO
@@ -9,6 +11,8 @@ from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
 from .expresiones.aritmetica import Aritmetica
 from .expresiones.relacional import Relacional
+from .expresiones.logico import Logico
+from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.declare import Declare
@@ -247,7 +251,7 @@ def p_select(p):
                | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
     if len(p) == 4:
-        p[0] = p[1]
+        p[0] = Select_Print(p[2])
     elif len(p) == 6 and p[2] == '*':
         p[0] = p[1]
     elif len(p) == 6 and p[3] == 'from':
@@ -362,23 +366,23 @@ def p_asignacion(p):
 
 def p_funcion_nativa(p):
     '''
-        funcion_nativa : CONCATENA IZQPAREN expresion COMA expresion DERPAREN
-                          | SUBSTRAER IZQPAREN expresion COMA expresion COMA expresion DERPAREN
+        funcion_nativa : CONCATENA IZQPAREN lista_expresiones DERPAREN
+                          | SUBSTRAER IZQPAREN lista_expresiones DERPAREN
                           | HOY IZQPAREN DERPAREN
                           | CONTAR IZQPAREN expresion DERPAREN
                           | SUMA IZQPAREN expresion DERPAREN
                           | CAST IZQPAREN expresion AS tipo_dato DERPAREN
     '''
     if p[1] == 'CONCATENA':
-        p[0] = {'accion': p[1], 'valor': p[3], 'valor2': p[5]}
+        p[0] = Funcion_Nativa(p[1],p[3])
     elif p[1] == 'SUBSTRAER':
-        p[0] = {'accion': p[1], 'valor': p[3], 'valor2': p[5], 'valor3': p[7]}
+        p[0] = Funcion_Nativa(p[1],p[3])
     elif p[1] == 'HOY':
-        p[0] = {'accion': p[1]}
+        p[0] = Funcion_Nativa(p[1],None)
     elif p[1] == 'CONTAR':
-        p[0] = {'accion': p[1], 'valor': p[3]}
+        p[0] = Funcion_Nativa(p[1],p[3])
     elif p[1] == 'SUMA':
-        p[0] = {'accion': p[1], 'valor': p[3]}
+        p[0] = Funcion_Nativa(p[1],p[3])
     elif p[1] == 'CAST':
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
     else:
@@ -414,9 +418,10 @@ def p_logicos(p):
                 | expresion OR_OP expresion
                 | NOT expresion
     '''
-    if p[1] == '&&': p[0] = p[1] and p[3]
-    elif p[1] == '||': p[0] = p[1] or p[3]
-    elif p[1] == '!': p[0] = not p[2]
+    if len(p) == 4:
+        p[0] = Logico(p[1], p[2], p[3])
+    elif len(p) == 3:
+        p[0] = Logico(None, p[1],p[2])
 
 def p_literal1(p):
     '''

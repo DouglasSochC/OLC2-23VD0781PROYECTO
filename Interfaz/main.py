@@ -87,7 +87,7 @@ def ejecutar_query():
         else:
             # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
             for elemento in salida:
-                respuesta = elemento.Ejecutar(None)
+                respuesta = elemento.Ejecutar(None, None)
                 if respuesta != None and isinstance(respuesta, Respuesta):
                     mensaje = respuesta.msg if respuesta.success else "ERROR: {}".format(respuesta.msg)
                     mostrar_salida_como_texto(mensaje)
