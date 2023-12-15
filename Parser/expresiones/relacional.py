@@ -3,7 +3,8 @@ from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoErro
 
 class Relacional(Expresion):
 
-    def __init__(self, expresion_izquierda: any, operador: str, expresion_derecha: any):
+    def __init__(self, id_nodo ,expresion_izquierda: any, operador: str, expresion_derecha: any):
+        self.id_nodo = id_nodo
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
         self.expresion_derecha = expresion_derecha
@@ -19,3 +20,15 @@ class Relacional(Expresion):
             return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
+
+    def GraficarArbol(self, id_padre):
+        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
+
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, self.operador)
+        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
+        union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
+
+        resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
+        resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
+
+        return label_operador + union_hijo_izquierdo + union_hijo_derecho + resultado_izquierda + resultado_derecha

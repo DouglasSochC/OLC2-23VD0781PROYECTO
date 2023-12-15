@@ -32,5 +32,4 @@ class Identificador(Expresion):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "IDENTIFICADOR")
         label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "I", self.valor)
         union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "I")
-        union_padre = "\"{}\"->\"{}\";\n".format(id_padre, self.id_nodo)
-        return label_encabezado + label_valor + union_hijo + union_padre
+        return label_encabezado + label_valor + union_hijo 

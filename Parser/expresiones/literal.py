@@ -4,8 +4,9 @@ from datetime import datetime
 
 class Literal(Expresion):
 
-    def __init__(self, value, tipado):
+    def __init__(self, id_nodo, value, tipado):
         super().__init__()
+        self.id_nodo = id_nodo
         self.value = value
         self.tipado = tipado
 
@@ -84,3 +85,9 @@ class Literal(Expresion):
                 return RetornoLiteral(str(self.value)[1:-1], TIPO_DATO.NVARCHAR)
             else:
                 return RetornoLiteral(self.value[1:-1], TIPO_DATO.NULL)
+
+    def GraficarArbol(self, id_padre):
+        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "LITERAL")
+        label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "I", self.value)
+        union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "I")
+        return label_encabezado + label_valor + union_hijo 
