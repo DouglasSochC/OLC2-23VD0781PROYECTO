@@ -1,6 +1,7 @@
 from ..abstract.instrucciones import Instruccion
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
 from ..abstract.retorno import TIPO_TOKEN, RetornoError
+from ..expresiones.identificador import Identificador
 from Funcionalidad.dml import DML
 
 class Select(Instruccion):
@@ -43,8 +44,13 @@ class Select(Instruccion):
 
             listado_condiciones.pop()
 
-
         dml = DML()
+
+        if self.lista_campos[0] == '*':
+            self.lista_campos.pop()
+            columnas = dml.obtener_todas_las_columnas_tabla(base_datos.valor, nombre_tabla)
+            for columna in columnas:
+                self.lista_campos.append(Identificador(-1, columna))
 
         # Se obtienen los indices que son validos segun las condiciones dadas
         lista_indices = dml.obtener_indices_segun_condiciones(base_datos.valor, nombre_tabla, listado_condiciones)

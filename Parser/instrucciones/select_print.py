@@ -1,5 +1,5 @@
 from ..abstract.instrucciones import Instruccion
-from ..abstract.retorno import RetornoError
+from ..abstract.retorno import RetornoError, RetornoLiteral
 
 class Select_Print(Instruccion):
 
@@ -13,8 +13,10 @@ class Select_Print(Instruccion):
                 res_ejecutar = expresion.Ejecutar(base_datos, entorno)
                 if isinstance(res_ejecutar, RetornoError):
                     return res_ejecutar.msg
-                else:
+                elif isinstance(res_ejecutar, RetornoLiteral):
                     return res_ejecutar.valor
+                else:
+                    return "ERROR: No se ha podido realizar el SELECT"
 
     def GraficarArbol(self, id_padre):
         return ""

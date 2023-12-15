@@ -240,37 +240,65 @@ class DML:
             contenido_xml = archivo.read()
 
         # Se formatea el XML a un diccionario para manejarlo de mejor forma
-        contenido = xmltodict.parse(contenido_xml)
+        contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
         tipo_dato = None
+
+        if isinstance(contenido, dict):
+            contenido = [contenido]
+
         # Se recorre fila por fila
-        for fila in contenido['producto']['registros']['fila']:
+        for fila in contenido:
 
             # Se ingresa a la fila la columna que se esta solicitando casteandolo al tipo de dato a utilizar
             if res_tipo_campo == 'int':
-                fila["temporal"] = int(fila[nombre_columna])
+                fila["temporal"] = int(fila[nombre_columna]) if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.INT
             elif res_tipo_campo == 'decimal':
-                fila["temporal"] = float(fila[nombre_columna])
+                fila["temporal"] = float(fila[nombre_columna]) if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.DECIMAL
             elif res_tipo_campo == 'bit':
-                fila["temporal"] = int(fila[nombre_columna])
+                fila["temporal"] = int(fila[nombre_columna]) if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.BIT
             elif res_tipo_campo == 'date':
-                fila["temporal"] =str(fila[nombre_columna])
+                fila["temporal"] =str(fila[nombre_columna]) if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.DATE
             elif res_tipo_campo == 'datetime':
-                fila["temporal"] =str(fila[nombre_columna])
+                fila["temporal"] =str(fila[nombre_columna]) if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.DATETIME
             elif res_tipo_campo == 'nchar':
-                fila["temporal"] = fila[nombre_columna]
+                fila["temporal"] = fila[nombre_columna] if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.NCHAR
             elif res_tipo_campo == 'nvarchar':
-                fila["temporal"] = fila[nombre_columna]
+                fila["temporal"] = fila[nombre_columna] if nombre_columna in fila else None
                 tipo_dato = TIPO_DATO.NVARCHAR
 
             respuesta_datos.append(fila)
 
         return Respuesta(True, tipo_dato, respuesta_datos)
+
+    def obtener_todas_las_columnas_tabla(self, nombre_bd:str, nombre_tabla: str):
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Lee el archivo XML
+        with open(path_tabla, 'r') as archivo:
+            contenido_xml = archivo.read()
+
+        respuesta = []
+        # Se formatea el XML a un diccionario para manejarlo de mejor forma
+        contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
+        for campo in contenido:
+            respuesta.append(campo['@name'])
+
+        return respuesta
 
     def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list):
 
@@ -322,8 +350,11 @@ class DML:
 
             # Se formatea el XML a un diccionario para manejarlo de mejor forma
             contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
-            for fila in contenido:
-                indices.append(fila['@index'])
+            if isinstance(contenido, list):
+                for fila in contenido:
+                    indices.append(fila['@index'])
+            else:
+                indices.append(contenido['@index'])
 
         return indices
 

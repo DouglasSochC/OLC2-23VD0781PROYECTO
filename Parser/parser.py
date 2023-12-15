@@ -253,17 +253,19 @@ def p_select(p):
     if len(p) == 4:
         p[0] = Select_Print(p[2])
     elif len(p) == 6 and p[2] == '*':
-        p[0] = p[1]
+        p[0] = Select(p[4], [p[2]], [])
     elif len(p) == 6 and p[3].lower() == 'from':
         p[0] = Select(p[4], p[2], [])
     elif len(p) == 6 and p[3] == '(':
+        # TODO
         p[0] = p[1]
     elif len(p) == 7:
+        # TODO
         p[0] = p[1]
     elif len(p) == 8 and p[2] == '(':
-        p[0] = p[1]
+        p[0] = Select(p[6], p[3], [])
     elif len(p) == 8 and p[2] == '*':
-        p[0] = p[1]
+        p[0] = Select(p[4], [p[2]], p[6])
     elif len(p) == 8 and p[3].lower() == 'from':
         p[0] = Select(p[4], p[2], p[6])
     elif len(p) == 8 and p[3] == '(':
@@ -271,7 +273,7 @@ def p_select(p):
     elif len(p) == 9:
         p[0] = p[1]
     elif len(p) == 10 and p[2] == '(':
-        p[0] = p[1]
+        p[0] = Select(p[6], p[3], p[8])
     elif len(p) == 10 and p[3] == '(':
         p[0] = p[1]
     elif len(p) == 11:
