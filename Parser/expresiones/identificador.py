@@ -17,7 +17,7 @@ class Identificador(Expresion):
         if tabla is not None:
 
             # Si es un SELECT, se obtendra toda la informacion del campo (self.valor) de la tabla
-            if tabla.tipo_token == TIPO_TOKEN.SELECT:
+            if tabla.tipo_token == TIPO_TOKEN.SELECT or tabla.tipo_token == TIPO_TOKEN.DELETE:
                 dml = DML()
                 res = dml.seleccionar_columna_tabla(base_datos.valor, tabla.valor, self.valor)
 

@@ -14,6 +14,7 @@ from .expresiones.logico import Logico
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
+from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
 
@@ -274,8 +275,12 @@ def p_update(p):
 def p_delete(p):
     '''
     delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
+           | DELETE FROM identificador PUNTOYCOMA
     '''
-    p[0] = p[1]
+    if len(p) == 7:
+        p[0] = Delete(p[3], p[5])
+    elif len(p) == 5:
+        p[0] = Delete(p[3], [])
 
 def p_if(p):
     '''

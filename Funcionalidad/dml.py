@@ -369,3 +369,38 @@ class DML:
                 respuesta_datos.append(fila['temporal'])
 
         return Respuesta(True, None, respuesta_datos)
+
+    ##############################################
+    ############### SECCION DELETE ###############
+    ##############################################
+
+    def eliminar_filas(self, nombre_bd:str, nombre_tabla: str, lista_indices: list):
+
+            if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+                return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+            elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+                return Respuesta(False, "Por favor, indique el nombre de la tabla")
+            elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+                return Respuesta(False, "No existe la base de datos seleccionada")
+            elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+                return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+            path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+            # Se obtiene la raiz del XML
+            tree = ET.parse(path_tabla)
+            root = tree.getroot()
+
+            cantidad_registros_eliminados = 0
+            for indice in lista_indices:
+
+                # Buscar y eliminar el registro con el indice especificado
+                registro_a_eliminar = root.find(f"./registros/fila[@index='{indice}']")
+                if registro_a_eliminar is not None:
+                    root.find('./registros').remove(registro_a_eliminar)
+                    cantidad_registros_eliminados += 1
+
+            # Guardar el resultado en un nuevo archivo XML
+            tree.write(path_tabla)
+
+            return Respuesta(True, "DELETE {}".format(cantidad_registros_eliminados))
