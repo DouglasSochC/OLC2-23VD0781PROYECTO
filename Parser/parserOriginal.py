@@ -5,7 +5,6 @@ from .abstract.retorno import *
 
 # Clases
 from .abstract.retorno import TIPO_DATO
-from .expresiones.accion import Accion
 from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
 from .expresiones.aritmetica import Aritmetica
@@ -15,8 +14,6 @@ from .expresiones.constrain import Constrain
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.declare import Declare
-from .instrucciones.alter import Alter
-
 
 contador = 0
 
@@ -206,23 +203,14 @@ def p_alter(p):
     '''
     alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Alter(id_nodo,p[1], p[2], p[3], p[4])
+    p[0] = p[1]
 
 def p_accion(p):
     '''
     accion : ADD COLUMN campos_table
            | DROP COLUMN identificador
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    if p[0] == 'ADD':
-        p[0] = Accion(id_nodo,p[1], p[2], p[3])
-    else:
-        p[0] = Accion(id_nodo,p[1], p[2], p[3])
+    p[0] = p[1]
 
 def p_drop(p):
     '''

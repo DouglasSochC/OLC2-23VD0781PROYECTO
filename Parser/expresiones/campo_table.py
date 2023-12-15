@@ -11,6 +11,8 @@ class Campo_Table:
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CAMPOS_TABLE")
+        if(id_padre != None):
+            print('el id del padre es',id_padre)
         resultado = label_encabezado
 
         for produccion in self.producciones:
