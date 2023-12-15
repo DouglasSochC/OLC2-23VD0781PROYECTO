@@ -2,8 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 from .util import Respuesta, validar_tipo_dato
 from dotenv import load_dotenv
-from datetime import datetime
-from Parser.abstract.retorno import TIPO_DATO
+from Parser.abstract.retorno import TIPO_DATO, RetornoRelacional
 import xmltodict
 
 load_dotenv()
@@ -104,7 +103,7 @@ class DML:
 
         return None
 
-    def __cumple_condicion(self, diccionario: dict, condiciones: list) -> bool:
+    def __cumple_condicion(self, condiciones: list) -> bool:
 
         # Cuando no hay condiciones que evaluar se retorna verdadero
         if len(condiciones) == 0:
@@ -117,22 +116,22 @@ class DML:
             if isinstance(condicion, tuple):
 
                 # Se obtiene la estructura de la condicion
-                clave = condicion[0]
+                op_izq = condicion[0]
                 operador = condicion[1]
-                valor = condicion[2]
+                op_der = condicion[2]
 
                 # Se verifica que la condicion se cumpla
-                if operador == '=' and diccionario.get(clave) != str(valor):
+                if operador == '=' and str(op_izq) != str(op_der):
                     cumple_condicion = False
-                if operador == '==' and diccionario.get(clave) != str(valor):
+                if operador == '==' and str(op_izq) != str(op_der):
                     cumple_condicion = False
-                elif operador == '>=' and float(diccionario.get(clave, 0)) < float(valor):
+                elif operador == '>=' and op_izq < op_der:
                     cumple_condicion = False
-                elif operador == '>' and float(diccionario.get(clave, 0)) <= float(valor):
+                elif operador == '>' and op_izq <= op_der:
                     cumple_condicion = False
-                elif operador == '<=' and float(diccionario.get(clave, 0)) > float(valor):
+                elif operador == '<=' and op_izq > op_der:
                     cumple_condicion = False
-                elif operador == '<' and float(diccionario.get(clave, 0)) >= float(valor):
+                elif operador == '<' and op_izq >= op_der:
                     cumple_condicion = False
 
             else:
@@ -277,15 +276,49 @@ class DML:
 
         return Respuesta(True, tipo_dato, respuesta_datos)
 
-    def aplicar_condiciones(self, data: list, lista_condiciones: list):
+    def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list):
+
+        auxiliar = {}
+        indices = []
+        for condicion in listado_condiciones:
+
+            # Se verifica si viene AND
+            if isinstance(condicion, RetornoRelacional):
+
+                # Se verifica que la operacion derecha sea lista igual que el de la izquierda. Se considera que ambas listas tienen las mismas dimensiones
+                if isinstance(condicion.operacion_derecha, list):
+                    if len(auxiliar) > 0:
+                        for llave, valor in enumerate(condicion.operacion_izquierda):
+                            auxiliar[valor['@index']].append((valor['temporal'], condicion.operador, condicion.operacion_derecha[llave]['temporal']))
+                    else:
+                        for llave, valor in enumerate(condicion.operacion_izquierda):
+                            auxiliar[valor['@index']] = ([(valor['temporal'], condicion.operador, condicion.operacion_derecha[llave]['temporal'])])
+                else:
+                    if len(auxiliar) > 0:
+                        for valor in condicion.operacion_izquierda:
+                            auxiliar[valor['@index']].append((valor['temporal'], condicion.operador, condicion.operacion_derecha))
+                    else:
+                        for valor in condicion.operacion_izquierda:
+                            auxiliar[valor['@index']] = ([(valor['temporal'], condicion.operador, condicion.operacion_derecha)])
+            else:
+                for llave in auxiliar:
+                    auxiliar[llave].append(condicion)
+
+        for clave, valor in auxiliar.items():
+            res_cumple_condicion = self.__cumple_condicion(valor)
+            if res_cumple_condicion:
+                indices.append(clave)
+
+        return indices
+
+    def sintetizar_condiciones(self, data: list, lista_indices: list):
 
         respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
 
         for fila in data:
 
-            # Se verifica que cumpla con las condiciones
-            se_cumple_condicion = self.__cumple_condicion(fila, lista_condiciones)
-            if se_cumple_condicion:
+            # Se identifica si el index esta dentro del listado de indices disponibles para mostrar
+            if fila["@index"] in lista_indices:
                 respuesta_datos.append(fila['temporal'])
 
         return Respuesta(True, None, respuesta_datos)
