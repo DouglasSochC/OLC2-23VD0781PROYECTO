@@ -1,6 +1,6 @@
 from ..abstract.instrucciones import Instruccion
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
-from ..abstract.retorno import TIPO_TOKEN, RetornoError
+from ..abstract.retorno import TIPO_TOKEN, RetornoError, RetornoLiteral
 from ..expresiones.identificador import Identificador
 from Funcionalidad.dml import DML
 
@@ -63,6 +63,11 @@ class Select(Instruccion):
 
             if isinstance(res_ejecutar, RetornoError):
                 return res_ejecutar.msg
+            if isinstance(res_ejecutar, RetornoLiteral):
+                resultado['encabezado'] = "NATIVA"
+                resultado['data'] = [res_ejecutar.valor]
+                temp_dimensional = 0
+                continue
 
             if temp_dimensional == -1:
                 temp_dimensional = len(res_ejecutar.lista)

@@ -243,12 +243,6 @@ def p_select(p):
                | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones FROM identificador WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
-               | SELECT identificador IZQPAREN DERPAREN PUNTOYCOMA
-               | SELECT identificador IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
-               | SELECT identificador IZQPAREN DERPAREN FROM identificador PUNTOYCOMA
-               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
-               | SELECT identificador IZQPAREN DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
-               | SELECT identificador IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
     '''
     if len(p) == 4:
         p[0] = Select_Print(p[2])
@@ -256,28 +250,14 @@ def p_select(p):
         p[0] = Select(p[4], [p[2]], [])
     elif len(p) == 6 and p[3].lower() == 'from':
         p[0] = Select(p[4], p[2], [])
-    elif len(p) == 6 and p[3] == '(':
-        # TODO
-        p[0] = p[1]
-    elif len(p) == 7:
-        # TODO
-        p[0] = p[1]
     elif len(p) == 8 and p[2] == '(':
         p[0] = Select(p[6], p[3], [])
     elif len(p) == 8 and p[2] == '*':
         p[0] = Select(p[4], [p[2]], p[6])
     elif len(p) == 8 and p[3].lower() == 'from':
         p[0] = Select(p[4], p[2], p[6])
-    elif len(p) == 8 and p[3] == '(':
-        p[0] = p[1]
-    elif len(p) == 9:
-        p[0] = p[1]
     elif len(p) == 10 and p[2] == '(':
         p[0] = Select(p[6], p[3], p[8])
-    elif len(p) == 10 and p[3] == '(':
-        p[0] = p[1]
-    elif len(p) == 11:
-        p[0] = p[1]
 
 def p_insert(p):
     '''
@@ -377,20 +357,20 @@ def p_funcion_nativa(p):
         funcion_nativa : CONCATENA IZQPAREN lista_expresiones DERPAREN
                           | SUBSTRAER IZQPAREN lista_expresiones DERPAREN
                           | HOY IZQPAREN DERPAREN
-                          | CONTAR IZQPAREN expresion DERPAREN
+                          | CONTAR IZQPAREN POR DERPAREN
                           | SUMA IZQPAREN expresion DERPAREN
                           | CAST IZQPAREN expresion AS tipo_dato DERPAREN
     '''
     if p[1] == 'CONCATENA':
-        p[0] = Funcion_Nativa(p[1],p[3])
+        p[0] = Funcion_Nativa(p[1], p[3])
     elif p[1] == 'SUBSTRAER':
-        p[0] = Funcion_Nativa(p[1],p[3])
+        p[0] = Funcion_Nativa(p[1], p[3])
     elif p[1] == 'HOY':
-        p[0] = Funcion_Nativa(p[1],None)
+        p[0] = Funcion_Nativa(p[1], None)
     elif p[1] == 'CONTAR':
-        p[0] = Funcion_Nativa(p[1],p[3])
+        p[0] = Funcion_Nativa(p[1], None)
     elif p[1] == 'SUMA':
-        p[0] = Funcion_Nativa(p[1],p[3])
+        p[0] = Funcion_Nativa(p[1], p[3])
     elif p[1] == 'CAST':
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
 

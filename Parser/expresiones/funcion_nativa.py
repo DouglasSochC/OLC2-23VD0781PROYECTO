@@ -1,4 +1,4 @@
-from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral
+from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral, RetornoIdentificador
 from ..abstract.expresiones import Expresion
 import datetime
 
@@ -10,53 +10,137 @@ class Funcion_Nativa(Expresion):
 
     def Ejecutar(self, base_datos, entorno):
 
-        if(self.expresiones is not None):
+        if self.expresiones is not None:
 
-            lista_exp = self.expresiones
+            if(self.accion == "CONCATENA"):
 
-        if(self.accion == "HOY"):
+                respuesta = None
+                alias = ""
 
-            fecha_hora_actual = datetime.datetime.now()
-            fecha_hora_formateada = fecha_hora_actual.strftime("%d-%m-%Y %H:%M:%S")
-            return RetornoLiteral(fecha_hora_formateada, TIPO_DATO.DATETIME)
+                for exp in self.expresiones:
 
-        elif(self.accion == "CONCATENA"):
+                    res_ejecutar = exp.Ejecutar(base_datos, entorno)
 
-            texto = ""
-            for exp in lista_exp:
-                aux = exp.Ejecutar(base_datos, entorno)
-                if(aux.tipado == TIPO_DATO.NCHAR or aux.tipado == TIPO_DATO.NVARCHAR):
-                    texto = texto + aux.valor
+                    # En el caso que encuentre un error durante el ejecutar
+                    if isinstance(res_ejecutar, RetornoError):
+                        return res_ejecutar
+
+                    if res_ejecutar.tipado == TIPO_DATO.NCHAR or res_ejecutar.tipado == TIPO_DATO.NVARCHAR:
+
+                        if respuesta is None and isinstance(res_ejecutar, RetornoLiteral):
+
+                            respuesta = res_ejecutar.valor
+                            alias += res_ejecutar.valor
+
+                        elif respuesta is None and isinstance(res_ejecutar, RetornoIdentificador):
+
+                            respuesta = res_ejecutar.lista
+                            alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
+
+                        elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, list):
+
+                            for valor in respuesta:
+                                valor['temporal'] = valor['temporal'] + res_ejecutar.valor
+                            alias += res_ejecutar.valor
+
+                        elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, list) is False:
+
+                            respuesta += res_ejecutar.valor
+                            alias += res_ejecutar.valor
+
+                        elif isinstance(res_ejecutar, RetornoIdentificador) and isinstance(respuesta, list):
+
+                            for llave, valor in enumerate(res_ejecutar.lista):
+                                respuesta[llave]['temporal'] = respuesta[llave]['temporal'] + valor['temporal']
+                            alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
+
+                        elif isinstance(res_ejecutar, RetornoIdentificador) and isinstance(respuesta, list) is False:
+
+                            for valor in res_ejecutar.lista:
+                                valor['temporal'] = respuesta + valor['temporal']
+                            respuesta = []
+                            respuesta = res_ejecutar.lista
+                            alias = "{" + "{}".format(res_ejecutar.identificador) + "}"
+
+                        elif isinstance(res_ejecutar, RetornoError):
+                            return res_ejecutar
+
+                    elif isinstance(res_ejecutar, RetornoIdentificador):
+                        return RetornoError("La concatenación no puede llevarse a cabo con la columna '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.identificador))
+                    elif isinstance(res_ejecutar, RetornoLiteral):
+                        return RetornoError("La concatenación no puede llevarse a cabo con el valor '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.valor))
+
+
+                if isinstance(respuesta, list):
+                    return RetornoIdentificador(alias, TIPO_DATO.NVARCHAR, respuesta)
                 else:
-                    return RetornoError("ERROR: No se puede realizar la operacion CONCATENA debido a que no son tipos de datos compatibles")
-            return RetornoLiteral(texto, TIPO_DATO.NVARCHAR)
+                    return RetornoLiteral(respuesta, TIPO_DATO.NVARCHAR)
 
-        elif(self.accion == "SUBSTRAER"):
+            elif(self.accion == "SUBSTRAER"):
 
-            texto = ""
-            if(len(lista_exp) == 3):
-                aux = lista_exp[0].Ejecutar(base_datos, entorno)
-                aux2 = lista_exp[1].Ejecutar(base_datos, entorno)
-                aux3 = lista_exp[2].Ejecutar(base_datos, entorno)
-                texto = aux.valor[aux2.valor:aux3.valor]
-                if(aux.tipado == TIPO_DATO.NCHAR or aux.tipado == TIPO_DATO.NVARCHAR)and(aux2.tipado == TIPO_DATO.INT or aux2.tipado == TIPO_DATO.BIT )and(aux3.tipado == TIPO_DATO.INT or aux3.tipado == TIPO_DATO.BIT):
-                    if(len(aux.valor) >= aux3.valor) and (aux3.valor > aux2.valor):
-                        texto = aux.valor[aux2.valor:aux3.valor]
-                    else:
-                        return RetornoError("ERROR: No se puede realizar la operacion SUBSTRAER debido a que los parametros no son de un tipo de dato compatible los parametros de inicio y fin de texto son erroneos")
-                else:
-                    return RetornoError("ERROR: No se puede realizar la operacion SUBSTRAER debido a que los parametros no son de un tipo de dato compatible con los parametros necesarios para esta funcion")
-            else:
-                return RetornoError("ERROR: No se puede realizar la operacion SUBSTRAER porque los parametros enviados son incorrectos")
+                respuesta = None
 
-            return RetornoLiteral(texto, TIPO_DATO.NVARCHAR)
+                if len(self.expresiones) != 3:
+                    return RetornoError("ERROR: No se puede realizar la operacion SUBSTRAER debido a que la cantidad de parametros no son adecuados (3).")
 
-        elif(self.accion == "CONTAR"):
+                listado = []
+                for exp in self.expresiones:
 
-            return RetornoLiteral(None, TIPO_DATO.INT)
+                    res_ejecutar = exp.Ejecutar(base_datos, entorno)
 
-        elif(self.accion == "SUMA"):
+                    # En el caso que encuentre un error durante el ejecutar
+                    if isinstance(res_ejecutar, RetornoError):
+                        return res_ejecutar
 
-            return RetornoLiteral(None, TIPO_DATO.DECIMAL)
+                    listado.append(res_ejecutar)
+
+                texto = listado[0]
+                inicial = listado[1]
+                longitud = listado[2]
+
+                if isinstance(texto, RetornoLiteral):
+
+                    if isinstance(inicial, RetornoLiteral) is False:
+                        return RetornoError("ERROR: El valor del inicial debe de ser entero")
+                    elif isinstance(longitud, RetornoLiteral)  is False:
+                        return RetornoError("ERROR: El valor de la longitud debe de ser entero")
+
+                    texto.valor = texto.valor[inicial.valor:longitud.valor]
+                    return RetornoLiteral(texto.valor, TIPO_DATO.NVARCHAR)
+
+                elif isinstance(texto, RetornoIdentificador):
+
+                    if isinstance(inicial, RetornoLiteral) is False:
+                        return RetornoError("ERROR: El valor del inicial debe de ser entero")
+                    elif isinstance(longitud, RetornoLiteral)  is False:
+                        return RetornoError("ERROR: El valor de la longitud debe de ser entero")
+
+                    for valor in texto.lista:
+                        valor['temporal'] = valor['temporal'][inicial.valor:longitud.valor]
+
+                    return RetornoIdentificador(texto.identificador, TIPO_DATO.NVARCHAR, texto.lista)
+
+                return RetornoError("ERROR: Ha ocurrido un error al realizar la operacion SUBSTRAER.")
+
+            # elif(self.accion == "CONTAR"):
+
+            #     return RetornoLiteral(None, TIPO_DATO.INT)
+
+            # elif(self.accion == "SUMA"):
+
+            #     return RetornoLiteral(None, TIPO_DATO.DECIMAL)
+
+            # elif(self.accion == "CAS"):
+
+            #     return RetornoLiteral(None, TIPO_DATO.DECIMAL)
+
+        else:
+
+            if(self.accion == "HOY"):
+
+                fecha_hora_actual = datetime.datetime.now()
+                fecha_hora_formateada = fecha_hora_actual.strftime("%d-%m-%Y %H:%M:%S")
+                return RetornoLiteral(fecha_hora_formateada, TIPO_DATO.DATETIME)
+
 
         return RetornoError("ERROR: Ha ocurrido un error al realizar la funcion nativa")
