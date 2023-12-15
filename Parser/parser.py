@@ -17,6 +17,7 @@ from .instrucciones.select import Select
 from .instrucciones.declare import Declare
 from .instrucciones.alter import Alter
 from .instrucciones.truncate import Truncate
+from .instrucciones.drop import Drop
 
 
 contador = 0
@@ -232,7 +233,10 @@ def p_drop(p):
          | DROP PROCEDURE identificador PUNTOYCOMA
          | DROP FUNCTION identificador PUNTOYCOMA
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Drop(id_nodo,p[1], p[2], p[3])
 
 def p_truncate(p):
     '''
