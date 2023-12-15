@@ -11,8 +11,8 @@ class Select(Instruccion):
         self.lista_condiciones = lista_condiciones
 
     # TODO: Falta implementar lo siguiente
-        # Implementar el alias 'AS' en cada columna
         # Implementar BETWEEN
+        # Implementar funciones nativas en el donde se obtienen las columnas y en donde se realiza las condiciones (WHERE)
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
@@ -29,7 +29,7 @@ class Select(Instruccion):
 
         # Se obtienen la lista de condiciones que se debe de aplicar al SELECT y se almacenan en la variable 'listado_condiciones'
         listado_condiciones = []
-        if (len(self.lista_condiciones) > 0):
+        if len(self.lista_condiciones) > 0:
             for condicion in self.lista_condiciones:
 
                 res = condicion.Ejecutar(base_datos, nuevo_entorno)
@@ -63,7 +63,8 @@ class Select(Instruccion):
             elif temp_dimensional != len(res_ejecutar.lista):
                 return "ERROR: No se puede realizar el 'SELECT' debido a problemas con las dimensionales de cada campo solicitado"
 
-            resultado['encabezado'].append(res_ejecutar.identificador)
+            identificador = res_ejecutar.identificador if res_ejecutar.alias is None else res_ejecutar.alias
+            resultado['encabezado'].append(identificador)
             res_aplicar_condiciones = dml.sintetizar_condiciones(res_ejecutar.lista, lista_indices)
             if (len(resultado['data']) == 0):
                 for valor in res_aplicar_condiciones.lista:

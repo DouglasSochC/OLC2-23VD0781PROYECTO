@@ -9,7 +9,8 @@ class TIPO_DATO(Enum):
     DATETIME = 4,
     NCHAR = 5,
     NVARCHAR = 6,
-    NULL = 7
+    NULL = 7,
+    BOOLEAN = 8
 
 @unique
 class TIPO_TOKEN(Enum) :

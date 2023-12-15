@@ -105,10 +105,6 @@ class DML:
 
     def __cumple_condicion(self, condiciones: list) -> bool:
 
-        # Cuando no hay condiciones que evaluar se retorna verdadero
-        if len(condiciones) == 0:
-            return True
-
         cumple_condicion = True
 
         for condicion in condiciones:
@@ -278,6 +274,16 @@ class DML:
 
     def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list):
 
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
         auxiliar = {}
         indices = []
         for condicion in listado_condiciones:
@@ -304,10 +310,20 @@ class DML:
                 for llave in auxiliar:
                     auxiliar[llave].append(condicion)
 
-        for clave, valor in auxiliar.items():
-            res_cumple_condicion = self.__cumple_condicion(valor)
-            if res_cumple_condicion:
-                indices.append(clave)
+        if len(auxiliar) > 0:
+            for clave, valor in auxiliar.items():
+                res_cumple_condicion = self.__cumple_condicion(valor)
+                if res_cumple_condicion:
+                    indices.append(clave)
+        else:
+            # Lee el archivo XML
+            with open(path_tabla, 'r') as archivo:
+                contenido_xml = archivo.read()
+
+            # Se formatea el XML a un diccionario para manejarlo de mejor forma
+            contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
+            for fila in contenido:
+                indices.append(fila['@index'])
 
         return indices
 
