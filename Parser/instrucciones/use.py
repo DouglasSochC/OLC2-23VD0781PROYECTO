@@ -1,7 +1,8 @@
 from ..abstract.instrucciones import Instruccion
 
 class Use(Instruccion):
-    def __init__(self, identificador: any):
+    def __init__(self, id_nodo: int,  identificador: any):
+        self.id_nodo = id_nodo
         self.identificador = identificador
         pass
 
@@ -9,4 +10,6 @@ class Use(Instruccion):
         base_datos.valor = "bd1"
     
     def GraficarArbol(self, id_padre):
-        pass
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "USE")
+        constr_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        return label_encabezado + constr_identificador
