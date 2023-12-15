@@ -14,6 +14,7 @@ from .expresiones.logico import Logico
 from .expresiones.campo_table import Campo_Table
 from .expresiones.constrain import Constrain
 from .expresiones.funcion_nativa import Funcion_Nativa
+from .expresiones.asignacion import Asignacion
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.declare import Declare
@@ -404,10 +405,14 @@ def p_asignacion(p):
         asignacion : expresion IGUAL expresion
                    | SET expresion
     '''
-    if len(p) == 4:
-        p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    if len(p)==4:
+        p[0] = Asignacion(id_nodo,p[1], p[2], p[3])
     else:
-        p[0] = {'accion': p[1], 'valor': p[2]}
+        #TODO: PROBAR SET EXPRESION
+        p[0] = Asignacion(id_nodo,p[1], p[2]) 
 
 def p_funcion_nativa(p):
     '''
@@ -422,8 +427,10 @@ def p_funcion_nativa(p):
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     if p[1] == 'CONCATENA':
+       #TODO: CAMBIAR PRODUCCION DE CONTATENA
        pass
     elif p[1] == 'SUBSTRAER':
+         #TODO: CAMBIAR PRODUCCION DE SUBSTRAER
         pass
     elif p[1] == 'HOY':
         p[0] = Funcion_Nativa(id_nodo,p[1])
@@ -432,6 +439,8 @@ def p_funcion_nativa(p):
     elif p[1] == 'SUMA':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'CAST':
+        #TODO: REVISAR PRODUCCION DE CAST
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], p[5])
         pass
     else:
        pass
