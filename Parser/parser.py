@@ -386,7 +386,11 @@ def p_expresion(p):
                 | identificador
                 | alias
     '''
-    p[0] = p[1]
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
+
 
 def p_alias(p):
     '''
@@ -422,7 +426,7 @@ def p_funcion_nativa(p):
     elif p[1] == 'SUBSTRAER':
         pass
     elif p[1] == 'HOY':
-        pass
+        p[0] = Funcion_Nativa(id_nodo,p[1])
     elif p[1] == 'CONTAR':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'SUMA':
