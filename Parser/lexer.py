@@ -100,9 +100,7 @@ tokens = [
     'PUNTO',
     'ARROBA',
     'IGUAL',
-    'PUNTOYCOMA',
-    'COMENTARIO_MULTILINEA',
-    'COMENTARIO_SIMPLE'
+    'PUNTOYCOMA'
 ] + list(reservadas.values())
 
 # Caracteres ignorados
