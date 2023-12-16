@@ -16,6 +16,7 @@ from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
 from .instrucciones.drop import Drop
+from .instrucciones.truncate import Truncate
 from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
@@ -66,7 +67,7 @@ def p_instruccion(p):
 
 def p_asignacion(p):
     '''
-    asignacion  : SET expresion PUNTOYCOMA 
+    asignacion  : SET expresion PUNTOYCOMA
     '''
     #p[0] =
 
@@ -209,7 +210,7 @@ def p_truncate(p):
     '''
     truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
-    p[0] = p[1]
+    p[0] = Truncate(p[3])
 
 def p_lista_sentencias_dml(p):
     '''
@@ -337,7 +338,7 @@ def p_expresion(p):
                 | asignacion_exp
                 | identificador
                 | alias
-                | IF IZQPAREN lista_expresiones DERPAREN 
+                | IF IZQPAREN lista_expresiones DERPAREN
     '''
     if len(p) == 4:
         p[0] = p[2]
@@ -361,10 +362,9 @@ def p_alias(p):
 
 def p_asignacion_exp(p):
     '''
-        asignacion_exp : expresion IGUAL expresion
+        asignacion_exp : ID IGUAL expresion
     '''
     p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
-    
 
 def p_funcion_nativa(p):
     '''
