@@ -26,6 +26,7 @@ from .instrucciones.truncate import Truncate
 from .instrucciones.drop import Drop
 from .instrucciones.exec import Exec
 from .instrucciones.insert import Insert
+from .instrucciones.instruccionGeneral import InstruccionGeneral
 
 
 contador = 0
@@ -70,7 +71,11 @@ def p_instruccion(p):
                 | llamar_procedure
                 | usar_db
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash("IG")) + contador)
+    contador += 1
+    p[0] = InstruccionGeneral(id_nodo,p[1])
+    
 
 def p_usar_db(p):
     '''
@@ -348,6 +353,7 @@ def p_update(p):
     '''
     update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
     '''
+   
     p[0] = p[1]
 
 def p_delete(p):
