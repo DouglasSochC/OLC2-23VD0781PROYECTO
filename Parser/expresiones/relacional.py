@@ -17,5 +17,9 @@ class Relacional(Expresion):
             return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.lista)
         elif isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoLiteral):
             return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
+        elif isinstance(exp_izq, RetornoError):
+            return exp_izq
+        elif isinstance(exp_der, RetornoError):
+            return exp_der
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
