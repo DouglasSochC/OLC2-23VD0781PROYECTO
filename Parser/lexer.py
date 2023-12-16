@@ -100,7 +100,9 @@ tokens = [
     'PUNTO',
     'ARROBA',
     'IGUAL',
-    'PUNTOYCOMA'
+    'PUNTOYCOMA',
+    'COMENTARIO_MULTILINEA',
+    'COMENTARIO_SIMPLE'
 ] + list(reservadas.values())
 
 # Caracteres ignorados
@@ -154,10 +156,10 @@ def t_ID(t):
 
 # Comentario de múltiples líneas /* .. */
 def t_COMENTARIO_MULTILINEA(t):
-    r'/\(.|\n)?\*/'
+    r'/\*(.|\n)*?\*/'
     t.lexer.lineno += t.value.count('\n')
 
-# Comentario simple // ...
+# Comentario simple -- ...
 def t_COMENTARIO_SIMPLE(t):
     r'\-\-.*\n'
     t.lexer.lineno += 1
