@@ -13,7 +13,8 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-variable = 3+3
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20), tipoCartera BIT,tipoBilletera INT PRIMARY KEY, tipo NVARCHAR(255);
+
 ''')
 '''
 DECLARE tabla1.columna INT;
