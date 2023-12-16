@@ -15,6 +15,7 @@ from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
+from .instrucciones.drop import Drop
 from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
@@ -195,7 +196,7 @@ def p_drop(p):
          | DROP PROCEDURE identificador PUNTOYCOMA
          | DROP FUNCTION identificador PUNTOYCOMA
     '''
-    p[0] = p[1]
+    p[0] = Drop(p[2].lower(), p[3])
 
 def p_truncate(p):
     '''

@@ -84,7 +84,7 @@ class DDL:
 
             # Se agrega los campos que lleva la tabla
             for param in parametros:
-                
+
                 # Se castean todos los atributos a 'str' para que puedan ser almacenados
                 atributos = {clave: str(valor) for clave, valor in param.items()}
 
@@ -145,6 +145,8 @@ class DDL:
             return Respuesta(False, "Por favor, indique el nombre de la tabla")
         elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
             return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
 
         # Se obtienen todas las tablas existentes de la base de datos
         tablas = os.listdir(self.__path_tablas.format(nombre_bd))
