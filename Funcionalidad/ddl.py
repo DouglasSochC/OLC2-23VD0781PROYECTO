@@ -3,6 +3,7 @@ import shutil
 import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 from .util import Respuesta
+import xmltodict
 
 load_dotenv()
 
@@ -168,6 +169,84 @@ class DDL:
 
         os.remove(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml")
         return Respuesta(True, "La tabla '{}' ha sido eliminada correctamente.".format(nombre_tabla))
+
+    ##############################################
+    ############## SECCION TRUNCATE ##############
+    ##############################################
+
+    def truncate_tabla(self, nombre_bd: str, nombre_tabla_truncar:str):
+        '''
+        Elimina toda la informacion que posee una tabla de una base de datos
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_tabla_truncar (str): Nombre de la tabla
+
+        Returns:
+            Respuesta
+        '''
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla_truncar is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla_truncar + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla_truncar))
+
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla_truncar + ".xml"
+
+        # Se obtienen todos los ID's que contiene la tabla
+        with open(path_tabla, 'r') as archivo:
+            contenido_xml = archivo.read()
+
+        # Se formatea el XML a un diccionario para manejarlo de mejor forma
+        registros = xmltodict.parse(contenido_xml)[nombre_tabla_truncar]['registros']['fila']
+        if isinstance(registros, dict):
+            registros = [registros]
+
+        # Se obtienen todas las tablas existentes de la base de datos
+        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+
+        # Se evalua tabla por tabla para verificar que la informacion a eliminar no este enlazada a otra tabla a traves de una llave foranea
+        for tabla in tablas:
+
+            # Se obtiene el nombre de la tabla actual que se esta analizando
+            tabla_actual = tabla.rsplit('.', 1)[0]
+            if tabla_actual == nombre_tabla_truncar:
+                continue
+
+            # Se busca el campo que tenga como llave foranea la tabla donde se eliminara toda la informacion, en el caso que no lo tenga se sigue analizando la siguiente tabla
+            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root = tree.getroot()
+            campo = root.find(".//estructura/campo[@fk_table='" + nombre_tabla_truncar + "']")
+            if campo is None:
+                continue
+
+            for contenido in registros:
+                es_utilizado = root.find(".//registros/fila[" + campo.get("name") + "='" + contenido[campo.get("fk_attribute")] + "']")
+                if es_utilizado is not None:
+                    return Respuesta(False, "No es posible truncar la tabla '{}' ya que contiene datos referenciados por la tabla '{}'.".format(nombre_tabla_truncar, tabla_actual))
+
+        # Parsear el archivo XML
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        # Encontrar el elemento <registros>
+        registros_elemento = root.find('registros')
+
+        # Verificar si el elemento <registros> existe
+        if registros_elemento is not None:
+            # Eliminar todo el contenido del elemento <registros>
+            for fila_elemento in registros_elemento.findall('fila'):
+                registros_elemento.remove(fila_elemento)
+
+        # Guardar los cambios de nuevo en el archivo
+        tree.write(path_tabla)
+
+        # os.remove(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml")
+        return Respuesta(True, "La tabla '{}' ha sido truncada exitosamente.".format(nombre_tabla_truncar))
 
     ##############################################
     ########### SECCION VALIDACIONES #############

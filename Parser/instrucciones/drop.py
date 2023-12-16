@@ -7,10 +7,13 @@ class Drop(Instruccion):
         self.tipo_eliminacion = tipo_eliminacion
         self.identificador = identificador
 
+    # TODO: Falta implementar lo siguiente
+        # Eliminar un procedimiento
+        # Eliminar una funcion
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("DELETE")
+            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("DROP")
 
         nombre = self.identificador.Ejecutar(base_datos, entorno).identificador
 

@@ -6,7 +6,6 @@ class BaseDatosWrapper:
 from Parser.parser import parse
 
 # Utilidades
-from Funcionalidad.util import Respuesta
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
 
 ts_global = TablaDeSimbolos()

@@ -12,10 +12,11 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
 
+# TRUNCATE producto;
 '''
-DELETE FROM producto WHERE id < 110;
-DELETE FROM producto WHERE id == 110;
-DELETE FROM producto;
+TRUNCATE TABLE tipo_producto; -- ERROR debido a una referencia
+TRUNCATE TABLE producto; -- EXITO
+TRUNCATE TABLE tipo_producto; -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones
