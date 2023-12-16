@@ -16,6 +16,7 @@ from .expresiones.campo_table import Campo_Table
 from .expresiones.constrain import Constrain
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .expresiones.listaExpresiones import ListaExpresiones
+from .expresiones.expresionGeneral import ExpresionGeneral
 from .expresiones.asignacion import Asignacion
 from .instrucciones.use import Use
 from .instrucciones.select import Select
@@ -24,6 +25,7 @@ from .instrucciones.alter import Alter
 from .instrucciones.truncate import Truncate
 from .instrucciones.drop import Drop
 from .instrucciones.exec import Exec
+from .instrucciones.insert import Insert
 
 
 contador = 0
@@ -50,6 +52,7 @@ def p_instrucciones_lista(p):
     '''
     instrucciones : instrucciones instruccion
     '''
+    
     p[1].append(p[2])
     p[0] = p[1]
 
@@ -336,7 +339,10 @@ def p_insert(p):
     '''
     insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Insert(id_nodo, p[1], p[3], p[5])
 
 def p_update(p):
     '''
@@ -379,15 +385,12 @@ def p_lista_expresiones(p):
         lista_expresiones : lista_expresiones COMA expresion
                          | expresion
     '''
-    global contador
-    id_nodo = str(abs(hash("LISTA_EXPRESIONES")) + contador)
-    contador += 1
-
+    
     if len(p) == 4:
-        p[1].agregar_expresion(p[3])
+        p[1].append(p[3])
         p[0] = p[1]
     else:
-        p[0] = ListaExpresiones(id_nodo, p[1])
+        p[0] = [p[1]]
 
 def p_expresion(p):
     '''
@@ -401,10 +404,13 @@ def p_expresion(p):
                 | identificador
                 | alias
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 4:
-        p[0] = p[2]
+        p[0] = ExpresionGeneral(id_nodo,p[2])
     else:
-        p[0] = p[1]
+        p[0] = ExpresionGeneral(id_nodo,p[1])
 
 
 def p_alias(p):

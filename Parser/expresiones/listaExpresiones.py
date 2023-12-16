@@ -1,23 +1,22 @@
 from ..abstract.expresiones import Expresion
 
 class ListaExpresiones(Expresion):
-    def __init__(self, id_nodo,  *expresiones):
+    def __init__(self,id_nodo, *expresiones):
         self.id_nodo = id_nodo
         self.expresiones = expresiones
-        
-    def agregar_expresion(self, expresion):
-        self.expresiones.append(expresion)
+
     
     def Ejecutar(self, base_datos, entorno):
-        print("Lista Expresiones")
+        print("Insert")
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "LISTA_EXPRESIONES")
-        resultado = label_encabezado
+    def GraficarArbol(self, id_padre=None):
+        id_nodo_actual = self.id_nodo or (id_padre + "_ListaExpresiones" if id_padre is not None else "ListaExpresiones")
 
-        for expresion in self.expresiones:
-            label_expresion = expresion.GraficarArbol(self.id_nodo)
-            union_expresion = "\"{}\"->\"{}\";\n".format(self.id_nodo, expresion.id_nodo)
-            resultado += label_expresion + union_expresion
+        label_lista_expresiones = "\"{}\"[label=\"ListaExpresiones\"];\n".format(id_nodo_actual)
+        
+        union_hijo = ""
 
-        return resultado
+        for i, expresion in enumerate(self.expresiones):
+            union_hijo += "\"{}\"->\"{}\";\n".format(id_nodo_actual, expresion.GraficarArbol(id_nodo_actual + f"_exp{i + 1}"))
+
+        return label_lista_expresiones + union_hijo
