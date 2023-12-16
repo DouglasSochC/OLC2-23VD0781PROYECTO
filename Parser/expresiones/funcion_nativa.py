@@ -4,7 +4,8 @@ import datetime
 
 class Funcion_Nativa(Expresion):
 
-    def __init__(self, accion, expresiones):
+    def __init__(self,id_nodo, accion, expresiones):
+        self.id_nodo = id_nodo
         self.accion = accion
         self.expresiones = expresiones
 
@@ -144,3 +145,21 @@ class Funcion_Nativa(Expresion):
 
 
         return RetornoError("ERROR: Ha ocurrido un error al realizar la funcion nativa")
+    
+
+    def GraficarArbol(self, id_padre):
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "FUNCION NATIVA")
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "A", self.accion)
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "A")
+        resultado_exp = ""
+        if(self.expresiones is None):
+            return label_encabezado + label_operador + union_enca_operador
+        
+        for exp in self.expresiones:
+            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
+            resultado_izquierda = exp.GraficarArbol(self.id_nodo)
+            resultado_exp += union_hijo_izquierdo + resultado_izquierda 
+      
+        return label_encabezado+ label_operador + union_enca_operador+ resultado_exp
+
+     

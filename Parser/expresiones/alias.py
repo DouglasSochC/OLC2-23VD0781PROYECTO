@@ -21,4 +21,14 @@ class Alias(Expresion):
             return RetornoIdentificador(res_ejecutar.identificador, res_ejecutar.tipado, res_ejecutar.lista, self.alias)
 
     def GraficarArbol(self, id_padre):
-        pass
+        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
+        
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "ALIAS")
+        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion.id_nodo)
+        
+        resultado_izquierda = self.expresion.GraficarArbol(id_padre)
+
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "as", self.alias)
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "as")
+        
+        return label_encabezado + union_hijo_izquierdo+resultado_izquierda +label_operador+union_enca_operador
