@@ -3,7 +3,8 @@ from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoErro
 
 class Aritmetica(Expresion):
 
-    def __init__(self, expresion_izquierda: any, operador: str, expresion_derecha: any):
+    def __init__(self,id_nodo, expresion_izquierda: any, operador: str, expresion_derecha: any):
+        self.id_nodo = id_nodo
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
         self.expresion_derecha = expresion_derecha
@@ -175,4 +176,16 @@ class Aritmetica(Expresion):
         return RetornoError("ERROR: Ha ocurrido un error al realizar una operación aritmetica.")
 
     def GraficarArbol(self, id_padre):
-        return ""
+        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "ARITMETICA")
+
+        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
+       
+        union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
+        
+        resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
+        resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
+        
+        return label_encabezado + union_hijo_izquierdo  + resultado_izquierda + label_operador +union_enca_operador +resultado_derecha + union_hijo_derecho

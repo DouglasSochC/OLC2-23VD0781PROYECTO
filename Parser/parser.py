@@ -9,6 +9,7 @@ from .expresiones.tipo_dato import Tipo_Dato
 from .expresiones.identificador import Identificador
 from .expresiones.alias import Alias
 from .expresiones.aritmetica import Aritmetica
+from .expresiones.asignacion import Asignacion
 from .expresiones.relacional import Relacional
 from .expresiones.logico import Logico
 from .expresiones.funcion_nativa import Funcion_Nativa
@@ -19,7 +20,7 @@ from .instrucciones.drop import Drop
 from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
-
+from .expresiones.listasGrafico.expresioniGenera import ExpresionGeneral
 contador = 0
 
 # Operadores de precedencia
@@ -339,12 +340,15 @@ def p_expresion(p):
                 | alias
                 | IF IZQPAREN lista_expresiones DERPAREN 
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 4:
-        p[0] = p[2]
+        p[0] = ExpresionGeneral(id_nodo,p[2])
     elif len(p) == 5:
-        p[0] = p[3]
+        p[0] = ExpresionGeneral(id_nodo,p[3])
     else:
-        p[0] = p[1]
+        p[0] = ExpresionGeneral(id_nodo,p[1])
 
 def p_alias(p):
     '''
@@ -363,7 +367,10 @@ def p_asignacion_exp(p):
     '''
         asignacion_exp : expresion IGUAL expresion
     '''
-    p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Asignacion(id_nodo,p[1], p[2], p[3])
     
 
 def p_funcion_nativa(p):
@@ -375,16 +382,19 @@ def p_funcion_nativa(p):
                           | SUMA IZQPAREN expresion DERPAREN
                           | CAST IZQPAREN expresion AS tipo_dato DERPAREN
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if p[1] == 'CONCATENA':
-        p[0] = Funcion_Nativa(p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'SUBSTRAER':
-        p[0] = Funcion_Nativa(p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'HOY':
-        p[0] = Funcion_Nativa(p[1], None)
+        p[0] = Funcion_Nativa(id_nodo,p[1], None)
     elif p[1] == 'CONTAR':
-        p[0] = Funcion_Nativa(p[1], None)
+        p[0] = Funcion_Nativa(id_nodo,p[1], None)
     elif p[1] == 'SUMA':
-        p[0] = Funcion_Nativa(p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'CAST':
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
 
@@ -395,7 +405,10 @@ def p_aritmeticos(p):
                     | expresion POR expresion
                     | expresion DIVIDIDO expresion
     '''
-    p[0] = Aritmetica(p[1], p[2], p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Aritmetica(id_nodo,p[1], p[2], p[3])
 
 def p_relacionales(p):
     '''
@@ -407,10 +420,13 @@ def p_relacionales(p):
                     | expresion MAYORIGUAL expresion
                     | BETWEEN expresion AND expresion
     '''
+    global contador
+    id_nodo = str(abs(hash("relacionalesOLC2")) + contador)
+    contador += 1
     if len(p) == 4:
-        p[0] = Relacional(p[1], p[2], p[3])
+        p[0] = Relacional(id_nodo,p[1], p[2], p[3])
     elif len(p) == 5:
-        p[0] = Relacional(p[2], p[1], p[4])
+        p[0] = Relacional(id_nodo,p[2], p[1], p[4])
 
 def p_logicos(p):
     '''
@@ -418,43 +434,61 @@ def p_logicos(p):
                 | expresion OR_OP expresion
                 | NOT expresion
     '''
+    global contador
+    id_nodo = str(abs(hash("logicosOLC2")) + contador)
+    contador += 1
     if len(p) == 4:
-        p[0] = Logico(p[1], p[2], p[3])
+        p[0] = Logico(id_nodo,p[1], p[2], p[3])
     elif len(p) == 3:
-        p[0] = Logico(None, p[1],p[2])
+        p[0] = Logico(id_nodo,None, p[1],p[2])
 
 def p_literal1(p):
     '''
         literal : LNUMERO
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if((len(str(p[1])) == 1) and(str(p[1]) == "0" or str(p[1]) == "1")):
-        p[0] = Literal(p[1], TIPO_DATO.BIT or TIPO_DATO.INT)
+        p[0] = Literal(id_nodo,p[1], TIPO_DATO.BIT or TIPO_DATO.INT)
     else:
-        p[0] = Literal(p[1], TIPO_DATO.INT)
+        p[0] = Literal(id_nodo,p[1], TIPO_DATO.INT)
 
 def p_literal2(p):
     '''
         literal : LDECIMAL
     '''
-    p[0] = Literal(p[1], TIPO_DATO.DECIMAL)
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DECIMAL)
 
 def p_literal3(p):
     '''
         literal : LFECHA
     '''
-    p[0] = Literal(p[1], TIPO_DATO.DATE)
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DATE)
 
 def p_literal4(p):
     '''
         literal : LFECHAHORA
     '''
-    p[0] = Literal(p[1], TIPO_DATO.DATETIME)
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DATETIME)
 
 def p_literal5(p):
     '''
         literal : LVARCHAR
     '''
-    p[0] = Literal(p[1], TIPO_DATO.NCHAR or TIPO_DATO.NVARCHAR)
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Literal(id_nodo,p[1], TIPO_DATO.NCHAR or TIPO_DATO.NVARCHAR)
 
 def p_identificador(p):
     '''
