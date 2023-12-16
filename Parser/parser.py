@@ -14,6 +14,7 @@ from .expresiones.logico import Logico
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
+from .instrucciones.insert import Insert
 from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
@@ -264,7 +265,7 @@ def p_insert(p):
     '''
     insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    p[0] = p[1]
+    p[0] = Insert(p[3], p[5], p[9])
 
 def p_update(p):
     '''

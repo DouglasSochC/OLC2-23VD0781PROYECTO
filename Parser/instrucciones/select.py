@@ -13,7 +13,7 @@ class Select(Instruccion):
 
     # TODO: Falta implementar lo siguiente
         # Implementar BETWEEN
-        # Implementar funciones nativas en el donde se obtienen las columnas y en donde se realiza las condiciones (WHERE)
+        # Implementar las siguientes funciones nativas CONTAR, SUMA, CAS
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":

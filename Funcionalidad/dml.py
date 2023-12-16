@@ -142,7 +142,7 @@ class DML:
     ############### SECCION INSERT ###############
     ##############################################
 
-    def insertar_registro_tabla(self, nombre_bd:str, nombre_tabla: str, tupla: list) -> str:
+    def insertar_registro_tabla(self, nombre_bd:str, nombre_tabla: str, tupla: list) -> Respuesta:
         '''
         Ingresa una tupla en una tabla
 
