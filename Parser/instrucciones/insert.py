@@ -12,7 +12,7 @@ class Insert(Instruccion):
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("DELETE")
+            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("INSERT")
 
         # Se obtiene el nombre de la tabla
         nombre_tabla = self.identificador.Ejecutar(base_datos, entorno).identificador

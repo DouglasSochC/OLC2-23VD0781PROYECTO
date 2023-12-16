@@ -73,7 +73,7 @@ def p_asignacion(p):
 
 def p_usar_db(p):
     '''
-    usar_db : USE identificador PUNTOYCOMA
+    usar_db : USE LVARCHAR PUNTOYCOMA
     '''
     p[0] = Use(p[2])
 

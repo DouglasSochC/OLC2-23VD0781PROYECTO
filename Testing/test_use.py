@@ -9,13 +9,12 @@ from Parser.parser import parse
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
 
 ts_global = TablaDeSimbolos()
-base_datos = BaseDatosWrapper("bd1")
+base_datos = BaseDatosWrapper("")
 instrucciones = parse(
-
 '''
-DELETE FROM producto WHERE id < 110;
-DELETE FROM producto WHERE id == 110;
-DELETE FROM producto;
+INSERT INTO producto (id, nombre) VALUES (250, "Dummy"); -- ERROR: No se ha seleccionado la BD
+USE "bd1"; -- EXITO
+INSERT INTO producto (id, nombre) VALUES (250, "Dummy"); -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

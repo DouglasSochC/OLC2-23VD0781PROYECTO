@@ -10,7 +10,7 @@ class Truncate(Instruccion):
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("SELECT")
+            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("TRUNCATE")
 
         # Se obtiene el nombre de la tabla
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
