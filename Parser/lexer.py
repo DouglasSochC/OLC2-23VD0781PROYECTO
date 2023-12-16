@@ -152,6 +152,16 @@ def t_ID(t):
     t.type = reservadas.get(t.value.lower(), 'ID')
     return t
 
+# Comentario de múltiples líneas /* .. */
+def t_COMENTARIO_MULTILINEA(t):
+    r'/\(.|\n)?\*/'
+    t.lexer.lineno += t.value.count('\n')
+
+# Comentario simple // ...
+def t_COMENTARIO_SIMPLE(t):
+    r'\-\-.*\n'
+    t.lexer.lineno += 1
+
 # Ignored token with an action associated with it
 def t_ignore_newline(t):
     r'\n+'

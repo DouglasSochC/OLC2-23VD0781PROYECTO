@@ -60,8 +60,15 @@ def p_instruccion(p):
                 | sentencia_dml
                 | llamar_procedure
                 | usar_db
+                | asignacion
     '''
     p[0] = p[1]
+
+def p_asignacion(p):
+    '''
+    asignacion  : SET expresion PUNTOYCOMA 
+    '''
+    #p[0] =
 
 def p_usar_db(p):
     '''
@@ -327,12 +334,15 @@ def p_expresion(p):
                 | literal
                 | funcion_nativa
                 | IZQPAREN expresion DERPAREN
-                | asignacion
+                | asignacion_exp
                 | identificador
                 | alias
+                | IF IZQPAREN lista_expresiones DERPAREN 
     '''
     if len(p) == 4:
         p[0] = p[2]
+    elif len(p) == 5:
+        p[0] = p[3]
     else:
         p[0] = p[1]
 
@@ -349,15 +359,12 @@ def p_alias(p):
     elif len(p) == 4:
         p[0] = Alias(id_nodo, p[1], p[3])
 
-def p_asignacion(p):
+def p_asignacion_exp(p):
     '''
-        asignacion : expresion IGUAL expresion
-                   | SET expresion
+        asignacion_exp : expresion IGUAL expresion
     '''
-    if len(p) == 4:
-        p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
-    else:
-        p[0] = {'accion': p[1], 'valor': p[2]}
+    p[0] = {'accion': p[1], 'tipo_dato': p[2], 'valor': p[3]}
+    
 
 def p_funcion_nativa(p):
     '''
