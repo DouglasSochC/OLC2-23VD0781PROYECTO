@@ -13,8 +13,6 @@ class Drop(Instruccion):
         # Eliminar un procedimiento
         # Eliminar una funcion
     def Ejecutar(self, base_datos, entorno):
-        print("Ejecutando Drop")
-    '''
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("DROP")
 
@@ -37,7 +35,7 @@ class Drop(Instruccion):
             return respuesta.valor
         else:
             return "ERROR: {}".format(respuesta.valor)
-    '''
+        
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DROP")
         label_tipo = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "T", self.tipo_eliminacion)

@@ -13,7 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-DROP TABLE producto;
+truncate table tbdetallefactura;
 ''')
 '''
 DECLARE tabla1.columna INT;

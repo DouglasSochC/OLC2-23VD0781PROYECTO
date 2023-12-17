@@ -250,7 +250,10 @@ def p_truncate(p):
     '''
     truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
-    p[0] = Truncate(p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Truncate(id_nodo,p[3])
 
 def p_lista_sentencias_dml(p):
     '''
