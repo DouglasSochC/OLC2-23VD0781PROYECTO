@@ -35,11 +35,14 @@ class DML:
 
             campo_nombre = campo.attrib['name']
 
-            # Si no viene un campo perteneciente a la tabla, se verifica si es nulleable o no
+            # Si no viene un campo perteneciente a la tabla, se verifica si es not_null
             if campo_nombre not in tupla:
 
+                if 'pk' in campo.attrib:
+                    return "La llave primaria '{}' no puede de ser NULL".format(campo_nombre)
+
                 # Debido a que el campo no viene, se debe validar si puede ser NULL o no
-                if 'nullable' not in campo.attrib:
+                if 'not_null' in campo.attrib:
                     return "El campo '{}' no puede de ser NULL".format(campo_nombre)
 
             # Debido a que el campo viene, hay que validar su restriccion segun el tipo de dato

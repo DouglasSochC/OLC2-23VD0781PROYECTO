@@ -14,6 +14,7 @@ from .expresiones.relacional import Relacional
 from .expresiones.campo_table import Campo_Table
 from .expresiones.constraint import Constraint
 from .expresiones.logico import Logico
+from .expresiones.expresion import Expresion
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
@@ -24,7 +25,6 @@ from .instrucciones.truncate import Truncate
 from .instrucciones.delete import Delete
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
-from .expresiones.listasGrafico.expresioniGenera import ExpresionGeneral
 contador = 0
 
 # Operadores de precedencia
@@ -107,11 +107,12 @@ def p_seg_num(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    if p[1] == 'INT':
+    p[1] = p[1].lower()
+    if p[1] == 'int':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.INT, -1)
-    elif p[1] == 'DECIMAL':
+    elif p[1] == 'decimal':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DECIMAL, -1)
-    elif p[1] == 'BIT':
+    elif p[1] == 'bit':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.BIT, -1)
     else:
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
@@ -124,9 +125,10 @@ def p_seg_date(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    if p[1] == 'DATE':
+    p[1] = p[1].lower()
+    if p[1] == 'date':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATE, -1)
-    elif p[1] == 'DATETIME':
+    elif p[1] == 'datetime':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATETIME, -1)
     else:
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
@@ -139,9 +141,10 @@ def p_seg_string(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    if p[1] == 'NVARCHAR':
+    p[1] = p[1].lower()
+    if p[1] == 'nvarchar':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NVARCHAR, p[3])
-    elif p[1] == 'NCHAR':
+    elif p[1] == 'nchar':
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NCHAR, p[3])
     else:
         p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
@@ -200,11 +203,12 @@ def p_constraint(p):
               | NOT NULL
               | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
-    if p[1].lower() == 'primary':
+    p[1] = p[1].lower()
+    if p[1] == 'primary':
         p[0] = Constraint('primary key', None, None)
-    elif p[1].lower() == 'not':
+    elif p[1] == 'not':
         p[0] = Constraint('not null', None, None)
-    elif p[1].lower() == 'references':
+    elif p[1] == 'references':
         p[0] = Constraint('references', p[2], p[4])
 
 def p_alter(p):
@@ -366,12 +370,12 @@ def p_expresion(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    if len(p) == 4:
-        p[0] = ExpresionGeneral(id_nodo,p[2])
+    if len(p) == 2:
+        p[0] = Expresion(id_nodo, p[1])
+    elif len(p) == 4:
+        p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
-        p[0] = ExpresionGeneral(id_nodo,p[3])
-    else:
-        p[0] = ExpresionGeneral(id_nodo,p[1])
+        p[0] = Expresion(id_nodo, p[4])
 
 def p_alias(p):
     '''
@@ -407,17 +411,18 @@ def p_funcion_nativa(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    if p[1] == 'CONCATENA':
+    p[1] = p[1].lower()
+    if p[1] == 'concatena':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
-    elif p[1] == 'SUBSTRAER':
+    elif p[1] == 'substraer':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
-    elif p[1] == 'HOY':
+    elif p[1] == 'hoy':
         p[0] = Funcion_Nativa(id_nodo,p[1], None)
-    elif p[1] == 'CONTAR':
+    elif p[1] == 'contar':
         p[0] = Funcion_Nativa(id_nodo,p[1], None)
-    elif p[1] == 'SUMA':
+    elif p[1] == 'suma':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
-    elif p[1] == 'CAST':
+    elif p[1] == 'cast':
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
 
 def p_aritmeticos(p):
@@ -454,7 +459,7 @@ def p_logicos(p):
     '''
         logicos : expresion AND_OP expresion
                 | expresion OR_OP expresion
-                | NOT expresion
+                | NOT_OP expresion
     '''
     global contador
     id_nodo = str(abs(hash("logicosOLC2")) + contador)

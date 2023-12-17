@@ -2,6 +2,7 @@ from ..abstract.expresiones import Expresion
 from ..abstract.retorno import TIPO_DATO
 
 class Tipo_Dato(Expresion):
+
     def __init__(self, id_nodo: int, tipo_dato: TIPO_DATO, dimension: int):
         self.id_nodo = id_nodo
         self.tipo_dato = tipo_dato

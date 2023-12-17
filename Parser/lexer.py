@@ -129,7 +129,6 @@ t_IZQPAREN = r'\('
 t_DERPAREN = r'\)'
 
 # Literal
-t_LDECIMAL = r'\d+\.\d+'
 t_LFECHA = r'\d{2}-\d{2}-\d{4}'
 t_LFECHAHORA = r'\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}'
 t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
@@ -143,6 +142,11 @@ t_PUNTOYCOMA = r'\;'
 
 # A function can be used if there is an associated action.
 # Write the matching regex in the docstring.
+def t_LDECIMAL(t):
+    r'\d+\.\d+'
+    t.value = float(t.value)
+    return t
+
 def t_LNUMERO(t):
     r'\d+'
     t.value = int(t.value)
@@ -150,6 +154,7 @@ def t_LNUMERO(t):
 
 def t_ID(t):
     r'[A-Za-z_][A-Za-z0-9_]*'
+    t.value = t.value.lower()
     t.type = reservadas.get(t.value.lower(), 'ID')
     return t
 

@@ -8,8 +8,8 @@ from Parser.parser import parse
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
 
-ts_global = TablaDeSimbolos()
-base_datos = BaseDatosWrapper("bd1")
+ts_global_1 = TablaDeSimbolos()
+base_datos_1 = BaseDatosWrapper("bd1")
 instrucciones = parse(
 
 '''
@@ -22,14 +22,14 @@ CREATE TABLE producto (
     total DECIMAL,
     fecha DATE,
     fecha_hora DATETIME,
-    nombre NCHAR(20) NOT NULL,
-    descripcion NVARCHAR(100),
+    nombre NCHAR(200) NOT NULL,
+    descripcion NVARCHAR(1000),
     id_tipo_producto INT REFERENCES tipo_producto (id)
 ); -- ERROR: No existe la referencia
 CREATE TABLE tipo_producto (
     id INT PRIMARY KEY,
-    nombre NCHAR(20) NOT NULL,
-    descripcion NVARCHAR(100)
+    nombre NCHAR(200) NOT NULL,
+    descripcion NVARCHAR(1000)
 ); -- EXITO
 CREATE TABLE producto (
     id INT PRIMARY KEY,
@@ -37,8 +37,8 @@ CREATE TABLE producto (
     total DECIMAL,
     fecha DATE,
     fecha_hora DATETIME,
-    nombre NCHAR(20) NOT NULL,
-    descripcion NVARCHAR(100),
+    nombre NCHAR(200) NOT NULL,
+    descripcion NVARCHAR(1000),
     id_tipo_producto INT REFERENCES tipo_producto (id)
 ); -- EXITO
 ''')
@@ -50,6 +50,41 @@ if instrucciones is not None:
         print("SALIDA STRING: {}".format(instrucciones))
     else:
         for instr in instrucciones:
-            res = instr.Ejecutar(base_datos, ts_global)
+            res = instr.Ejecutar(base_datos_1, ts_global_1)
             print(res)
 
+ts_global_2 = TablaDeSimbolos()
+base_datos_2 = BaseDatosWrapper("bd2")
+instrucciones = parse(
+
+'''
+CREATE TABLE Libros (
+    id INT PRIMARY KEY,
+    titulo NVARCHAR(100),
+    autor NVARCHAR(50),
+    anio_publicacion INT,
+    genero NVARCHAR(30)
+); -- EXITO
+CREATE TABLE Usuarios (
+    id INT PRIMARY KEY,
+    nombre NVARCHAR(50),
+    email NVARCHAR(100)
+); -- EXITO
+CREATE TABLE Prestamos (
+    id INT PRIMARY KEY,
+    id_libro INT REFERENCES Libros(id),
+    id_usuario INT REFERENCES Usuarios(id),
+    fecha_prestamo DATE,
+    fecha_devolucion DATE
+); -- EXITO
+''')
+
+# Se revisa que se haya obtenido una instrucciones
+if instrucciones is not None:
+
+    if isinstance(instrucciones, str):
+        print("SALIDA STRING: {}".format(instrucciones))
+    else:
+        for instr in instrucciones:
+            res = instr.Ejecutar(base_datos_2, ts_global_2)
+            print(res)
