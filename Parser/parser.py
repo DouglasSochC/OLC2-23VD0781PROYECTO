@@ -60,7 +60,12 @@ def p_instrucciones_lista2(p):
 
 def p_instruccion(p):
     '''
-    instruccion : expresion
+    instruccion : declaracion_variable
+                | sentencia_ddl
+                | sentencia_dml
+                | llamar_procedure
+                | usar_db
+                | asignacion
     '''
     p[0] = p[1]
 

@@ -1,2 +1,1 @@
-#import Interfaz.main
-import Testing.test_graficoAST
+import Interfaz.main
