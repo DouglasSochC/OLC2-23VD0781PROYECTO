@@ -21,14 +21,21 @@ class Alias(Expresion):
             return RetornoIdentificador(res_ejecutar.identificador, res_ejecutar.tipado, res_ejecutar.lista, self.alias)
 
     def GraficarArbol(self, id_padre):
-        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALIAS")
         
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "ALIAS")
-        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion.id_nodo)
+        resultado_exp = ""
         
-        resultado_izquierda = self.expresion.GraficarArbol(id_padre)
-
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "as", self.alias)
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "as")
-        
-        return label_encabezado + union_hijo_izquierdo+resultado_izquierda +label_operador+union_enca_operador
+        if isinstance(self.expresion, list):
+            for exp in self.expresiones:
+                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
+                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
+                resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        else:
+            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
+            resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
+            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+      
+        label_alias = "\"{}\"[label=\"{}\"];\n".format(self.alias, self.alias)
+        union_alias = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.alias)
+      
+        return label_encabezado+ resultado_exp+ label_alias+ union_alias

@@ -13,7 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-variable = 3+3
+
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -32,6 +32,7 @@ truncate table tbdetallefactura;
 3 > 3 && 3 < 7
 CAST(@NCHAR AS INT)
 EXEC varaibles ( master );
+concatena("hola", "mundo")
 
 
 INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);

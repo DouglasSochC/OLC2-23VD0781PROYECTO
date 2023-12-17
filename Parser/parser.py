@@ -375,6 +375,7 @@ def p_expresion(p):
     elif len(p) == 4:
         p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
+        #TODO: por probar 
         p[0] = Expresion(id_nodo, p[4])
 
 def p_alias(p):
