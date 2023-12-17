@@ -13,8 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20), tipoCartera BIT,tipoBilletera INT PRIMARY KEY, tipo NVARCHAR(255);
-
+DROP TABLE producto;
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -33,7 +32,11 @@ truncate table tbdetallefactura;
 3 > 3 && 3 < 7
 CAST(@NCHAR AS INT)
 EXEC varaibles ( master );
-
+DROP TABLE producto1;
+DROP TABLE tipo_producto;
+DROP TABLE producto;
+DROP DATABASE bd2;
+DROP DATABASE bd1;
 
 INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
 '''

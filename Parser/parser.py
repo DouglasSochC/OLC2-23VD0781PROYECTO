@@ -241,7 +241,10 @@ def p_drop(p):
          | DROP PROCEDURE identificador PUNTOYCOMA
          | DROP FUNCTION identificador PUNTOYCOMA
     '''
-    p[0] = Drop(p[2].lower(), p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Drop(id_nodo,p[2].lower(), p[3])
 
 def p_truncate(p):
     '''
