@@ -41,6 +41,11 @@ CREATE TABLE producto (
     descripcion NVARCHAR(1000),
     id_tipo_producto INT REFERENCES tipo_producto (id)
 ); -- EXITO
+CREATE TABLE jugador (
+    id INT PRIMARY KEY,
+    nombre NCHAR(200) NOT NULL,
+    puntaje INT
+); -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

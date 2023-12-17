@@ -16,6 +16,7 @@ from .expresiones.constraint import Constraint
 from .expresiones.logico import Logico
 from .expresiones.expresion import Expresion
 from .expresiones.funcion_nativa import Funcion_Nativa
+from .expresiones.accion import Accion
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
@@ -23,6 +24,7 @@ from .instrucciones.create import Create
 from .instrucciones.drop import Drop
 from .instrucciones.truncate import Truncate
 from .instrucciones.delete import Delete
+from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
 contador = 0
@@ -215,14 +217,14 @@ def p_alter(p):
     '''
     alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
-    p[0] = p[1]
+    p[0] = Alter(p[3], p[4])
 
 def p_accion(p):
     '''
     accion : ADD COLUMN campos_table
            | DROP COLUMN identificador
     '''
-    p[0] = p[1]
+    p[0] = Accion(p[1].lower(), p[3])
 
 def p_drop(p):
     '''
