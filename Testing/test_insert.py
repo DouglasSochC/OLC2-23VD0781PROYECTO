@@ -93,6 +93,27 @@ INSERT INTO producto (id, esta_bueno, total, fecha, fecha_hora, nombre, descripc
 VALUES (30, 1, 299.99, "10-07-2023", "10-07-2023 10:30:00", "Mesa de Centro", "Mesa de centro elegante para la sala de estar", 6); -- ERROR: No se puede duplicar una llave primaria
 INSERT INTO producto (id, esta_bueno, total, fecha, fecha_hora, nombre, descripcion, id_tipo_producto)
 VALUES (300, 1, 299.99, "10-07-2023", "10-07-2023 10:30:00", "Mesa de Centro", "Mesa de centro elegante para la sala de estar", 1000); -- ERROR: No existe la llave foranea
+
+INSERT INTO jugador (id, nombre, puntaje) VALUES (1, "Juan Pérez", 85);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (2, "María Gómez", 92);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (3, "Carlos Rodríguez", 78);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (4, "Ana López", 95);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (5, "Pedro Ramirez", 88);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (6, "Luisa Fernández", 90);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (7, "Miguel Torres", 75);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (8, "Isabel Garcia", 82);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (9, "David Martinez", 89);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (10, "Laura Perez", 94);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (11, "Carlos Herrera", 80);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (12, "Elena Ruiz", 91);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (13, "Juan Carlos Morales", 87);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (14, "Beatriz Soto", 93);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (15, "Francisco Jiménez", 79);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (16, "Sofía Navarro", 96);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (17, "Javier Castro", 84);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (18, "Marina Ortega", 88);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (19, "Ricardo Herrera", 97);
+INSERT INTO jugador (id, nombre, puntaje) VALUES (20, "Eva Gutierrez", 83);
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

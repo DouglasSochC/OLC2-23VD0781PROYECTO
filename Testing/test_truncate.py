@@ -12,11 +12,10 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
 
-# TRUNCATE producto;
 '''
 TRUNCATE TABLE tipo_producto; -- ERROR debido a una referencia
-TRUNCATE TABLE producto; -- EXITO
-TRUNCATE TABLE tipo_producto; -- EXITO
+TRUNCATE TABLE test; -- ERROR: No existe la tabla
+TRUNCATE TABLE jugador; -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

@@ -205,7 +205,7 @@ class DDL:
 
         path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla_truncar + ".xml"
 
-        # Se obtienen todos los ID's que contiene la tabla
+        # Se obtienen todos registros que contiene la tabla a la cual se va a truncar
         with open(path_tabla, 'r') as archivo:
             contenido_xml = archivo.read()
 
@@ -226,14 +226,14 @@ class DDL:
                 continue
 
             # Se busca el campo que tenga como llave foranea la tabla donde se eliminara toda la informacion, en el caso que no lo tenga se sigue analizando la siguiente tabla
-            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
-            root = tree.getroot()
-            campo = root.find(".//estructura/campo[@fk_table='" + nombre_tabla_truncar + "']")
+            tree_tabla = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root_tabla = tree_tabla.getroot()
+            campo = root_tabla.find(".//estructura/campo[@fk_table='" + nombre_tabla_truncar + "']")
             if campo is None:
                 continue
 
             for contenido in registros:
-                es_utilizado = root.find(".//registros/fila[" + campo.get("name") + "='" + contenido[campo.get("fk_attribute")] + "']")
+                es_utilizado = root_tabla.find(".//registros/fila[" + campo.get("name") + "='" + contenido[campo.get("fk_attribute")] + "']")
                 if es_utilizado is not None:
                     return Respuesta(False, "No es posible truncar la tabla '{}' ya que contiene datos referenciados por la tabla '{}'.".format(nombre_tabla_truncar, tabla_actual))
 
@@ -255,6 +255,131 @@ class DDL:
 
         # os.remove(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml")
         return Respuesta(True, "La tabla '{}' ha sido truncada exitosamente.".format(nombre_tabla_truncar))
+
+    ##############################################
+    ############### SECCION ALTER ################
+    ##############################################
+
+    def alter_drop_columna(self, nombre_bd: str, nombre_tabla: str, nombre_columna: str) -> Respuesta:
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se verifica que exista la columna
+        tree_tabla = ET.parse(path_tabla)
+        root_tabla = tree_tabla.getroot()
+
+        campo = root_tabla.find(f".//estructura/campo[@name='{nombre_columna}']")
+        if campo is None:
+            return Respuesta(False, "La columna '{}' no existe en la tabla '{}'".format(nombre_columna, nombre_tabla))
+
+        # Se obtienen todos registros que contiene la tabla en el que se dropeara una columna
+        with open(path_tabla, 'r') as archivo:
+            contenido_xml = archivo.read()
+
+        # Se formatea el XML a un diccionario para manejarlo de mejor forma
+        registros = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
+        if isinstance(registros, dict):
+            registros = [registros]
+
+        # Se obtienen todas las tablas existentes de la base de datos
+        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+
+        # Se evalua tabla por tabla para verificar que la informacion a eliminar no este enlazada a otra tabla a traves de una llave foranea
+        for tabla in tablas:
+
+            # Se obtiene el nombre de la tabla actual que se esta analizando
+            tabla_actual = tabla.rsplit('.', 1)[0]
+            if tabla_actual == nombre_tabla:
+                continue
+
+            # Se busca el campo que tenga como llave foranea la tabla donde se eliminara toda la informacion, en el caso que no lo tenga se sigue analizando la siguiente tabla
+            tree_tabla_analizar = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root_tabla_analizar = tree_tabla_analizar.getroot()
+            llave_foranea = root_tabla_analizar.find(".//estructura/campo[@fk_table='" + nombre_tabla + "']")
+            if llave_foranea is None:
+                continue
+
+            # Se verifica que la columna a dropear es una llave foranea
+            if llave_foranea.attrib['fk_attribute'] != nombre_columna:
+                continue
+
+            # Se verifica cuales son los registros que estan utilizando la llave actual en otra tabla
+            for contenido in registros:
+                es_utilizado = root_tabla_analizar.find(".//registros/fila[" + llave_foranea.get("name") + "='" + contenido[llave_foranea.get("fk_attribute")] + "']")
+                if es_utilizado is not None:
+                    return Respuesta(False, "No es posible eliminar la columna '{}' de la tabla '{}' debido a que esta contiene datos referenciados por la tabla '{}'.".format(nombre_columna, nombre_tabla, tabla_actual))
+
+        # Se busca y elimina el campo de la estructura de la tabla
+        registro_a_eliminar = root_tabla.find(f".//campo[@name='{nombre_columna}']")
+        if registro_a_eliminar is not None:
+            root_tabla.find('.//estructura').remove(registro_a_eliminar)
+
+        # Se elimina el elemento en cada fila
+        for fila in root_tabla.findall('.//fila'):
+            elemento = fila.find(nombre_columna)
+            if elemento is not None:
+                fila.remove(elemento)
+
+        # Guardar el resultado en un nuevo archivo XML
+        tree_tabla.write(path_tabla)
+
+        return Respuesta(True, "Columna '{}' de la tabla '{}' eliminada correctamente.".format(nombre_columna, nombre_tabla))
+
+    def alter_add_campos(self, nombre_bd: str, nombre_tabla: str, lista_campos: list) -> Respuesta:
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se verifica que exista la columna
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        # Se obtiene los campos de la tabla
+        estructura = root.find(".//estructura")
+
+        for campo in lista_campos:
+            campo_encontrado = estructura.find(".//campo[@name='" + campo['name'] + "']")
+            if campo_encontrado is not None:
+                return Respuesta(False, "La columna '{}' ya existe en la tabla '{}'".format(campo['name'], nombre_tabla))
+
+        # Se agrega los nuevos campos
+        for param in lista_campos:
+
+            # Se castean todos los atributos a 'str' para que puedan ser almacenados
+            atributos = {clave: str(valor) for clave, valor in param.items()}
+
+            # Se verifica que exista la tabla a la que se desea realizar el enlace
+            if 'fk_table' in param:
+                if not os.path.exists(self.__path_tablas.format(nombre_bd) + param['fk_table'] + ".xml"):
+                    return Respuesta(False, "La referencia a la tabla '{}' en la declaración REFERENCES no es válida, ya que la tabla no existe en la base de datos.".format(param['fk_table']))
+
+            # Crear un nuevo elemento campo
+            campo_nuevo = ET.Element("campo", attrib=atributos)
+
+            # Agregar el nuevo elemento al elemento campos
+            estructura.append(campo_nuevo)
+
+        # Guardar el árbol XML actualizado en el mismo archivo
+        tree.write(path_tabla)
+
+        return Respuesta(True, "Campos agregados correctamente")
 
     ##############################################
     ########### SECCION VALIDACIONES #############
