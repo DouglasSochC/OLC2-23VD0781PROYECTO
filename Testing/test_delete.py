@@ -13,11 +13,10 @@ base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
 
 '''
-DROP TABLE producto1; -- ERROR: Esta tabla no existe
-DROP TABLE tipo_producto; -- ERROR: No se puede eliminar ya que tiene algunos ID's en uso en otras tablas
-DROP TABLE producto; -- EXITO
-DROP DATABASE bd3; -- ERROR: No existe la BD
-DROP DATABASE bd1; -- EXITO
+DELETE FROM producto1 WHERE id > 100; -- ERROR: No existe la tabla en la BD
+DELETE FROM producto WHERE test < 100; -- ERROR: No existe la columna 'test' en la tabla
+DELETE FROM tipo_producto WHERE id <= 5; -- ERROR: Este ID esta siendo utilizado en otra tabla
+DELETE FROM producto WHERE id <= 10; -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

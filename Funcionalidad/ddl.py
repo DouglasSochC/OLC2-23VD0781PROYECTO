@@ -160,6 +160,9 @@ class DDL:
         # Se evalua tabla por tabla para verificar que la tabla que se desee eliminar no este referenciada a otra tabla
         for tabla in tablas:
 
+            if tabla.rsplit('.', 1)[0] == nombre_tabla:
+                continue
+
             # Se obtiene la raiz del XML de la tabla
             tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
             root = tree.getroot()

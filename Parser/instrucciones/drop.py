@@ -1,9 +1,11 @@
 from ..abstract.instrucciones import Instruccion
+from ..expresiones.identificador import Identificador
+from ..abstract.retorno import RetornoError
 from Funcionalidad.ddl import DDL
 
 class Drop(Instruccion):
 
-    def __init__(self, tipo_eliminacion: any, identificador: any):
+    def __init__(self, tipo_eliminacion: str, identificador: Identificador):
         self.tipo_eliminacion = tipo_eliminacion
         self.identificador = identificador
 
@@ -15,7 +17,11 @@ class Drop(Instruccion):
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("DROP")
 
-        nombre = self.identificador.Ejecutar(base_datos, entorno).identificador
+        # Se obtiene el nombre
+        res_identificador = self.identificador.Ejecutar(base_datos, entorno)
+        if isinstance(res_identificador, RetornoError):
+            return res_identificador.msg
+        nombre = res_identificador.identificador
 
         dll = DDL()
         respuesta = None

@@ -120,7 +120,9 @@ class DML:
                 op_der = condicion[2]
 
                 # Se verifica que la condicion se cumpla
-                if operador == '=' and str(op_izq) != str(op_der):
+                if op_izq is None or op_der is None:
+                    cumple_condicion = False
+                elif operador == '=' and str(op_izq) != str(op_der):
                     cumple_condicion = False
                 if operador == '==' and str(op_izq) != str(op_der):
                     cumple_condicion = False
@@ -303,7 +305,7 @@ class DML:
 
         return respuesta
 
-    def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list):
+    def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list) -> Respuesta | list:
 
         if nombre_bd is None: # Se valida que haya seleccionado una base de datos
             return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
@@ -407,3 +409,50 @@ class DML:
             tree.write(path_tabla)
 
             return Respuesta(True, "DELETE {}".format(cantidad_registros_eliminados))
+
+    def validar_indices(self, nombre_bd: str, nombre_tabla:str, listado_indices: list) -> Respuesta:
+
+        # Se obtienen todos los registros de los indices debido a que es necesario revisar si no esta siendo utilizado en otro lugar algun registro por medio de llave foranea
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se obtiene la raiz del XML
+        tree = ET.parse(path_tabla)
+        root_tabla_actual = tree.getroot()
+
+        registros = []
+        for indice in listado_indices:
+            fila = root_tabla_actual.find(f".//fila[@index='{indice}']")
+            registros.append(fila)
+
+        # Se obtienen todas las tablas existentes de la base de datos
+        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+
+        # Se evalua tabla por tabla para verificar
+        for tabla in tablas:
+
+            nombre_tabla_evaluar = tabla.rsplit('.', 1)[0]
+            if  nombre_tabla_evaluar == nombre_tabla:
+                continue
+
+            # Se obtiene la raiz del XML de la tabla
+            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root_a_evaluar = tree.getroot()
+
+            # Se obtiene los campos de la tabla a verificar que son una llave foranea
+            campos_con_llave_foranea = root_a_evaluar.findall(".//estructura/campo/[@fk_table]")
+
+            # Se verifica que no se elimine un registro que esta siendo utilizado en otra tabla
+            for campo in campos_con_llave_foranea:
+
+                if campo.attrib['fk_table'] == nombre_tabla:
+
+                    for obj in registros:
+
+                        fila = obj.find(campo.attrib['fk_attribute'])
+                        if fila is not None:
+
+                            resultado = root_a_evaluar.find(".//fila[{}='{}']".format(campo.attrib['name'], fila.text))
+                            if resultado is not None:
+                                return Respuesta(False, "No se puede realizar la operación DELETE en la tabla '{}' debido a que el campo '{}' con valor '{}' esta siendo referenciado en la tabla '{}' a través de una llave foranea.".format(nombre_tabla, campo.attrib['fk_attribute'], fila.text, nombre_tabla_evaluar))
+
+        return Respuesta(True, "")
