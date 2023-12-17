@@ -14,6 +14,10 @@ base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
 truncate table tbdetallefactura;
+truncate table tbdetallefactura2;
+USE "nd1";
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+
 ''')
 '''
 DECLARE tabla1.columna INT;

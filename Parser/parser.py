@@ -21,11 +21,14 @@ from .instrucciones.declare import Declare
 from .instrucciones.delete import Delete
 from .instrucciones.drop import Drop
 from .instrucciones.insert import Insert
+from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
+from .instrucciones.listaGrafico.instruccionesDDL import InstruccionDDL
+from .instrucciones.listaGrafico.instruccionesDML import InstruccionDML
 from .instrucciones.select import Select
 from .instrucciones.select_print import Select_Print
 from .instrucciones.truncate import Truncate
 from .instrucciones.use import Use
-from .expresiones.listasGrafico.expresioniGenera import ExpresionGeneral
+from .expresiones.listasGrafico.expresionGenera import ExpresionGeneral
 contador = 0
 
 # Operadores de precedencia
@@ -44,6 +47,7 @@ def p_inicio(p):
     '''
     inicio : instrucciones
     '''
+  
     p[0] = p[1]
 
 def p_instrucciones_lista(p):
@@ -68,7 +72,10 @@ def p_instruccion(p):
                 | usar_db
                 | asignacion
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = InstruccionGeneral(id_nodo,p[1])
 
 def p_asignacion(p):
     '''
@@ -157,7 +164,10 @@ def p_sentencia_ddl(p):
                       | truncate
                       | drop
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = InstruccionDDL(id_nodo,p[1])
 
 def p_create(p):
     '''
