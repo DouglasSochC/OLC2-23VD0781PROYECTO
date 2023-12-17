@@ -152,13 +152,21 @@ class Funcion_Nativa(Expresion):
         label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "A", self.accion)
         union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "A")
         resultado_exp = ""
-        if(self.expresiones is None):
-            return label_encabezado + label_operador + union_enca_operador
         
-        for exp in self.expresiones:
-            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-            resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-            resultado_exp += union_hijo_izquierdo + resultado_izquierda 
+        if(self.expresiones is None):
+          return label_encabezado+ label_operador + union_enca_operador
+        
+        if isinstance(self.expresiones, list):
+            print("es lista")
+            for exp in self.expresiones:
+                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
+                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
+                resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        else:
+            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresiones.id_nodo)
+            resultado_izquierda = self.expresiones.GraficarArbol(self.id_nodo)
+            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+      
       
         return label_encabezado+ label_operador + union_enca_operador+ resultado_exp
 

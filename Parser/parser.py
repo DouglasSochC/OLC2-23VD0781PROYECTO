@@ -60,12 +60,7 @@ def p_instrucciones_lista2(p):
 
 def p_instruccion(p):
     '''
-    instruccion : declaracion_variable
-                | sentencia_ddl
-                | sentencia_dml
-                | llamar_procedure
-                | usar_db
-                | asignacion
+    instruccion : expresion
     '''
     p[0] = p[1]
 
@@ -375,6 +370,7 @@ def p_expresion(p):
     elif len(p) == 4:
         p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
+        #TODO: por probar 
         p[0] = Expresion(id_nodo, p[4])
 
 def p_alias(p):
