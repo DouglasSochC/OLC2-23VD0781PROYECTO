@@ -79,7 +79,10 @@ def p_usar_db(p):
     '''
     usar_db : USE LVARCHAR PUNTOYCOMA
     '''
-    p[0] = Use(p[2])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Use(id_nodo,p[2])
 
 def p_declaracion_variable(p):
     '''
