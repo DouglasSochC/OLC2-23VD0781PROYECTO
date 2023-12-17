@@ -81,6 +81,9 @@ def p_asignacion(p):
     '''
     asignacion  : SET expresion PUNTOYCOMA
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     p[0] = p[1]
 
 def p_usar_db(p):
@@ -327,7 +330,10 @@ def p_insert(p):
     '''
     insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    p[0] = Insert(p[3], p[5], p[9])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Insert(id_nodo,p[3], p[5], p[9])
 
 def p_update(p):
     '''

@@ -13,10 +13,8 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-truncate table tbdetallefactura;
-truncate table tbdetallefactura2;
-USE "nd1";
-ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
+INSERT INTO tbCalificacion (id,nacionalidad,equipo) VALUES(100,"Pedros","Barcelona");
 
 ''')
 '''

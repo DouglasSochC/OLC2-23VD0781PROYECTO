@@ -4,7 +4,8 @@ from Funcionalidad.dml import DML
 
 class Insert(Instruccion):
 
-    def __init__(self, identificador, lista_campos: list, lista_valores: list):
+    def __init__(self, id_nodo, identificador, lista_campos: list, lista_valores: list):
+        self.id_nodo = id_nodo
         self.identificador = identificador
         self.lista_campos = lista_campos
         self.lista_valores = lista_valores
@@ -52,4 +53,21 @@ class Insert(Instruccion):
             return "ERROR: {}".format(res_dml.valor)
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "INSERT")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+      
+        resultado  = label_encabezado + label_identificador 
+
+
+        if self.lista_campos != None:
+            for campo in self.lista_campos:
+                label_campo = campo.GraficarArbol(self.id_nodo)
+                union_campo = "\"{}\"->\"{}\";\n".format(self.id_nodo, campo.id_nodo)
+                resultado += label_campo + union_campo
+        
+        if self.lista_valores != None:
+            for valor in self.lista_valores:
+                label_valor = valor.GraficarArbol(self.id_nodo)
+                union_valor = "\"{}\"->\"{}\";\n".format(self.id_nodo, valor.id_nodo)
+                resultado += label_valor + union_valor
+        return resultado
