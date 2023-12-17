@@ -44,6 +44,7 @@ reservadas = {
 
     # Constraint
     'primary': 'PRIMARY',
+    'not': 'NOT',
     'null': 'NULL',
     'key': 'KEY',
     'references': 'REFERENCES',
@@ -83,7 +84,7 @@ tokens = [
     # Expresiones logicas
     'OR_OP',
     'AND_OP',
-    'NOT',
+    'NOT_OP',
     'IZQPAREN',
     'DERPAREN',
 
@@ -123,7 +124,7 @@ t_MENOR = r'\<'
 # Expresiones logicas
 t_OR_OP = r'\|\|'
 t_AND_OP = r'\&\&'
-t_NOT = r'\!'
+t_NOT_OP = r'\!'
 t_IZQPAREN = r'\('
 t_DERPAREN = r'\)'
 

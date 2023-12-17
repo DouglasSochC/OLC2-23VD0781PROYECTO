@@ -19,7 +19,7 @@ class DDL:
     ############### SECCION CREATE ###############
     ##############################################
 
-    def crear_base_de_datos(self, nombre_bd: str):
+    def crear_base_de_datos(self, nombre_bd: str) -> Respuesta:
         '''
         Crea una base de datos nueva
 
@@ -42,7 +42,7 @@ class DDL:
         else:
             return Respuesta(False, "Ya existe una base de datos con el mismo nombre.")
 
-    def crear_tabla(self, nombre_bd:str, nombre_tabla: str, parametros: list):
+    def crear_tabla(self, nombre_bd:str, nombre_tabla: str, parametros: list) -> Respuesta:
         '''
         Crea una tabla nueva
 
@@ -88,6 +88,11 @@ class DDL:
 
                 # Se castean todos los atributos a 'str' para que puedan ser almacenados
                 atributos = {clave: str(valor) for clave, valor in param.items()}
+
+                # Se verifica que exista la tabla a la que se desea realizar el enlace
+                if 'fk_table' in param:
+                    if not os.path.exists(self.__path_tablas.format(nombre_bd) + param['fk_table'] + ".xml"):
+                        return Respuesta(False, "La referencia a la tabla '{}' en la declaración REFERENCES no es válida, ya que la tabla no existe en la base de datos.".format(param['fk_table']))
 
                 # Se almacena cada campo que tendra la tabla
                 ET.SubElement(estructura, "campo", attrib=atributos)

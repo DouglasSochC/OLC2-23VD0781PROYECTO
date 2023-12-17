@@ -11,11 +11,14 @@ from .expresiones.alias import Alias
 from .expresiones.aritmetica import Aritmetica
 from .expresiones.asignacion import Asignacion
 from .expresiones.relacional import Relacional
+from .expresiones.campo_table import Campo_Table
+from .expresiones.constraint import Constraint
 from .expresiones.logico import Logico
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
+from .instrucciones.create import Create
 from .instrucciones.drop import Drop
 from .instrucciones.truncate import Truncate
 from .instrucciones.delete import Delete
@@ -98,7 +101,7 @@ def p_tipo_dato(p):
 def p_seg_num(p):
     '''
     seg_num : INT
-            | DECIMAL IZQPAREN LNUMERO COMA LNUMERO DERPAREN
+            | DECIMAL
             | BIT
     '''
     global contador
@@ -159,16 +162,30 @@ def p_create(p):
                | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
                | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
-    p[0] = p[1]
+    if len(p) == 5:
+        p[0] = Create(p[2].lower(), p[3], None)
+    elif len(p) == 8:
+        p[0] = Create(p[2].lower(), p[3], p[5])
+    else:
+        p[0] = p[1]
 
 def p_campos_table(p):
     '''
-    campos_table : campos_table COMA identificador tipo_dato constrain
+    campos_table : campos_table COMA identificador tipo_dato constraint
                  | campos_table COMA identificador tipo_dato
-                 | identificador tipo_dato constrain
+                 | identificador tipo_dato constraint
                  | identificador tipo_dato
     '''
-    p[0] = p[1]
+    if len(p) == 6:
+        p[1].append(Campo_Table(p[3], p[4], p[5]))
+        p[0] = p[1]
+    elif len(p) == 5:
+        p[1].append(Campo_Table(p[3], p[4], None))
+        p[0] = p[1]
+    elif len(p) == 4:
+        p[0] = [Campo_Table(p[1], p[2], p[3])]
+    elif len(p) == 3:
+        p[0] = [Campo_Table(p[1], p[2], None)]
 
 def p_parametros(p):
     '''
@@ -177,13 +194,18 @@ def p_parametros(p):
     '''
     p[0] = p[1]
 
-def p_constrain(p):
+def p_constraint(p):
     '''
-    constrain : PRIMARY KEY
+    constraint : PRIMARY KEY
               | NOT NULL
               | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
-    p[0] = p[1]
+    if p[1].lower() == 'primary':
+        p[0] = Constraint('primary key', None, None)
+    elif p[1].lower() == 'not':
+        p[0] = Constraint('not null', None, None)
+    elif p[1].lower() == 'references':
+        p[0] = Constraint('references', p[2], p[4])
 
 def p_alter(p):
     '''
@@ -259,11 +281,11 @@ def p_select(p):
     if len(p) == 4:
         p[0] = Select_Print(p[2])
     elif len(p) == 6 and p[2] == '*':
-        p[0] = Select(p[4], [p[2]], [])
+        p[0] = Select(p[4], [p[2]], None)
     elif len(p) == 6 and p[3].lower() == 'from':
-        p[0] = Select(p[4], p[2], [])
+        p[0] = Select(p[4], p[2], None)
     elif len(p) == 8 and p[2] == '(':
-        p[0] = Select(p[6], p[3], [])
+        p[0] = Select(p[6], p[3], None)
     elif len(p) == 8 and p[2] == '*':
         p[0] = Select(p[4], [p[2]], p[6])
     elif len(p) == 8 and p[3].lower() == 'from':
@@ -291,7 +313,7 @@ def p_delete(p):
     if len(p) == 7:
         p[0] = Delete(p[3], p[5])
     elif len(p) == 5:
-        p[0] = Delete(p[3], [])
+        p[0] = Delete(p[3], None)
 
 def p_if(p):
     '''
@@ -372,7 +394,6 @@ def p_asignacion_exp(p):
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     p[0] = Asignacion(id_nodo,p[1], p[2], p[3])
-    
 
 def p_funcion_nativa(p):
     '''
