@@ -16,7 +16,7 @@ class Create(Instruccion):
         # Crear un procedimiento
         # Crear una funcion
     def Ejecutar(self, base_datos, entorno):
-        ''''
+        
         ddl = DDL()
 
         # Se obtiene el nombre
@@ -46,7 +46,7 @@ class Create(Instruccion):
 
                 res = ddl.crear_tabla(base_datos.valor, nombre, campos)
                 return res.valor if res.success else "ERROR: {}".format(res.valor)
-        '''
+        
     def GraficarArbol(self, id_padre):
         #TODO: Falta implementar lo siguiente
         # GRAFICAR UN PROCEDIMIENTO
