@@ -27,6 +27,7 @@ from .instrucciones.delete import Delete
 from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.select_print import Select_Print
+from .instrucciones.listaGrafico.identificadorLista import IdentificadorLista
 contador = 0
 
 # Operadores de precedencia
@@ -69,7 +70,10 @@ def p_instruccion(p):
                 | usar_db
                 | asignacion
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = IdentificadorLista(id_nodo, p[1])
 
 def p_asignacion(p):
     '''
