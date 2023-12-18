@@ -1,6 +1,6 @@
 from ..abstract.instrucciones import Instruccion
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
-from ..abstract.retorno import TIPO_TOKEN, RetornoError, RetornoLiteral
+from ..abstract.retorno import TIPO_ENTORNO, TIPO_TOKEN, RetornoError, RetornoLiteral
 from ..expresiones.identificador import Identificador
 from Funcionalidad.dml import DML
 
@@ -19,13 +19,13 @@ class Select(Instruccion):
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("SELECT")
 
-        nuevo_entorno = TablaDeSimbolos({})
+        nuevo_entorno = TablaDeSimbolos(TIPO_ENTORNO.SENTENCIA_DML, {})
 
         # Se obtiene el nombre de la tabla
         nombre_tabla = self.identificador.Ejecutar(base_datos, nuevo_entorno).identificador
 
         # Se almacena la tabla para poder acceder a ella desde un identificador y asi poder obtener la informacion completa de la tabla
-        simbolo = Simbolo('nombre_tabla', None, TIPO_TOKEN.SELECT, nombre_tabla, None)
+        simbolo = Simbolo('nombre_tabla', None, TIPO_TOKEN.SELECT, nombre_tabla, nuevo_entorno.entorno)
         nuevo_entorno.agregar(simbolo)
 
         # Se obtienen la lista de condiciones que se debe de aplicar al SELECT y se almacenan en la variable 'listado_condiciones'

@@ -1,5 +1,9 @@
 # Para realizar el analisis
+from Parser.abstract.retorno import TIPO_ENTORNO
 from Parser.parser import parse
+from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+
+
 
 # Para la construccion de la interfaz
 import tkinter as tk
@@ -80,14 +84,14 @@ def ejecutar_query():
 
     # Se revisa que se haya obtenido una salida
     if salida is not None:
-        
+        ts_global_1 = TablaDeSimbolos(TIPO_ENTORNO.GLOBAL)
         # Se setea la salida para los errores lexicos y sintacticos
         if isinstance(salida, str):
             mostrar_salida_como_texto(salida)
         else:
             # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
             for elemento in salida:
-                respuesta = elemento.Ejecutar(None)
+                respuesta = elemento.Ejecutar(None, ts_global_1)
                 if respuesta != None and isinstance(respuesta, Respuesta):
                     mensaje = respuesta.msg if respuesta.success else "ERROR: {}".format(respuesta.msg)
                     mostrar_salida_como_texto(mensaje)

@@ -25,8 +25,8 @@ class Identificador(Expresion):
                     return RetornoIdentificador(self.valor, res.valor, res.lista, self.alias_nombre)
                 else:
                     return RetornoError(res.valor)
-
         return RetornoIdentificador(self.valor, None, [], self.alias_nombre)
+        
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "IDENTIFICADOR")

@@ -31,14 +31,15 @@ class TIPO_TOKEN(Enum) :
     PARAMETRO = 15
     COLUMNA = 16
     NOMBRE_TABLA = 17
+    
 
 @unique
 class TIPO_ENTORNO(Enum) :
     GLOBAL = 1
-    IF = 2
-    WHILE = 3
-    FUNCION = 4
-    PROCEDIMIENTO = 5
+    SENTENCIA_DDL = 2
+    SENTENCIA_DML = 3
+    SENTENCIA_SSL = 4
+    
 
 @unique
 class TIPO_OPERACION(Enum):
@@ -75,6 +76,11 @@ class RetornoRelacional:
         self.operacion_izquierda = operacion_izquierda
         self.operador = operador
         self.operacion_derecha = operacion_derecha
+
+class RetornoTipoDato:
+    def __init__(self, tipado: TIPO_DATO, dimension: int):
+        self.tipado = tipado
+        self.dimension = dimension
 
 class RetornoError:
     def __init__(self, msg: str):

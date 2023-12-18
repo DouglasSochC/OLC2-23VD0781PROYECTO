@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import TIPO_DATO
+from ..abstract.retorno import TIPO_DATO, RetornoTipoDato
 
 class Tipo_Dato(Expresion):
 
@@ -9,7 +9,8 @@ class Tipo_Dato(Expresion):
         self.dimension = dimension
 
     def Ejecutar(self, base_datos, entorno):
-        return {'tipo_dato': self.tipo_dato, 'dimension': self.dimension}
+        tipo = RetornoTipoDato(self.tipo_dato, self.dimension)
+        return tipo
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TIPO_DATO")

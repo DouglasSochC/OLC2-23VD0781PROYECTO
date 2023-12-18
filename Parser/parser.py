@@ -73,9 +73,9 @@ def p_instruccion(p):
 
 def p_asignacion(p):
     '''
-    asignacion  : SET expresion PUNTOYCOMA
+    asignacion  : SET asignacion_exp PUNTOYCOMA
     '''
-    #p[0] =
+    p[0] = p[2]
 
 def p_usar_db(p):
     '''
@@ -400,7 +400,7 @@ def p_asignacion_exp(p):
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    p[0] = Asignacion(id_nodo,p[1], p[2], p[3])
+    p[0] = Asignacion(id_nodo,p[1], p[3])
 
 def p_funcion_nativa(p):
     '''
