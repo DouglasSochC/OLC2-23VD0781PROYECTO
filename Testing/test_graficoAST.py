@@ -13,7 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
 ''')
 '''
 DECLARE tabla1.columna INT;
