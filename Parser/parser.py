@@ -170,10 +170,13 @@ def p_create(p):
                | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
                | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 5:
-        p[0] = Create(p[2].lower(), p[3], None)
+        p[0] = Create(id_nodo,p[2].lower(), p[3], None)
     elif len(p) == 8:
-        p[0] = Create(p[2].lower(), p[3], p[5])
+        p[0] = Create(id_nodo,p[2].lower(), p[3], p[5])
     else:
         p[0] = p[1]
 
@@ -250,13 +253,19 @@ def p_drop(p):
          | DROP PROCEDURE identificador PUNTOYCOMA
          | DROP FUNCTION identificador PUNTOYCOMA
     '''
-    p[0] = Drop(p[2].lower(), p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Drop(id_nodo,p[2].lower(), p[3])
 
 def p_truncate(p):
     '''
     truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
-    p[0] = Truncate(p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Truncate(id_nodo,p[3])
 
 def p_lista_sentencias_dml(p):
     '''

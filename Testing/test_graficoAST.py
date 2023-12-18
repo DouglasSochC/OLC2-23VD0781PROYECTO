@@ -13,7 +13,13 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+   CREATE TABLE accounts (
+	user_id INT PRIMARY KEY,
+	username NVARCHAR ( 50 ) NOT NULL,
+	password NVARCHAR ( 50 ) NOT NULL
+	
+);
+
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -33,6 +39,7 @@ truncate table tbdetallefactura;
 CAST(@NCHAR AS INT)
 EXEC varaibles ( master );
 concatena("hola", "mundo")
+CREATE DATABASE bd1;
 
 
 INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);

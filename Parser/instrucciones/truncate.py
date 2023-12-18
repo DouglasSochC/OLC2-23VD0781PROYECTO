@@ -4,11 +4,12 @@ from Funcionalidad.ddl import DDL
 
 class Truncate(Instruccion):
 
-    def __init__(self, identificador: any):
+    def __init__(self, id_nodo, identificador: any):
+        self.id_nodo = id_nodo
         self.identificador = identificador
 
     def Ejecutar(self, base_datos, entorno):
-
+        
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("TRUNCATE")
 
@@ -26,6 +27,8 @@ class Truncate(Instruccion):
             return res_truncate.valor
         else:
             return "ERROR: {}".format(res_truncate.valor)
-
+        
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TRUNCATE")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        return label_encabezado + label_identificador
