@@ -13,12 +13,8 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-   CREATE TABLE accounts (
-	user_id INT PRIMARY KEY,
-	username NVARCHAR ( 50 ) NOT NULL,
-	password NVARCHAR ( 50 ) NOT NULL
-	
-);
+   INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos");
+
 
 ''')
 '''

@@ -198,7 +198,6 @@ def p_campos_table(p):
         p[1].append(Campo_Table(id_nodo,p[3], p[4], None))
         p[0] = p[1]
     elif len(p) == 4:
-        print("aqui entraste")
         p[0] = [Campo_Table(id_nodo,p[1], p[2], p[3])]
     elif len(p) == 3:
         p[0] = [Campo_Table(id_nodo,p[1], p[2], None)]
@@ -329,7 +328,10 @@ def p_insert(p):
     '''
     insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    p[0] = Insert(p[3], p[5], p[9])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Insert(id_nodo,p[3], p[5], p[9])
 
 def p_update(p):
     '''
@@ -342,10 +344,13 @@ def p_delete(p):
     delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
            | DELETE FROM identificador PUNTOYCOMA
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 7:
-        p[0] = Delete(p[3], p[5])
+        p[0] = Delete(id_nodo,p[3], p[5])
     elif len(p) == 5:
-        p[0] = Delete(p[3], None)
+        p[0] = Delete(id_nodo,p[3], None)
 
 def p_if(p):
     '''
