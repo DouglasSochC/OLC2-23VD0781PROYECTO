@@ -5,12 +5,13 @@ from ..expresiones.identificador import Identificador
 
 class Accion(Expresion):
 
-    def __init__(self, tipo_accion: str, accion: list[Campo_Table] | Identificador):
+    def __init__(self, id_nodo, tipo_accion: str, accion: list[Campo_Table] | Identificador):
+        self.id_nodo = id_nodo
         self.tipo_accion = tipo_accion
         self.accion = accion
 
     def Ejecutar(self, base_datos, entorno):
-
+        
         if self.tipo_accion == 'add':
 
             respuesta = []
@@ -36,6 +37,25 @@ class Accion(Expresion):
 
             nombre_columna = res_accion.identificador
             return nombre_columna
-
+        
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ACCION")
+        label_tipo_accion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "C", self.tipo_accion)
+        union_encabezado_tipo_accion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "C")
+        result = label_encabezado + label_tipo_accion + union_encabezado_tipo_accion
+
+        if isinstance(self.accion, list) and self.accion:
+            primer_elemento = self.accion[0]
+            if isinstance(primer_elemento, Campo_Table):
+                for campo in self.accion:
+                    label_campo = campo.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
+                    result += label_campo + union_tipo_accion_campo
+            else:
+                label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
+                result += label_tipo_dato 
+        else:
+            label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
+            result += label_tipo_dato
+
+        return result

@@ -184,16 +184,21 @@ def p_campos_table(p):
                  | identificador tipo_dato constraint
                  | identificador tipo_dato
     '''
+    global contador
+    elemento_hashable = p[3] if len(p) > 3 else p[1]
+    id_nodo = str(abs(hash(elemento_hashable)) + contador)
+    contador += 1
     if len(p) == 6:
-        p[1].append(Campo_Table(p[3], p[4], p[5]))
+        p[1].append(Campo_Table(id_nodo,p[3], p[4], p[5]))
         p[0] = p[1]
     elif len(p) == 5:
-        p[1].append(Campo_Table(p[3], p[4], None))
+        p[1].append(Campo_Table(id_nodo,p[3], p[4], None))
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = [Campo_Table(p[1], p[2], p[3])]
+        print("aqui entraste")
+        p[0] = [Campo_Table(id_nodo,p[1], p[2], p[3])]
     elif len(p) == 3:
-        p[0] = [Campo_Table(p[1], p[2], None)]
+        p[0] = [Campo_Table(id_nodo,p[1], p[2], None)]
 
 def p_parametros(p):
     '''
@@ -208,26 +213,35 @@ def p_constraint(p):
               | NOT NULL
               | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     p[1] = p[1].lower()
     if p[1] == 'primary':
-        p[0] = Constraint('primary key', None, None)
+        p[0] = Constraint(id_nodo,'primary key', None, None)
     elif p[1] == 'not':
-        p[0] = Constraint('not null', None, None)
+        p[0] = Constraint(id_nodo,'not null', None, None)
     elif p[1] == 'references':
-        p[0] = Constraint('references', p[2], p[4])
+        p[0] = Constraint(id_nodo,'references', p[2], p[4])
 
 def p_alter(p):
     '''
     alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
-    p[0] = Alter(p[3], p[4])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Alter(id_nodo,p[3], p[4])
 
 def p_accion(p):
     '''
     accion : ADD COLUMN campos_table
            | DROP COLUMN identificador
     '''
-    p[0] = Accion(p[1].lower(), p[3])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Accion(id_nodo,p[1].lower(), p[3])
 
 def p_drop(p):
     '''

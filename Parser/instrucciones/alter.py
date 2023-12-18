@@ -6,12 +6,13 @@ from Funcionalidad.ddl import DDL
 
 class Alter(Instruccion):
 
-    def __init__(self, identificador: Identificador, accion: Accion):
+    def __init__(self, id_nodo,identificador: Identificador, accion: Accion):
+        self.id_nodo = id_nodo
         self.identificador = identificador
         self.accion = accion
 
     def Ejecutar(self, base_datos, entorno):
-
+        
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("ALTER")
 
@@ -36,6 +37,11 @@ class Alter(Instruccion):
             return res_alter_add.valor if res_alter_add.success else "ERROR: {}".format(res_alter_add.valor)
         else:
             return "ERROR: Ha ocurrido un error al realizar la instruccion 'ALTER'"
-
+    
+        
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALTER")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        label_accion = self.accion.GraficarArbol(self.id_nodo)
+        union_encabezado_accion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.accion.id_nodo)
+        return label_encabezado + label_identificador + label_accion  + union_encabezado_accion
