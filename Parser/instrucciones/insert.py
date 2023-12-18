@@ -5,13 +5,14 @@ from Funcionalidad.dml import DML
 
 class Insert(Instruccion):
 
-    def __init__(self, identificador: Identificador, lista_campos: list, lista_valores: list):
+    def __init__(self, id_nodo, identificador: Identificador, lista_campos: list, lista_valores: list):
+        self.id_nodo = id_nodo
         self.identificador = identificador
         self.lista_campos = lista_campos
         self.lista_valores = lista_valores
 
     def Ejecutar(self, base_datos, entorno):
-
+        '''
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("INSERT")
 
@@ -57,6 +58,26 @@ class Insert(Instruccion):
             return res_dml.valor
         else:
             return "ERROR: {}".format(res_dml.valor)
-
+'''
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "INSERT")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        resultado = label_encabezado + label_identificador
+
+        if self.lista_campos is not None:
+            for campo in self.lista_campos:
+                label_campo = campo.GraficarArbol(self.id_nodo)
+                unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, campo.id_nodo)
+                resultado += label_campo + unir_campo
+        
+        label_values = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"c", "VALUES")
+        union_values = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.id_nodo+"c")
+        resultado += label_values + union_values
+        
+        if self.lista_valores is not None:
+            for valor in self.lista_valores:
+                label_valor = valor.GraficarArbol(self.id_nodo)
+                unir_valor = "\"{}\" -> \"{}\"\n".format(self.id_nodo, valor.id_nodo)
+                resultado += label_valor + unir_valor
+        
+        return resultado
