@@ -12,7 +12,7 @@ class Insert(Instruccion):
         self.lista_valores = lista_valores
 
     def Ejecutar(self, base_datos, entorno):
-        '''
+        
         if base_datos.valor == "":
             return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("INSERT")
 
@@ -58,7 +58,7 @@ class Insert(Instruccion):
             return res_dml.valor
         else:
             return "ERROR: {}".format(res_dml.valor)
-'''
+
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "INSERT")
         label_identificador = self.identificador.GraficarArbol(self.id_nodo)
