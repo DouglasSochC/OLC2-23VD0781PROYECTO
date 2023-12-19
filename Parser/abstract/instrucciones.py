@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractclassmethod
+from ..tablas.tabla_simbolo import TablaDeSimbolos
 
 class Instruccion(metaclass=ABCMeta):
 
@@ -6,7 +7,7 @@ class Instruccion(metaclass=ABCMeta):
         pass
 
     @abstractclassmethod
-    def Ejecutar(self, base_datos, entorno):
+    def Ejecutar(self, base_datos, entorno: TablaDeSimbolos):
         pass
 
     @abstractclassmethod

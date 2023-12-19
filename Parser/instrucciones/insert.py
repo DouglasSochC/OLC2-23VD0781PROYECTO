@@ -12,9 +12,9 @@ class Insert(Instruccion):
         self.lista_valores = lista_valores
 
     def Ejecutar(self, base_datos, entorno):
-        
+
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("INSERT")
+            return "Para ejecutar el comando '{}', es necesario seleccionar una base de datos.".format("INSERT")
 
         # Se obtiene el nombre de la tabla
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
@@ -69,15 +69,15 @@ class Insert(Instruccion):
                 label_campo = campo.GraficarArbol(self.id_nodo)
                 unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, campo.id_nodo)
                 resultado += label_campo + unir_campo
-        
+
         label_values = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"c", "VALUES")
         union_values = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.id_nodo+"c")
         resultado += label_values + union_values
-        
+
         if self.lista_valores is not None:
             for valor in self.lista_valores:
                 label_valor = valor.GraficarArbol(self.id_nodo)
                 unir_valor = "\"{}\" -> \"{}\"\n".format(self.id_nodo, valor.id_nodo)
                 resultado += label_valor + unir_valor
-        
+
         return resultado

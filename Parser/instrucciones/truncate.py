@@ -9,9 +9,9 @@ class Truncate(Instruccion):
         self.identificador = identificador
 
     def Ejecutar(self, base_datos, entorno):
-        
+
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("TRUNCATE")
+            return "Para ejecutar el comando '{}', es necesario seleccionar una base de datos.".format("TRUNCATE")
 
         # Se obtiene el nombre de la tabla
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
@@ -27,7 +27,7 @@ class Truncate(Instruccion):
             return res_truncate.valor
         else:
             return "ERROR: {}".format(res_truncate.valor)
-        
+
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TRUNCATE")
         label_identificador = self.identificador.GraficarArbol(self.id_nodo)

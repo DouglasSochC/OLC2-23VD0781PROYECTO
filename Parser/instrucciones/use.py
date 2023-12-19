@@ -9,9 +9,8 @@ class Use(Instruccion):
         pass
 
     def Ejecutar(self, base_datos, entorno):
-        
+
         nombre = self.identificador
-        nombre = nombre[1:-1]
 
         administracion = Administracion()
 

@@ -13,32 +13,11 @@ class TIPO_DATO(Enum):
     BOOLEAN = 8
 
 @unique
-class TIPO_TOKEN(Enum) :
-    ALIAS = 1
-    VARIABLE = 2
-    FUNCION = 3
-    PROCEDIMIENTO = 4
-    SELECT = 5
-    UPDATE = 6
-    INSERT = 7
-    DELETE = 8
-    CREATE = 9
-    USE = 10
-    DROP = 11
-    TRUNCATE = 12
-    ALTER = 13
-    EXEC = 14
-    PARAMETRO = 15
-    COLUMNA = 16
-    NOMBRE_TABLA = 17
-
-@unique
 class TIPO_ENTORNO(Enum) :
     GLOBAL = 1
-    IF = 2
-    WHILE = 3
-    FUNCION = 4
-    PROCEDIMIENTO = 5
+    SENTENCIA_DDL = 2
+    SENTENCIA_DML = 3
+    SENTENCIA_SSL = 4
 
 @unique
 class TIPO_OPERACION(Enum):
@@ -55,7 +34,7 @@ class TIPO_OPERACION(Enum):
     ASIGNACION = 11
     OR_OP = 12
     AND_OP = 13
-    NOT = 14
+    NOT_OP = 14
 
 class RetornoLiteral:
     def __init__(self, valor = None, tipado = TIPO_DATO.NULL):

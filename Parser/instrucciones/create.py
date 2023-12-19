@@ -6,7 +6,7 @@ from Funcionalidad.ddl import DDL
 
 class Create(Instruccion):
 
-    def __init__(self, id_nodo,instruccion: str, identificador: Identificador, campos_table: list[Campo_Table]):
+    def __init__(self, id_nodo: str, instruccion: str, identificador: Identificador, campos_table: list[Campo_Table]):
         self.id_nodo = id_nodo
         self.instruccion = instruccion
         self.identificador = identificador
@@ -16,7 +16,7 @@ class Create(Instruccion):
         # Crear un procedimiento
         # Crear una funcion
     def Ejecutar(self, base_datos, entorno):
-        
+
         ddl = DDL()
 
         # Se obtiene el nombre
@@ -31,7 +31,7 @@ class Create(Instruccion):
         else:
 
             if base_datos.valor == "":
-                return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("CREATE")
+                return "Para ejecutar el comando '{}', es necesario seleccionar una base de datos.".format("CREATE")
 
             if self.instruccion == 'table':
 
@@ -46,11 +46,12 @@ class Create(Instruccion):
 
                 res = ddl.crear_tabla(base_datos.valor, nombre, campos)
                 return res.valor if res.success else "ERROR: {}".format(res.valor)
-        
+
+    #TODO: Falta implementar lo siguiente
+        # Graficar un procedimiento
+        # Graficar una funcion
     def GraficarArbol(self, id_padre):
-        #TODO: Falta implementar lo siguiente
-        # GRAFICAR UN PROCEDIMIENTO
-        # GRAFICAR UNA FUNCION
+
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CREATE")
         label_instruccion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "CR", self.instruccion)
         union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "CR")
@@ -66,6 +67,6 @@ class Create(Instruccion):
                     result += label_campo + union_tipo_accion_campo
             else:
                 label_tipo_dato = self.campos_table.GraficarArbol(self.id_nodo)
-                result += label_tipo_dato 
-           
+                result += label_tipo_dato
+
         return result

@@ -1,7 +1,5 @@
 from ply.yacc import yacc
 from .lexer import tokens, lexer, errores
-from .expresiones.literal import *
-from .abstract.retorno import *
 
 # Clases
 from .abstract.retorno import TIPO_DATO
@@ -17,6 +15,7 @@ from .expresiones.logico import Logico
 from .expresiones.expresion import Expresion
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .expresiones.accion import Accion
+from .expresiones.literal import Literal
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
@@ -37,7 +36,7 @@ precedence = (
     ('left', 'IGUALIGUAL', 'DIFERENTE', 'MENOR', 'MAYOR', 'MENORIGUAL', 'MAYORIGUAL'),
     ('left', 'MAS', 'MENOS'),
     ('left', 'POR', 'DIVIDIDO'),
-    ('right', 'NOT'),
+    ('right', 'NOT_OP'),
     ('left', 'IZQPAREN', 'DERPAREN'),
 )
 
@@ -70,10 +69,11 @@ def p_instruccion(p):
                 | usar_db
                 | asignacion
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = IdentificadorLista(id_nodo, p[1])
+    # global contador
+    # id_nodo = str(abs(hash(p[1])) + contador)
+    # contador += 1
+    # p[0] = IdentificadorLista(id_nodo, p[1])
+    p[0] = p[1]
 
 def p_asignacion(p):
     '''
@@ -412,7 +412,7 @@ def p_expresion(p):
     elif len(p) == 4:
         p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
-        #TODO: por probar 
+        #TODO: por probar
         p[0] = Expresion(id_nodo, p[4])
 
 def p_alias(p):

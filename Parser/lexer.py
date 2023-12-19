@@ -131,7 +131,6 @@ t_DERPAREN = r'\)'
 # Literal
 t_LFECHA = r'\d{2}-\d{2}-\d{4}'
 t_LFECHAHORA = r'\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}'
-t_LVARCHAR =  r'\"([^\\\n]|(\\.))*?\"'
 
 # Otros
 t_IGUAL = r'\='
@@ -156,6 +155,11 @@ def t_ID(t):
     r'[A-Za-z_][A-Za-z0-9_]*'
     t.value = t.value.lower()
     t.type = reservadas.get(t.value.lower(), 'ID')
+    return t
+
+def t_LVARCHAR(t):
+    r'(\'[^\']*\'|\"[^\"]*\")'
+    t.value = t.value[1:-1] # Se remueven las comillas
     return t
 
 # Comentario de múltiples líneas /* .. */

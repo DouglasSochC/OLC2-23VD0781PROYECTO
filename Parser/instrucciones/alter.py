@@ -12,9 +12,9 @@ class Alter(Instruccion):
         self.accion = accion
 
     def Ejecutar(self, base_datos, entorno):
-         
+
         if base_datos.valor == "":
-            return "Para ejecutar la consulta '{}', es necesario seleccionar una base de datos.".format("ALTER")
+            return "Para ejecutar el comando '{}', es necesario seleccionar una base de datos.".format("ALTER")
 
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
         if isinstance(res_identificador, RetornoError):
@@ -37,8 +37,7 @@ class Alter(Instruccion):
             return res_alter_add.valor if res_alter_add.success else "ERROR: {}".format(res_alter_add.valor)
         else:
             return "ERROR: Ha ocurrido un error al realizar la instruccion 'ALTER'"
-     
-        
+
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALTER")
         label_identificador = self.identificador.GraficarArbol(self.id_nodo)

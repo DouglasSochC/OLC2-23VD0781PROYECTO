@@ -74,24 +74,24 @@ class Literal(Expresion):
 
             ref = len(str(self.value))
             if(1 <= ref <= 4000):
-                return RetornoLiteral(str(self.value)[1:-1], TIPO_DATO.NCHAR)
+                return RetornoLiteral(str(self.value), TIPO_DATO.NCHAR)
             else:
-                return RetornoLiteral(self.value[1:-1], TIPO_DATO.NULL)
+                return RetornoLiteral(self.value, TIPO_DATO.NULL)
 
         elif self.tipado == TIPO_DATO.NVARCHAR:
 
             ref = len(str(self.value))
             if(0 < ref <= 2000000):
-                return RetornoLiteral(str(self.value)[1:-1], TIPO_DATO.NVARCHAR)
+                return RetornoLiteral(str(self.value), TIPO_DATO.NVARCHAR)
             else:
-                return RetornoLiteral(self.value[1:-1], TIPO_DATO.NULL)
+                return RetornoLiteral(self.value, TIPO_DATO.NULL)
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "LITERAL")
         label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "I", self.removeQuotes(self.value))
         union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "I")
-        return label_encabezado + label_valor + union_hijo 
-    
+        return label_encabezado + label_valor + union_hijo
+
     def removeQuotes(self, value):
         if isinstance(value, str):
             if value.startswith('"') and value.endswith('"'):

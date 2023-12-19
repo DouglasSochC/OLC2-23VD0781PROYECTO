@@ -3,7 +3,7 @@ from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoErro
 
 class Relacional(Expresion):
 
-    def __init__(self,id_nodo, expresion_izquierda: any, operador: str, expresion_derecha: any):
+    def __init__(self,id_nodo, expresion_izquierda: RetornoIdentificador | RetornoLiteral, operador: str, expresion_derecha: RetornoIdentificador | RetornoLiteral):
         self.id_nodo = id_nodo
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador

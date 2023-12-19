@@ -16,7 +16,7 @@ instrucciones = parse(
 DELETE FROM producto1 WHERE id > 100; -- ERROR: No existe la tabla en la BD
 DELETE FROM producto WHERE test < 100; -- ERROR: No existe la columna 'test' en la tabla
 DELETE FROM tipo_producto WHERE id <= 5; -- ERROR: Este ID esta siendo utilizado en otra tabla
-DELETE FROM producto WHERE id <= 10; -- EXITO
+DELETE FROM producto WHERE id <= 10; -- EXITO 10 ELIMINACIONES
 ''')
 
 # Se revisa que se haya obtenido una instrucciones
