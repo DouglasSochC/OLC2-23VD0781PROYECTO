@@ -27,7 +27,7 @@ class TablaDeSimbolos():
 
             # Caso contrario que no se encuentre se busca en un nivel superior
             if self.padre is not None:
-                return self.padre.obtener(self.id)
+                return self.padre.obtener(id)
 
             return None
 

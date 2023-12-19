@@ -55,6 +55,11 @@ class RetornoRelacional:
         self.operador = operador
         self.operacion_derecha = operacion_derecha
 
+class RetornoAsignacion:
+    def __init__(self, nombre_variable: str, expresion: any):
+        self.nombre_variable = nombre_variable
+        self.expresion = expresion
+
 class RetornoError:
     def __init__(self, msg: str):
         self.msg = msg

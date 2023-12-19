@@ -19,9 +19,20 @@ class Relacional(Expresion):
         elif isinstance(exp_der, RetornoError):
             return exp_der
         if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
             return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.lista)
         elif isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoLiteral):
-            return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
+            # EVALUAR ESTO EN EL SELECT
+            if len(exp_izq.lista) <= 0:
+                return RetornoRelacional(None, exp_izq.identificador, self.operador, exp_der.valor)
+            else:
+                return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
 

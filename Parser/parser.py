@@ -26,6 +26,7 @@ from .instrucciones.delete import Delete
 from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.set import Set
+from .instrucciones.if_i import If_I
 contador = 0
 
 # Operadores de precedencia
@@ -353,8 +354,20 @@ def p_if(p):
     '''
         if : IF expresion THEN instrucciones ELSE instrucciones END IF PUNTOYCOMA
            | IF expresion THEN instrucciones END IF PUNTOYCOMA
+           | IF expresion BEGIN instrucciones END ELSE BEGIN instrucciones END
+           | IF expresion BEGIN instrucciones END
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    if len(p) == 10 and p[3].lower() == 'then':
+        p[0] = If_I(id_nodo, p[2], p[4], p[6])
+    elif len(p) == 8:
+        p[0] = If_I(id_nodo, p[2], p[4], None)
+    elif len(p) == 10 and p[3].lower() == 'begin':
+        p[0] = If_I(id_nodo, p[2], p[4], p[8])
+    elif len(p) == 6:
+        p[0] = If_I(id_nodo, p[2], p[4], None)
 
 def p_while(p):
     '''
