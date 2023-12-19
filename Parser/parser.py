@@ -25,8 +25,7 @@ from .instrucciones.truncate import Truncate
 from .instrucciones.delete import Delete
 from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
-from .instrucciones.select_print import Select_Print
-from .instrucciones.listaGrafico.identificadorLista import IdentificadorLista
+from .instrucciones.set import Set
 contador = 0
 
 # Operadores de precedencia
@@ -43,75 +42,84 @@ precedence = (
 # Gramatica
 def p_inicio(p):
     '''
-    inicio : instrucciones
+        inicio : instrucciones
     '''
     p[0] = p[1]
 
 def p_instrucciones_lista(p):
     '''
-    instrucciones : instrucciones instruccion
+        instrucciones : instrucciones instruccion
     '''
     p[1].append(p[2])
     p[0] = p[1]
 
 def p_instrucciones_lista2(p):
     '''
-    instrucciones : instruccion
+        instrucciones : instruccion
     '''
     p[0] = [p[1]]
 
 def p_instruccion(p):
     '''
-    instruccion : declaracion_variable
-                | sentencia_ddl
-                | sentencia_dml
-                | llamar_procedure
-                | usar_db
-                | asignacion
+        instruccion : declare
+                    | set
+                    | if
+                    | while
+                    | comando_sql
+                    | RETURN expresion PUNTOYCOMA
     '''
-    # global contador
-    # id_nodo = str(abs(hash(p[1])) + contador)
-    # contador += 1
-    # p[0] = IdentificadorLista(id_nodo, p[1])
     p[0] = p[1]
 
-def p_asignacion(p):
+def p_comando_sql(p):
     '''
-    asignacion  : SET expresion PUNTOYCOMA
+        comando_sql : sentencia_ddl
+                    | sentencia_dml
+                    | exec
+                    | use
     '''
-    #p[0] =
+    p[0] = p[1]
+
+def p_set(p):
+    '''
+    set  : SET identificador IGUAL expresion PUNTOYCOMA
+    '''
+    p[0] = Set(None, p[2], p[4])
 
 def p_usar_db(p):
     '''
-    usar_db : USE LVARCHAR PUNTOYCOMA
+        use : USE LVARCHAR PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     p[0] = Use(id_nodo,p[2])
 
-def p_declaracion_variable(p):
+def p_declare(p):
     '''
-    declaracion_variable : DECLARE identificador tipo_dato PUNTOYCOMA
+        declare : DECLARE identificador tipo_dato PUNTOYCOMA
+                | DECLARE identificador AS tipo_dato PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    p[0] = Declare(id_nodo, p[2], p[3])
+    if len(p) == 5:
+        p[0] = Declare(id_nodo, p[2], p[3])
+    elif len(p) == 6:
+        p[0] = Declare(id_nodo, p[2], p[4])
 
 def p_tipo_dato(p):
     '''
-    tipo_dato : seg_num
-        | seg_date
-        | seg_string
+        tipo_dato : seg_num
+                  | seg_date
+                  | seg_string
     '''
     p[0] = p[1]
 
 def p_seg_num(p):
     '''
-    seg_num : INT
-            | DECIMAL
-            | BIT
+        seg_num : INT
+                | DECIMAL
+                | BIT
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -128,8 +136,8 @@ def p_seg_num(p):
 
 def p_seg_date(p):
     '''
-    seg_date : DATE
-            | DATETIME
+        seg_date : DATE
+                 | DATETIME
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -144,8 +152,8 @@ def p_seg_date(p):
 
 def p_seg_string(p):
     '''
-    seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
-                | NCHAR IZQPAREN LNUMERO DERPAREN
+        seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
+                   | NCHAR IZQPAREN LNUMERO DERPAREN
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -171,8 +179,8 @@ def p_create(p):
     '''
         create : CREATE DATABASE identificador PUNTOYCOMA
                | CREATE TABLE identificador IZQPAREN campos_table DERPAREN PUNTOYCOMA
-               | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN lista_sentencias_dml END PUNTOYCOMA
-               | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN lista_sentencias_dml END PUNTOYCOMA
+               | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN instrucciones END PUNTOYCOMA
+               | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN instrucciones END PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -186,10 +194,10 @@ def p_create(p):
 
 def p_campos_table(p):
     '''
-    campos_table : campos_table COMA identificador tipo_dato constraint
-                 | campos_table COMA identificador tipo_dato
-                 | identificador tipo_dato constraint
-                 | identificador tipo_dato
+        campos_table : campos_table COMA identificador tipo_dato constraint
+                    | campos_table COMA identificador tipo_dato
+                    | identificador tipo_dato constraint
+                    | identificador tipo_dato
     '''
     global contador
     elemento_hashable = p[3] if len(p) > 3 else p[1]
@@ -208,16 +216,16 @@ def p_campos_table(p):
 
 def p_parametros(p):
     '''
-    parametros : parametros COMA identificador tipo_dato
+        parametros : parametros COMA identificador tipo_dato
                 | identificador tipo_dato
     '''
     p[0] = p[1]
 
 def p_constraint(p):
     '''
-    constraint : PRIMARY KEY
-              | NOT NULL
-              | REFERENCES identificador IZQPAREN identificador DERPAREN
+        constraint : PRIMARY KEY
+                   | NOT NULL
+                   | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -232,7 +240,7 @@ def p_constraint(p):
 
 def p_alter(p):
     '''
-    alter : ALTER TABLE identificador accion PUNTOYCOMA
+        alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -241,8 +249,8 @@ def p_alter(p):
 
 def p_accion(p):
     '''
-    accion : ADD COLUMN campos_table
-           | DROP COLUMN identificador
+        accion : ADD COLUMN campos_table
+               | DROP COLUMN identificador
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -251,10 +259,10 @@ def p_accion(p):
 
 def p_drop(p):
     '''
-    drop : DROP DATABASE identificador PUNTOYCOMA
-         | DROP TABLE identificador PUNTOYCOMA
-         | DROP PROCEDURE identificador PUNTOYCOMA
-         | DROP FUNCTION identificador PUNTOYCOMA
+        drop : DROP DATABASE identificador PUNTOYCOMA
+             | DROP TABLE identificador PUNTOYCOMA
+             | DROP PROCEDURE identificador PUNTOYCOMA
+             | DROP FUNCTION identificador PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -263,40 +271,25 @@ def p_drop(p):
 
 def p_truncate(p):
     '''
-    truncate : TRUNCATE TABLE identificador PUNTOYCOMA
+        truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     p[0] = Truncate(id_nodo,p[3])
 
-def p_lista_sentencias_dml(p):
+def p_exec(p):
     '''
-    lista_sentencias_dml : lista_sentencias_dml sentencia_dml
-                         | sentencia_dml
-    '''
-    if len(p) == 3:
-        p[1].append(p[2])
-        p[0] = p[1]
-    else:
-        p[0] = [p[1]]
-
-def p_llamar_procedure(p):
-    '''
-    llamar_procedure : EXEC identificador lista_expresiones PUNTOYCOMA
+        exec : EXEC identificador lista_expresiones PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_sentencia_dml(p):
     '''
-    sentencia_dml : select
-                | insert
-                | update
-                | delete
-                | if
-                | while
-                | RETURN expresion PUNTOYCOMA
-                | expresion
+        sentencia_dml : select
+                      | insert
+                      | update
+                      | delete
     '''
     if len(p) == 4:
         p[0] = p[2]
@@ -314,7 +307,7 @@ def p_select(p):
                | SELECT lista_expresiones PUNTOYCOMA
     '''
     if len(p) == 4:
-        p[0] = Select_Print(p[2])
+        p[0] = Select(None, p[2], None)
     elif len(p) == 6 and p[2] == '*':
         p[0] = Select(p[4], [p[2]], None)
     elif len(p) == 6 and p[3].lower() == 'from':
@@ -330,7 +323,7 @@ def p_select(p):
 
 def p_insert(p):
     '''
-    insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+        insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -339,14 +332,14 @@ def p_insert(p):
 
 def p_update(p):
     '''
-    update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
+        update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_delete(p):
     '''
-    delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
-           | DELETE FROM identificador PUNTOYCOMA
+        delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
+               | DELETE FROM identificador PUNTOYCOMA
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -358,21 +351,21 @@ def p_delete(p):
 
 def p_if(p):
     '''
-    if : IF expresion THEN sentencia_dml ELSE sentencia_dml END IF PUNTOYCOMA
-       | IF expresion THEN sentencia_dml END IF PUNTOYCOMA
+        if : IF expresion THEN instrucciones ELSE instrucciones END IF PUNTOYCOMA
+           | IF expresion THEN instrucciones END IF PUNTOYCOMA
     '''
     p[0] = p[1]
 
 def p_while(p):
     '''
-    while : WHILE expresion BEGIN lista_sentencias_dml END
+        while : WHILE expresion BEGIN instrucciones END
     '''
     p[0] = p[1]
 
 def p_condicion(p):
     '''
-    condicion : condicion AND expresion
-              | expresion
+        condicion : condicion AND expresion
+                  | expresion
     '''
     if len(p) == 4:
         p[1].append(p[3])
@@ -383,7 +376,7 @@ def p_condicion(p):
 def p_lista_expresiones(p):
     '''
         lista_expresiones : lista_expresiones COMA expresion
-                         | expresion
+                          | expresion
     '''
     if len(p) == 4:
         p[1].append(p[3])
@@ -394,15 +387,15 @@ def p_lista_expresiones(p):
 def p_expresion(p):
     '''
         expresion : aritmeticos
-                | relacionales
-                | logicos
-                | literal
-                | funcion_nativa
-                | IZQPAREN expresion DERPAREN
-                | asignacion_exp
-                | identificador
-                | alias
-                | IF IZQPAREN lista_expresiones DERPAREN
+                  | relacionales
+                  | logicos
+                  | literal
+                  | funcion_nativa
+                  | IZQPAREN expresion DERPAREN
+                  | asignacion
+                  | identificador
+                  | alias
+                  | IF IZQPAREN lista_expresiones DERPAREN
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -418,7 +411,7 @@ def p_expresion(p):
 def p_alias(p):
     '''
         alias : expresion AS ID
-            | expresion ID
+              | expresion ID
     '''
     global contador
     id_nodo = str(abs(hash("AS")) + contador)
@@ -428,23 +421,23 @@ def p_alias(p):
     elif len(p) == 4:
         p[0] = Alias(id_nodo, p[1], p[3])
 
-def p_asignacion_exp(p):
+def p_asignacion(p):
     '''
-        asignacion_exp : ID IGUAL expresion
+        asignacion : identificador IGUAL expresion
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    p[0] = Asignacion(id_nodo,p[1], p[2], p[3])
+    p[0] = Asignacion(id_nodo, p[1], p[3])
 
 def p_funcion_nativa(p):
     '''
         funcion_nativa : CONCATENA IZQPAREN lista_expresiones DERPAREN
-                          | SUBSTRAER IZQPAREN lista_expresiones DERPAREN
-                          | HOY IZQPAREN DERPAREN
-                          | CONTAR IZQPAREN POR DERPAREN
-                          | SUMA IZQPAREN expresion DERPAREN
-                          | CAST IZQPAREN expresion AS tipo_dato DERPAREN
+                       | SUBSTRAER IZQPAREN lista_expresiones DERPAREN
+                       | HOY IZQPAREN DERPAREN
+                       | CONTAR IZQPAREN POR DERPAREN
+                       | SUMA IZQPAREN expresion DERPAREN
+                       | CAST IZQPAREN expresion AS tipo_dato DERPAREN
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -478,12 +471,12 @@ def p_aritmeticos(p):
 def p_relacionales(p):
     '''
         relacionales : expresion IGUALIGUAL expresion
-                    | expresion DIFERENTE expresion
-                    | expresion MENOR expresion
-                    | expresion MAYOR expresion
-                    | expresion MENORIGUAL expresion
-                    | expresion MAYORIGUAL expresion
-                    | BETWEEN expresion AND expresion
+                     | expresion DIFERENTE expresion
+                     | expresion MENOR expresion
+                     | expresion MAYOR expresion
+                     | expresion MENORIGUAL expresion
+                     | expresion MAYORIGUAL expresion
+                     | BETWEEN expresion AND expresion
     '''
     global contador
     id_nodo = str(abs(hash("relacionalesOLC2")) + contador)
@@ -557,9 +550,9 @@ def p_literal5(p):
 
 def p_identificador(p):
     '''
-    identificador : ID
-                  | ID PUNTO ID
-                  | ARROBA ID
+        identificador : ID
+                      | ID PUNTO ID
+                      | ARROBA ID
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
@@ -567,7 +560,7 @@ def p_identificador(p):
     if len(p) == 2:
         p[0] = Identificador(id_nodo, p[1])
     elif len(p) == 3:
-        p[0] = Identificador(id_nodo, p[2])
+        p[0] = Identificador(id_nodo, p[1] + p[2])
     elif len(p) == 4 and p[2] == '.':
         p[0] = Identificador(id_nodo, p[3], p[1])
 
