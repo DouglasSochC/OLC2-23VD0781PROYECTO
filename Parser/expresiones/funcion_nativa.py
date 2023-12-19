@@ -13,7 +13,7 @@ class Funcion_Nativa(Expresion):
 
         if self.expresiones is not None:
 
-            if(self.accion == "CONCATENA"):
+            if(self.accion == "concatena"):
 
                 respuesta = None
                 alias = ""
@@ -77,7 +77,7 @@ class Funcion_Nativa(Expresion):
                 else:
                     return RetornoLiteral(respuesta, TIPO_DATO.NVARCHAR)
 
-            elif(self.accion == "SUBSTRAER"):
+            elif(self.accion == "substraer"):
 
                 respuesta = None
 
@@ -123,21 +123,21 @@ class Funcion_Nativa(Expresion):
 
                 return RetornoError("ERROR: Ha ocurrido un error al realizar la operacion SUBSTRAER.")
 
-            # elif(self.accion == "CONTAR"):
+            # elif(self.accion == "contar"):
 
             #     return RetornoLiteral(None, TIPO_DATO.INT)
 
-            # elif(self.accion == "SUMA"):
+            # elif(self.accion == "suma"):
 
             #     return RetornoLiteral(None, TIPO_DATO.DECIMAL)
 
-            # elif(self.accion == "CAS"):
+            # elif(self.accion == "cas"):
 
             #     return RetornoLiteral(None, TIPO_DATO.DECIMAL)
 
         else:
 
-            if(self.accion == "HOY"):
+            if(self.accion == "hoy"):
 
                 fecha_hora_actual = datetime.datetime.now()
                 fecha_hora_formateada = fecha_hora_actual.strftime("%d-%m-%Y %H:%M:%S")
@@ -145,17 +145,17 @@ class Funcion_Nativa(Expresion):
 
 
         return RetornoError("ERROR: Ha ocurrido un error al realizar la funcion nativa")
-    
+
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "FUNCION NATIVA")
         label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "A", self.accion)
         union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "A")
         resultado_exp = ""
-        
+
         if(self.expresiones is None):
           return label_encabezado+ label_operador + union_enca_operador
-        
+
         if isinstance(self.expresiones, list):
             print("es lista")
             for exp in self.expresiones:
@@ -166,8 +166,6 @@ class Funcion_Nativa(Expresion):
             union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresiones.id_nodo)
             resultado_izquierda = self.expresiones.GraficarArbol(self.id_nodo)
             resultado_exp += union_hijo_izquierdo + resultado_izquierda
-      
-      
-        return label_encabezado+ label_operador + union_enca_operador+ resultado_exp
 
-     
+
+        return label_encabezado+ label_operador + union_enca_operador+ resultado_exp

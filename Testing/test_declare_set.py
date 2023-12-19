@@ -11,11 +11,14 @@ from Parser.tablas.tabla_simbolo import TablaDeSimbolos
 ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
-
 '''
-DELETE FROM producto WHERE id < 110;
-DELETE FROM producto WHERE id == 110;
-DELETE FROM producto;
+DECLARE @texto NCHAR(1); -- EXITO
+SET @texto = "ab"; -- ERROR: Se excede la dimension
+
+DECLARE @hola DATETIME; -- EXITO
+DECLARE @hola DATETIME; -- ERROR: Ya esta instanciada el nombre
+SET @hola = "123"; -- ERROR: Tipo de dato
+SET @hola = HOY(); -- EXITO
 ''')
 
 # Se revisa que se haya obtenido una instrucciones
@@ -27,4 +30,3 @@ if instrucciones is not None:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos, ts_global)
             print(res)
-
