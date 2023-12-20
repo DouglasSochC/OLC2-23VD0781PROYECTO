@@ -1,4 +1,4 @@
-from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral, RetornoIdentificador
+from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral, RetornoArreglo
 from ..abstract.expresiones import Expresion
 import datetime
 
@@ -33,7 +33,7 @@ class Funcion_Nativa(Expresion):
                             respuesta = res_ejecutar.valor
                             alias += res_ejecutar.valor
 
-                        elif respuesta is None and isinstance(res_ejecutar, RetornoIdentificador):
+                        elif respuesta is None and isinstance(res_ejecutar, RetornoArreglo):
 
                             respuesta = res_ejecutar.lista
                             alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
@@ -49,13 +49,13 @@ class Funcion_Nativa(Expresion):
                             respuesta += res_ejecutar.valor
                             alias += res_ejecutar.valor
 
-                        elif isinstance(res_ejecutar, RetornoIdentificador) and isinstance(respuesta, list):
+                        elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, list):
 
                             for llave, valor in enumerate(res_ejecutar.lista):
                                 respuesta[llave]['temporal'] = respuesta[llave]['temporal'] + valor['temporal']
                             alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
 
-                        elif isinstance(res_ejecutar, RetornoIdentificador) and isinstance(respuesta, list) is False:
+                        elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, list) is False:
 
                             for valor in res_ejecutar.lista:
                                 valor['temporal'] = respuesta + valor['temporal']
@@ -66,14 +66,14 @@ class Funcion_Nativa(Expresion):
                         elif isinstance(res_ejecutar, RetornoError):
                             return res_ejecutar
 
-                    elif isinstance(res_ejecutar, RetornoIdentificador):
+                    elif isinstance(res_ejecutar, RetornoArreglo):
                         return RetornoError("La concatenación no puede llevarse a cabo con la columna '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.identificador))
                     elif isinstance(res_ejecutar, RetornoLiteral):
                         return RetornoError("La concatenación no puede llevarse a cabo con el valor '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.valor))
 
 
                 if isinstance(respuesta, list):
-                    return RetornoIdentificador(alias, TIPO_DATO.NVARCHAR, respuesta)
+                    return RetornoArreglo(alias, TIPO_DATO.NVARCHAR, respuesta)
                 else:
                     return RetornoLiteral(respuesta, TIPO_DATO.NVARCHAR)
 
@@ -109,7 +109,7 @@ class Funcion_Nativa(Expresion):
                     texto.valor = texto.valor[inicial.valor:longitud.valor]
                     return RetornoLiteral(texto.valor, TIPO_DATO.NVARCHAR)
 
-                elif isinstance(texto, RetornoIdentificador):
+                elif isinstance(texto, RetornoArreglo):
 
                     if isinstance(inicial, RetornoLiteral) is False:
                         return RetornoError("ERROR: El valor del inicial debe de ser entero")
@@ -119,7 +119,7 @@ class Funcion_Nativa(Expresion):
                     for valor in texto.lista:
                         valor['temporal'] = valor['temporal'][inicial.valor:longitud.valor]
 
-                    return RetornoIdentificador(texto.identificador, TIPO_DATO.NVARCHAR, texto.lista)
+                    return RetornoArreglo(texto.identificador, TIPO_DATO.NVARCHAR, texto.lista)
 
                 return RetornoError("ERROR: Ha ocurrido un error al realizar la operacion SUBSTRAER.")
 

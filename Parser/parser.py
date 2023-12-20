@@ -16,6 +16,7 @@ from .expresiones.expresion import Expresion
 from .expresiones.funcion_nativa import Funcion_Nativa
 from .expresiones.accion import Accion
 from .expresiones.literal import Literal
+from .expresiones.parametro import Parametro
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
@@ -187,11 +188,13 @@ def p_create(p):
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     if len(p) == 5:
-        p[0] = Create(id_nodo,p[2].lower(), p[3], None)
+        p[0] = Create(id_nodo, p[2].lower(), p[3], None, None, None, None)
     elif len(p) == 8:
-        p[0] = Create(id_nodo,p[2].lower(), p[3], p[5])
-    else:
-        p[0] = p[1]
+        p[0] = Create(id_nodo, p[2].lower(), p[3], p[5], None, None, None)
+    elif len(p) == 12:
+        p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[9], None)
+    elif len(p) == 14:
+        p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[11], p[8])
 
 def p_campos_table(p):
     '''
@@ -217,10 +220,21 @@ def p_campos_table(p):
 
 def p_parametros(p):
     '''
-        parametros : parametros COMA identificador tipo_dato
-                | identificador tipo_dato
+        parametros : parametros COMA identificador AS tipo_dato
+                   | identificador AS tipo_dato
+                   | parametros COMA identificador tipo_dato
+                   | identificador tipo_dato
     '''
-    p[0] = p[1]
+    if len(p) == 6:
+        p[1].append(Parametro(p[3], p[5]))
+        p[0] = p[1]
+    elif len(p) == 4:
+        p[0] = [Parametro(p[1], p[3])]
+    elif len(p) == 5:
+        p[1].append(Parametro(p[3], p[4]))
+        p[0] = p[1]
+    elif len(p) == 3:
+        p[0] = [Parametro(p[1], p[2])]
 
 def p_constraint(p):
     '''
@@ -574,7 +588,7 @@ def p_identificador(p):
         p[0] = Identificador(id_nodo, p[1])
     elif len(p) == 3:
         p[0] = Identificador(id_nodo, p[1] + p[2])
-    elif len(p) == 4 and p[2] == '.':
+    elif len(p) == 4:
         p[0] = Identificador(id_nodo, p[3], p[1])
 
 def p_error(p):

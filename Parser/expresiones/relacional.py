@@ -1,9 +1,9 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoError, RetornoRelacional
+from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, RetornoRelacional
 
 class Relacional(Expresion):
 
-    def __init__(self,id_nodo, expresion_izquierda: RetornoIdentificador | RetornoLiteral, operador: str, expresion_derecha: RetornoIdentificador | RetornoLiteral):
+    def __init__(self,id_nodo, expresion_izquierda: RetornoArreglo | RetornoLiteral, operador: str, expresion_derecha: RetornoArreglo | RetornoLiteral):
         self.id_nodo = id_nodo
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
@@ -18,13 +18,13 @@ class Relacional(Expresion):
             return exp_izq
         elif isinstance(exp_der, RetornoError):
             return exp_der
-        if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
+        if isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
             # EVALUAR ESTO EN EL SELECT
             # EVALUAR ESTO EN EL SELECT
             # EVALUAR ESTO EN EL SELECT
             # EVALUAR ESTO EN EL SELECT
             return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.lista)
-        elif isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoLiteral):
+        elif isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoLiteral):
             # EVALUAR ESTO EN EL SELECT
             # EVALUAR ESTO EN EL SELECT
             # EVALUAR ESTO EN EL SELECT

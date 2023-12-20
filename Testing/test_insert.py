@@ -7,6 +7,7 @@ from Parser.parser import parse
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoError
 
 ts_global_1 = TablaDeSimbolos()
 base_datos_1 = BaseDatosWrapper("bd1")
@@ -17,6 +18,8 @@ INSERT INTO test (id, nombre) VALUES (1000, "Dummy"); -- ERROR: No existe la tab
 INSERT INTO producto (id, nombre, nombre) VALUES (1000, "Dummy", "Dummy"); -- ERROR: Doble parametro
 INSERT INTO producto (nombre) VALUES ("Dummy"); -- ERROR: Llave primaria obligatoria
 INSERT INTO tipo_producto (id, descripcion) VALUES (1, "Productos electronicos"); -- ERROR: Parametro nombre es obligatorio
+INSERT INTO tipo_producto (id / 2, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- ERROR: Al definir los campos
+INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1 + @var, "Test", "Hola mundo!"); -- ERROR: Al definir los valores
 
 INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
 INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (2, "Ropa", "Ropa de moda"); -- EXITO
@@ -124,7 +127,7 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos_1, ts_global_1)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
 
 ts_global_2 = TablaDeSimbolos()
 base_datos_2 = BaseDatosWrapper("bd2")
@@ -203,4 +206,4 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos_2, ts_global_2)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)

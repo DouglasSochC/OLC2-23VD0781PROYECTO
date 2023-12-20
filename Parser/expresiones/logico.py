@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoIdentificador, RetornoLiteral, RetornoError, TIPO_DATO
+from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, TIPO_DATO
 
 class Logico(Expresion):
     def __init__(self, id_nodo, expresion_izquierda: any, operador: str, expresion_derecha: any):
@@ -19,12 +19,12 @@ class Logico(Expresion):
             return exp_der
 
         if self.operador == "&&":
-            if isinstance(exp_izq, RetornoIdentificador) and isinstance(exp_der, RetornoIdentificador):
+            if isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
                 for indice, diccionario in enumerate(exp_izq.lista):
 
                     diccionario['temporal'] = diccionario['temporal'] and exp_der.lista[indice]['temporal']
 
-                return RetornoIdentificador(exp_izq.identificador, TIPO_DATO.BOOLEAN, exp_izq.lista)
+                return RetornoArreglo(exp_izq.identificador, TIPO_DATO.BOOLEAN, exp_izq.lista)
             
     def GraficarArbol(self, id_padre):
         id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre

@@ -37,17 +37,26 @@ class TIPO_OPERACION(Enum):
     NOT_OP = 14
 
 class RetornoLiteral:
-    def __init__(self, valor = None, tipado = TIPO_DATO.NULL):
+    def __init__(self, valor: any = None, tipado: TIPO_DATO = TIPO_DATO.NULL, identificador: str = None):
         self.valor = valor
         self.tipado = tipado
+        self.identificador = identificador
 
-class RetornoIdentificador:
-    def __init__(self, identificador: str, tipado: TIPO_DATO, lista: list = [], alias: str = None):
+class RetornoArreglo:
+    def __init__(self, identificador: str, tipado: TIPO_DATO = TIPO_DATO.NULL, lista: list = [], alias: str = None):
         self.identificador = identificador
         self.tipado = tipado
         self.lista = lista
         self.alias = alias
 
+class RetornoCodigo:
+    def __init__(self, codigo: str):
+        self.codigo = codigo
+
+# ELIMINAR
+# ELIMINAR
+# ELIMINAR
+# ELIMINAR
 class RetornoRelacional:
     def __init__(self, valor: bool, operacion_izquierda: list, operador :str, operacion_derecha: any):
         self.valor = valor
@@ -55,6 +64,10 @@ class RetornoRelacional:
         self.operador = operador
         self.operacion_derecha = operacion_derecha
 
+# ELIMINAR
+# ELIMINAR
+# ELIMINAR
+# ELIMINAR
 class RetornoAsignacion:
     def __init__(self, nombre_variable: str, expresion: any):
         self.nombre_variable = nombre_variable
@@ -62,4 +75,8 @@ class RetornoAsignacion:
 
 class RetornoError:
     def __init__(self, msg: str):
+        self.msg = msg
+
+class RetornoCorrecto:
+    def __init__(self, msg: str = None):
         self.msg = msg

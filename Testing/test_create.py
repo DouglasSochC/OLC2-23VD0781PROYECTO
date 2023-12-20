@@ -7,6 +7,7 @@ from Parser.parser import parse
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoError
 
 ts_global_1 = TablaDeSimbolos()
 base_datos_1 = BaseDatosWrapper("bd1")
@@ -46,6 +47,19 @@ CREATE TABLE jugador (
     nombre NCHAR(200) NOT NULL,
     puntaje INT
 ); -- EXITO
+CREATE PROCEDURE sp_test(@aumento int, @fecha date, @texto nvarchar(10))
+AS
+BEGIN
+    -- DECLARE @var nvarchar(100); -- EXITO
+    -- SET @var = 1; -- EXITO
+    INSERT INTO tipo_producto (id / 2 + "hola mundo", nombre, descripcion) VALUES (1, @hola, "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+END;
 ''')
 
 # Se revisa que se haya obtenido una instrucciones
@@ -56,7 +70,7 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos_1, ts_global_1)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
 
 ts_global_2 = TablaDeSimbolos()
 base_datos_2 = BaseDatosWrapper("bd2")
@@ -92,4 +106,4 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos_2, ts_global_2)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
