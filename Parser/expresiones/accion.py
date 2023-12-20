@@ -11,18 +11,18 @@ class Accion(Expresion):
         self.accion = accion
 
     def Ejecutar(self, base_datos, entorno):
-        
+
         if self.tipo_accion == 'add':
 
             respuesta = []
 
             for campo in self.accion:
                 res_campo = campo.Ejecutar(base_datos, entorno)
-                if isinstance(res_campo, RetornoError):
-                    return res_campo
 
                 if 'not_null' in res_campo:
                     return RetornoError("No es posible agregar la restricción NOT NULL en la columna '{}', debido a que la columna se está agregando sin un valor predeterminado y contiene valores nulos existentes.".format(res_campo['name']))
+                elif 'pk' in res_campo:
+                    return RetornoError("No es posible agregar la restricción PRIMARY KEY en la columna '{}', debido a que la columna se está agregando sin un valor predeterminado y contiene valores nulos existentes.".format(res_campo['name']))
 
                 # Se almacena el diccionario que contiene toda la informacion del nuevo campo a agregar en la tabla
                 respuesta.append(res_campo)
@@ -32,12 +32,9 @@ class Accion(Expresion):
         elif self.tipo_accion == 'drop':
 
             res_accion = self.accion.Ejecutar(base_datos, entorno)
-            if isinstance(res_accion, RetornoError):
-                return res_accion
-
-            nombre_columna = res_accion.identificador
+            nombre_columna = res_accion['identificador']
             return nombre_columna
-        
+
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ACCION")
         label_tipo_accion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "C", self.tipo_accion)
@@ -53,7 +50,7 @@ class Accion(Expresion):
                     result += label_campo + union_tipo_accion_campo
             else:
                 label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
-                result += label_tipo_dato 
+                result += label_tipo_dato
         else:
             label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
             result += label_tipo_dato

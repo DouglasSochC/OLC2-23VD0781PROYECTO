@@ -7,13 +7,14 @@ from Parser.parser import parse
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoError
 
 ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
-
 '''
 ALTER TABLE jugador add column fecha DATE NOT NULL, test INT; -- ERROR: No se puede agregar la restriccion NOT NULL
+ALTER TABLE jugador add column id2 INT PRIMARY KEY, test INT; -- ERROR: No se puede agregar la restriccion NOT NULL
 ALTER TABLE tabla1 add column fecha DATE, test INT; -- ERROR: No existe la tabla
 ALTER TABLE jugador add column fecha DATE, id BIT; -- ERROR: Ya existe la columna ID
 ALTER TABLE jugador ADD column fecha DATE, fecha_exacta DATETIME; -- EXITO
@@ -32,5 +33,5 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos, ts_global)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
 

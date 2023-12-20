@@ -1,5 +1,5 @@
 from ..abstract.instrucciones import Instruccion
-from ..abstract.retorno import RetornoError
+from ..abstract.retorno import RetornoError, RetornoCorrecto
 from Funcionalidad.administracion import Administracion
 
 class Use(Instruccion):
@@ -11,7 +11,7 @@ class Use(Instruccion):
 
     def Ejecutar(self, base_datos, entorno):
 
-        # Se verifica que no se este utilizando este CREATE dentro de la creacion de un procedimiento o funcion
+        # Se verifica que no se este utilizando este 'USE' dentro de la creacion de un procedimiento o funcion
         construccion = entorno.obtener("construir_procedimiento")
         construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
         if construccion is not None:
@@ -25,9 +25,9 @@ class Use(Instruccion):
 
         if res_admin.success:
             base_datos.valor = nombre
-            return res_admin.valor
+            return RetornoCorrecto(res_admin.valor)
         else:
-            return "ERROR: {}".format(res_admin.valor)
+            return RetornoError(res_admin.valor)
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "USE")

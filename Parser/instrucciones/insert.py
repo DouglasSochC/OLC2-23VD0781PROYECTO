@@ -4,9 +4,6 @@ from ..expresiones.identificador import Identificador
 from ..expresiones.expresion import Expresion
 from Funcionalidad.dml import DML
 
-from ..tablas.tabla_simbolo import Simbolo
-from ..abstract.retorno import TIPO_DATO, TIPO_ENTORNO
-
 class Insert(Instruccion):
 
     def __init__(self, id_nodo: str, identificador: Identificador, lista_campos: list[Expresion], lista_valores: list[Expresion]):
@@ -52,9 +49,6 @@ class Insert(Instruccion):
             return RetornoCodigo("INSERT INTO {} ({}) VALUES ({});\n".format(nombre_tabla, ", ".join(campos), ", ".join(valores)))
 
         else:
-
-            simb = Simbolo("@var", 1, TIPO_DATO.INT, -1, TIPO_ENTORNO.SENTENCIA_DDL)
-            entorno.agregar(simb)
 
             campos = []
             for campo in self.lista_campos:
