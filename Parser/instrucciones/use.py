@@ -1,16 +1,23 @@
 from ..abstract.instrucciones import Instruccion
+from ..abstract.retorno import RetornoError
 from Funcionalidad.administracion import Administracion
 
 class Use(Instruccion):
 
-    def __init__(self, id_nodo, identificador: str):
+    def __init__(self, id_nodo, texto: str):
         self.id_nodo = id_nodo
-        self.identificador = identificador
+        self.texto = texto
         pass
 
     def Ejecutar(self, base_datos, entorno):
 
-        nombre = self.identificador
+        # Se verifica que no se este utilizando este CREATE dentro de la creacion de un procedimiento o funcion
+        construccion = entorno.obtener("construir_procedimiento")
+        construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
+        if construccion is not None:
+            return RetornoError("No puede utilizar el comando 'USE' dentro de la creacion de un PROCEDURE o FUNCTION")
+
+        nombre = self.texto
 
         administracion = Administracion()
 
@@ -24,7 +31,7 @@ class Use(Instruccion):
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "USE")
-        label_base_datos = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "DB", self.removeQuotes(self.identificador))
+        label_base_datos = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "DB", self.removeQuotes(self.texto))
         constr_identificador = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "DB")
         return label_encabezado + label_base_datos + constr_identificador
 
