@@ -26,9 +26,17 @@ class Asignacion(Expresion):
 
             # Se obtienen los datos que contiene el 'IDENTIFICADOR'
             dml = DML()
-            datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'])
-            if datos_identificador.success is False:
-                return RetornoError(datos_identificador.valor)
+            datos_identificador = None
+            # Se busca en la tabla de simbolos el nombre de la variable
+            simbolo = entorno.obtener("condicion")
+
+            if simbolo is None:
+                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'])
+                if datos_identificador.success is False:
+                    return RetornoError(datos_identificador.valor)
+                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], datos_identificador.lista)
+            else:
+                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], simbolo.valor)
 
             # Se obtienen los datos que contiene la 'EXPRESION'
             res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
@@ -60,13 +68,17 @@ class Asignacion(Expresion):
 
                 for tupla_identificador in arreglo_identificador.lista:
 
+                    # Se verifica que exista la llave dentro de la tupla
+                    if "{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador) not in tupla_identificador:
+                        continue
+
                     for tupla_expresion in arreglo_expresion.lista:
 
                         # Se verifica que el tipo de dato sea el mismo
-                        if tupla_identificador["{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])]['tipado'] != tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['tipado']:
+                        if tupla_identificador["{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)]['tipado'] != tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['tipado']:
                             return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], arreglo_expresion.identificador))
 
-                        if tupla_identificador["{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])]['valor'] == tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['valor']:
+                        if tupla_identificador["{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)]['valor'] == tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['valor']:
                             tupla_homologacion = {}
                             tupla_homologacion.update(tupla_identificador)
                             tupla_homologacion.update(tupla_expresion)

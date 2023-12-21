@@ -15,13 +15,15 @@ instrucciones = parse(
 '''
 SELECT id, nombre, total FROM producto, tipo_producto WHERE id = id; -- ERROR: Es ambiguo
 SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto > "2"; -- ERROR: Diferentes tipos de dato
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto > 2; -- EXITO
 SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto = "2"; -- ERROR: Diferentes tipos de dato
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = 2; -- EXITOSO
 SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.nombre; -- ERROR: Diferentes tipos de dato
 SELECT id, nombre, total FROM tipo_producto, producto, jugador WHERE jugador.id >= tipo_producto.id; -- ERROR: No se puede realizar una operacion relacional entre dos columnas.
-SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id; -- EXITO
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id = jugador.id; -- ERROR: La tabla jugador no se incluye en la clausula FROM
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND jugador.id = producto.id; -- ERROR: No retorna nada debido a que la primera condicion no tiene jugador
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id; -- EXITO
 
--- SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto = 2; -- EXITOSO
--- SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto > 2; -- EXITO
 -- SELECT id, nombre, total FROM tipo_producto, producto, jugador WHERE jugador.id >= 1 AND tipo_producto.id >= 1; -- EXITO
 /* SELECT id, nombre, total FROM producto;
 SELECT (id, total) FROM producto;

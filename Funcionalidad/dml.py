@@ -278,6 +278,8 @@ class DML:
             return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla), None)
         elif existe_campo is False:
             return Respuesta(False, "La columna '{}' no se encuentra en la tabla '{}'.".format(nombre_columna, nombre_tabla), None)
+        elif nombre_tabla not in datos:
+            return Respuesta(False, "La consulta 'SELECT' no incluye la tabla '{}' en la cláusula FROM.".format(nombre_tabla), None)
 
         # # El 'valor' de la respuesta tendra el nombre de la tabla
         # # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
