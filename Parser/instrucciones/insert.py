@@ -34,7 +34,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     campos.append(res.codigo)
                 else:
-                    return RecursionError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
 
             valores = []
             for valor in self.lista_valores:
@@ -44,7 +44,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     valores.append(res.codigo)
                 else:
-                    return RecursionError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
 
             return RetornoCodigo("INSERT INTO {} ({}) VALUES ({});\n".format(nombre_tabla, ", ".join(campos), ", ".join(valores)))
 

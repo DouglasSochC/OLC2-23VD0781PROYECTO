@@ -2,7 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 from .util import Respuesta, validar_tipo_dato
 from dotenv import load_dotenv
-from Parser.abstract.retorno import TIPO_DATO, RetornoRelacional
+from Parser.abstract.retorno import TIPO_DATO
 import xmltodict
 
 load_dotenv()
@@ -86,62 +86,22 @@ class DML:
 
         return tupla_respuesta
 
-    def __tipo_dato_campo(self, path_tabla: str, nombre_tabla: str, nombre_campo: str) -> dict | None:
+    def __convertir_a_literal(self, valor: any, tipo_dato: str) -> any:
 
-        if nombre_campo == "":
-            return "Debe de indicar el campo"
-
-        # Lee el contenido del archivo XML
-        with open(path_tabla, 'r') as archivo:
-            contenido_xml = archivo.read()
-
-        # Se formatea el XML a un diccionario para manejarlo de mejor forma
-        contenido = xmltodict.parse(contenido_xml)
-
-        # Se verifica que exista el campo y ademas se obtiene el tipo de dato de ese campo
-        for campo in contenido[nombre_tabla]['estructura']['campo']:
-
-            if campo["@name"] == nombre_campo:
-                return campo["@type"]
-
-        return None
-
-    def __cumple_condicion(self, condiciones: list) -> bool:
-
-        cumple_condicion = True
-
-        for condicion in condiciones:
-
-            if isinstance(condicion, tuple):
-
-                # Se obtiene la estructura de la condicion
-                op_izq = condicion[0]
-                operador = condicion[1]
-                op_der = condicion[2]
-
-                # Se verifica que la condicion se cumpla
-                if op_izq is None or op_der is None:
-                    cumple_condicion = False
-                elif operador == '=' and str(op_izq) != str(op_der):
-                    cumple_condicion = False
-                if operador == '==' and str(op_izq) != str(op_der):
-                    cumple_condicion = False
-                elif operador == '>=' and op_izq < op_der:
-                    cumple_condicion = False
-                elif operador == '>' and op_izq <= op_der:
-                    cumple_condicion = False
-                elif operador == '<=' and op_izq > op_der:
-                    cumple_condicion = False
-                elif operador == '<' and op_izq >= op_der:
-                    cumple_condicion = False
-
-            else:
-                if condicion == 'AND':
-                    pass
-                elif condicion == 'OR':
-                    cumple_condicion = True
-
-        return cumple_condicion
+            if tipo_dato == 'int':
+                return {'valor': int(valor), 'tipo': TIPO_DATO.INT}
+            elif tipo_dato == 'decimal':
+                return {'valor': float(valor), 'tipo': TIPO_DATO.DECIMAL}
+            elif tipo_dato == 'bit':
+                return {'valor': int(valor), 'tipo': TIPO_DATO.BIT}
+            elif tipo_dato == 'date':
+                return {'valor': str(valor), 'tipo': TIPO_DATO.DATE}
+            elif tipo_dato == 'datetime':
+                return {'valor': str(valor), 'tipo': TIPO_DATO.DATETIME}
+            elif tipo_dato == 'nchar':
+                return {'valor': str(valor), 'tipo': TIPO_DATO.NCHAR}
+            elif tipo_dato == 'nvarchar':
+                return {'valor': str(valor), 'tipo': TIPO_DATO.NVARCHAR}
 
     ##############################################
     ############### SECCION INSERT ###############
@@ -211,21 +171,18 @@ class DML:
     ############### SECCION SELECT ###############
     ##############################################
 
-    def seleccionar_columna_tabla(self, nombre_bd:str, nombre_tabla: str, nombre_columna:str):
+    def obtener_datos_tabla(self, nombre_bd: str, nombre_tabla:str):
         '''
-        Obtiene la informacion de una columna
+        Obtiene todos los datos de una tabla
 
         Parameters:
             nombre_bd (str): Nombre de la base de datos
             nombre_tabla (str): Nombre de la tabla
-            nombre_columna (str): Todos los datos que contiene la columna
         '''
 
         if nombre_bd is None: # Se valida que haya seleccionado una base de datos
             return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
         elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
-            return Respuesta(False, "Por favor, indique el nombre de la tabla")
-        elif nombre_columna is None:  # Se valida que este el nombre de la columna
             return Respuesta(False, "Por favor, indique el nombre de la tabla")
         elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
             return Respuesta(False, "No existe la base de datos seleccionada")
@@ -234,11 +191,6 @@ class DML:
 
         respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
         path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
-
-        # Se obtiene el tipo de dato del campo
-        res_tipo_campo = self.__tipo_dato_campo(path_tabla, nombre_tabla, nombre_columna)
-        if res_tipo_campo is None:
-            return Respuesta(False, "La columna '{}' es invalida".format(nombre_columna))
 
         # Lee el archivo XML
         with open(path_tabla, 'r') as archivo:
@@ -246,7 +198,7 @@ class DML:
 
         # Se formatea el XML a un diccionario para manejarlo de mejor forma
         contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
-        tipo_dato = None
+        estructura = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
 
         if isinstance(contenido, dict):
             contenido = [contenido]
@@ -254,205 +206,79 @@ class DML:
         # Se recorre fila por fila
         for fila in contenido:
 
-            # Se ingresa a la fila la columna que se esta solicitando casteandolo al tipo de dato a utilizar
-            if res_tipo_campo == 'int':
-                fila["temporal"] = int(fila[nombre_columna]) if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.INT
-            elif res_tipo_campo == 'decimal':
-                fila["temporal"] = float(fila[nombre_columna]) if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.DECIMAL
-            elif res_tipo_campo == 'bit':
-                fila["temporal"] = int(fila[nombre_columna]) if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.BIT
-            elif res_tipo_campo == 'date':
-                fila["temporal"] =str(fila[nombre_columna]) if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.DATE
-            elif res_tipo_campo == 'datetime':
-                fila["temporal"] =str(fila[nombre_columna]) if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.DATETIME
-            elif res_tipo_campo == 'nchar':
-                fila["temporal"] = fila[nombre_columna] if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.NCHAR
-            elif res_tipo_campo == 'nvarchar':
-                fila["temporal"] = fila[nombre_columna] if nombre_columna in fila else None
-                tipo_dato = TIPO_DATO.NVARCHAR
+            fila_tipada = {}
+            for tipado in estructura:
 
-            respuesta_datos.append(fila)
-
-        return Respuesta(True, tipo_dato, respuesta_datos)
-
-    def obtener_todas_las_columnas_tabla(self, nombre_bd:str, nombre_tabla: str):
-
-        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
-            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
-        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
-            return Respuesta(False, "Por favor, indique el nombre de la tabla")
-        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
-            return Respuesta(False, "No existe la base de datos seleccionada")
-        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
-            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
-        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
-
-        # Lee el archivo XML
-        with open(path_tabla, 'r') as archivo:
-            contenido_xml = archivo.read()
-
-        respuesta = []
-        # Se formatea el XML a un diccionario para manejarlo de mejor forma
-        contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
-        for campo in contenido:
-            respuesta.append(campo['@name'])
-
-        return respuesta
-
-    def obtener_indices_segun_condiciones(self, nombre_bd:str, nombre_tabla: str, listado_condiciones: list) -> Respuesta | list:
-
-        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
-            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
-        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
-            return Respuesta(False, "Por favor, indique el nombre de la tabla")
-        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
-            return Respuesta(False, "No existe la base de datos seleccionada")
-        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
-            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
-        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
-
-        auxiliar = {}
-        indices = []
-        for condicion in listado_condiciones:
-
-            # Se verifica si viene AND
-            if isinstance(condicion, RetornoRelacional):
-
-                # Se verifica que la operacion derecha sea lista igual que el de la izquierda. Se considera que ambas listas tienen las mismas dimensiones
-                if isinstance(condicion.operacion_derecha, list):
-                    if len(auxiliar) > 0:
-                        for llave, valor in enumerate(condicion.operacion_izquierda):
-                            auxiliar[valor['@index']].append((valor['temporal'], condicion.operador, condicion.operacion_derecha[llave]['temporal']))
-                    else:
-                        for llave, valor in enumerate(condicion.operacion_izquierda):
-                            auxiliar[valor['@index']] = ([(valor['temporal'], condicion.operador, condicion.operacion_derecha[llave]['temporal'])])
+                fila_tipada['{}.@index'.format(nombre_tabla)] = fila['@index']
+                if tipado['@name'] in fila:
+                    conversion_literal = self.__convertir_a_literal(fila[tipado['@name']], tipado['@type'])
+                    fila_tipada[nombre_tabla + "." + tipado['@name']] = { 'valor': conversion_literal['valor'], 'tipado': conversion_literal['tipo'] }
                 else:
-                    if len(auxiliar) > 0:
-                        for valor in condicion.operacion_izquierda:
-                            auxiliar[valor['@index']].append((valor['temporal'], condicion.operador, condicion.operacion_derecha))
-                    else:
-                        for valor in condicion.operacion_izquierda:
-                            auxiliar[valor['@index']] = ([(valor['temporal'], condicion.operador, condicion.operacion_derecha)])
-            else:
-                for llave in auxiliar:
-                    auxiliar[llave].append(condicion)
+                    conversion_literal = self.__convertir_a_literal(-1, tipado['@type'])
+                    fila_tipada[nombre_tabla + "." + tipado['@name']] = { 'valor': None, 'tipado': conversion_literal['tipo'] }
 
-        if len(auxiliar) > 0:
-            for clave, valor in auxiliar.items():
-                res_cumple_condicion = self.__cumple_condicion(valor)
-                if res_cumple_condicion:
-                    indices.append(clave)
+            respuesta_datos.append(fila_tipada)
+
+        return Respuesta(True, None, respuesta_datos)
+
+    def verificar_columna_tabla(self, nombre_bd: str, datos: list, nombre_columna:str, nombre_tabla:str = None) -> Respuesta:
+
+        # Se busca en que tabla se encuentra la columna
+        if nombre_tabla is None:
+
+            # Se obtienen todas las tablas existentes de la base de datos
+            tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+            # Variable que valida si existe alguna ambiguedad
+            ambiguedad = 0
+
+            # Se evalua tabla por tabla para verificar que la informacion a eliminar no este enlazada a otra tabla a traves de una llave foranea
+            for tabla in tablas:
+
+                # Se obtienen todos registros que contiene la tabla
+                path_tabla = self.__path_tablas.format(nombre_bd) + tabla
+                with open(path_tabla, 'r') as archivo:
+                    contenido_xml = archivo.read()
+
+                # Se formatea el XML a un diccionario para manejarlo de mejor forma
+                campos = xmltodict.parse(contenido_xml)[tabla.split(".")[0]]['estructura']['campo']
+
+                # Se recorre cada campo de la tabla
+                for campo in campos:
+
+                    # Se verifica si el campo es igual al que se desea eliminar
+                    if campo['@name'] == nombre_columna:
+                        ambiguedad += 1
+                        nombre_tabla = tabla.split(".")[0]
+
+            if ambiguedad > 1:
+                return Respuesta(False, "La columna '{}' se encuentra en mas de una tabla, por favor, especifique en que tabla se encuentra.".format(nombre_columna), None)
         else:
-            # Lee el archivo XML
+
+            if not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+                return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+            existe_campo = False
+
+            # Se obtienen todos registros que contiene la tabla
+            path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
             with open(path_tabla, 'r') as archivo:
                 contenido_xml = archivo.read()
 
             # Se formatea el XML a un diccionario para manejarlo de mejor forma
-            contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
-            if isinstance(contenido, list):
-                for fila in contenido:
-                    indices.append(fila['@index'])
-            else:
-                indices.append(contenido['@index'])
+            campos = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
+             # Se recorre cada campo de la tabla
+            for campo in campos:
 
-        return indices
+                # Se verifica si el campo es igual al que se desea eliminar
+                if campo['@name'] == nombre_columna:
+                    existe_campo = True
+                    break
 
-    def sintetizar_condiciones(self, data: list, lista_indices: list):
+        if nombre_tabla is None:
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla), None)
+        elif existe_campo is False:
+            return Respuesta(False, "La columna '{}' no se encuentra en la tabla '{}'.".format(nombre_columna, nombre_tabla), None)
 
-        respuesta_datos = [] # Variable que almacenara toda la informacion obtenida
-
-        for fila in data:
-
-            # Se identifica si el index esta dentro del listado de indices disponibles para mostrar
-            if fila["@index"] in lista_indices:
-                respuesta_datos.append(fila['temporal'])
-
-        return Respuesta(True, None, respuesta_datos)
-
-    ##############################################
-    ############### SECCION DELETE ###############
-    ##############################################
-
-    def eliminar_filas(self, nombre_bd:str, nombre_tabla: str, lista_indices: list):
-
-            if nombre_bd is None: # Se valida que haya seleccionado una base de datos
-                return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
-            elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
-                return Respuesta(False, "Por favor, indique el nombre de la tabla")
-            elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
-                return Respuesta(False, "No existe la base de datos seleccionada")
-            elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
-                return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
-
-            path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
-
-            # Se obtiene la raiz del XML
-            tree = ET.parse(path_tabla)
-            root = tree.getroot()
-
-            cantidad_registros_eliminados = 0
-            for indice in lista_indices:
-
-                # Buscar y eliminar el registro con el indice especificado
-                registro_a_eliminar = root.find(f"./registros/fila[@index='{indice}']")
-                if registro_a_eliminar is not None:
-                    root.find('./registros').remove(registro_a_eliminar)
-                    cantidad_registros_eliminados += 1
-
-            # Guardar el resultado en un nuevo archivo XML
-            tree.write(path_tabla)
-
-            return Respuesta(True, "DELETE {}".format(cantidad_registros_eliminados))
-
-    def validar_indices(self, nombre_bd: str, nombre_tabla:str, listado_indices: list) -> Respuesta:
-
-        # Se obtienen todos los registros de los indices debido a que es necesario revisar si no esta siendo utilizado en otro lugar algun registro por medio de llave foranea
-        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
-
-        # Se obtiene la raiz del XML
-        tree = ET.parse(path_tabla)
-        root_tabla_actual = tree.getroot()
-
-        registros = []
-        for indice in listado_indices:
-            fila = root_tabla_actual.find(f".//fila[@index='{indice}']")
-            registros.append(fila)
-
-        # Se obtienen todas las tablas existentes de la base de datos
-        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
-
-        # Se evalua tabla por tabla para verificar
-        for tabla in tablas:
-
-            nombre_tabla_evaluar = tabla.rsplit('.', 1)[0]
-            if  nombre_tabla_evaluar == nombre_tabla:
-                continue
-
-            # Se obtiene la raiz del XML de la tabla
-            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
-            root_a_evaluar = tree.getroot()
-
-            # Se obtiene los campos de la tabla a verificar que son una llave foranea
-            campos_con_llave_foranea = root_a_evaluar.findall(".//estructura/campo/[@fk_table]")
-
-            # Se verifica que no se elimine un registro que esta siendo utilizado en otra tabla
-            for campo in campos_con_llave_foranea:
-
-                if campo.attrib['fk_table'] == nombre_tabla:
-
-                    for obj in registros:
-
-                        fila = obj.find(campo.attrib['fk_attribute'])
-                        if fila is not None:
-
-                            resultado = root_a_evaluar.find(".//fila[{}='{}']".format(campo.attrib['name'], fila.text))
-                            if resultado is not None:
-                                return Respuesta(False, "No se puede realizar la operación DELETE en la tabla '{}' debido a que el campo '{}' con valor '{}' esta siendo referenciado en la tabla '{}' a través de una llave foranea.".format(nombre_tabla, campo.attrib['fk_attribute'], fila.text, nombre_tabla_evaluar))
-
-        return Respuesta(True, "")
+        # # El 'valor' de la respuesta tendra el nombre de la tabla
+        # # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
+        return Respuesta(True, nombre_tabla, datos[nombre_tabla])

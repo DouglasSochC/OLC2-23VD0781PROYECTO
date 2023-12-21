@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, RetornoRelacional
+from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, TIPO_DATO
 
 class Relacional(Expresion):
 
@@ -18,35 +18,50 @@ class Relacional(Expresion):
             return exp_izq
         elif isinstance(exp_der, RetornoError):
             return exp_der
+
         if isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.lista)
+
+            if self.operador == "==":
+                return RetornoError("No se puede utilizar el operador '==' para aplicar una condicion.")
+
+            return RetornoError("No se puede realizar una operacion relacional entre dos columnas.")
+
         elif isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoLiteral):
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            # EVALUAR ESTO EN EL SELECT
-            if len(exp_izq.lista) <= 0:
-                return RetornoRelacional(None, exp_izq.identificador, self.operador, exp_der.valor)
-            else:
-                return RetornoRelacional(None, exp_izq.lista, self.operador, exp_der.valor)
+
+            if self.operador == "==":
+                return RetornoError("No se puede utilizar el operador '==' para aplicar una condicion.")
+
+            # Almacena todos los datos que cumplen con la condicion (lo importante aqui es que posee el indice de cada dato)
+            respuesta = []
+            for item in exp_izq.lista:
+
+                valor_item = item["{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador)]
+                if valor_item['tipado'] != exp_der.tipado:
+                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(exp_izq.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+
+                if valor_item['valor'] is not None:
+                    comparacion = eval(f"valor_item['valor'] {self.operador} exp_der.valor")
+                    if comparacion:
+                        respuesta.append(item)
+
+            return RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, respuesta, exp_izq.alias)
+
+        elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoArreglo):
+            return RetornoError("La operación relacional '{} {} {}' es invalida.".format(exp_izq.valor, self.operador, exp_der.identificador))
+        elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+            resultado = eval(f"exp_izq.valor {self.operador} exp_der.valor")
+            resultado = 1 if resultado else 0
+            return RetornoLiteral(resultado, TIPO_DATO.BIT)
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
 
     def GraficarArbol(self, id_padre):
         id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "RELACIONAL")
-
         union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
-
         union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
-
         resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
         label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
         union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
         resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
-
         return label_encabezado + union_hijo_izquierdo  + resultado_izquierda + label_operador +union_enca_operador +resultado_derecha + union_hijo_derecho

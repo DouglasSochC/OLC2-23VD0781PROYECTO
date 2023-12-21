@@ -17,6 +17,7 @@ from .expresiones.funcion_nativa import Funcion_Nativa
 from .expresiones.accion import Accion
 from .expresiones.literal import Literal
 from .expresiones.parametro import Parametro
+from .expresiones.condicion import Condicion
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
@@ -313,12 +314,12 @@ def p_sentencia_dml(p):
 
 def p_select(p):
     '''
-        select : SELECT POR FROM identificador PUNTOYCOMA
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
-               | SELECT lista_expresiones FROM identificador PUNTOYCOMA
-               | SELECT POR FROM identificador WHERE condicion PUNTOYCOMA
-               | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
-               | SELECT lista_expresiones FROM identificador WHERE condicion PUNTOYCOMA
+        select : SELECT POR FROM lista_expresiones PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM lista_expresiones PUNTOYCOMA
+               | SELECT lista_expresiones FROM lista_expresiones PUNTOYCOMA
+               | SELECT POR FROM lista_expresiones WHERE condicion PUNTOYCOMA
+               | SELECT IZQPAREN lista_expresiones DERPAREN FROM lista_expresiones WHERE condicion PUNTOYCOMA
+               | SELECT lista_expresiones FROM lista_expresiones WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
     '''
     if len(p) == 4:
@@ -394,11 +395,13 @@ def p_condicion(p):
         condicion : condicion AND expresion
                   | expresion
     '''
+    global contador
+    id_nodo = str(abs(hash("COND")) + contador)
+    contador += 1
     if len(p) == 4:
-        p[1].append(p[3])
-        p[0] = p[1]
+        p[0] = Condicion(id_nodo, p[1], p[2], p[3])
     else:
-        p[0] = [p[1]]
+        p[0] = Condicion(id_nodo, p[1], None, None)
 
 def p_lista_expresiones(p):
     '''
@@ -535,7 +538,7 @@ def p_literal1(p):
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     if((len(str(p[1])) == 1) and(str(p[1]) == "0" or str(p[1]) == "1")):
-        p[0] = Literal(id_nodo,p[1], TIPO_DATO.BIT or TIPO_DATO.INT)
+        p[0] = Literal(id_nodo,p[1], TIPO_DATO.INT)
     else:
         p[0] = Literal(id_nodo,p[1], TIPO_DATO.INT)
 

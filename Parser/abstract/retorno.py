@@ -43,35 +43,15 @@ class RetornoLiteral:
         self.identificador = identificador
 
 class RetornoArreglo:
-    def __init__(self, identificador: str, tipado: TIPO_DATO = TIPO_DATO.NULL, lista: list = [], alias: str = None):
+    def __init__(self, identificador: str, tabla_del_identificador: str, lista: list = [], alias: str = None):
         self.identificador = identificador
-        self.tipado = tipado
+        self.tabla_del_identificador = tabla_del_identificador
         self.lista = lista
         self.alias = alias
 
 class RetornoCodigo:
     def __init__(self, codigo: str):
         self.codigo = codigo
-
-# ELIMINAR
-# ELIMINAR
-# ELIMINAR
-# ELIMINAR
-class RetornoRelacional:
-    def __init__(self, valor: bool, operacion_izquierda: list, operador :str, operacion_derecha: any):
-        self.valor = valor
-        self.operacion_izquierda = operacion_izquierda
-        self.operador = operador
-        self.operacion_derecha = operacion_derecha
-
-# ELIMINAR
-# ELIMINAR
-# ELIMINAR
-# ELIMINAR
-class RetornoAsignacion:
-    def __init__(self, nombre_variable: str, expresion: any):
-        self.nombre_variable = nombre_variable
-        self.expresion = expresion
 
 class RetornoError:
     def __init__(self, msg: str):
