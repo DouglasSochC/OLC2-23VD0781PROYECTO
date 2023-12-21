@@ -33,18 +33,30 @@ class Relacional(Expresion):
 
             # Almacena todos los datos que cumplen con la condicion (lo importante aqui es que posee el indice de cada dato)
             respuesta = []
-            for item in exp_izq.lista:
 
-                valor_item = item["{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador)]
+            # Se busca en la tabla de simbolos el nombre de la variable en el caso que ocurra una condicion
+            simbolo = entorno.obtener("condicion")
+            arreglo = None
+            if simbolo is None:
+                arreglo = exp_izq
+            else:
+                arreglo = RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, simbolo.valor)
+
+            for item in arreglo.lista:
+
+                if "{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador) not in item:
+                    continue
+
+                valor_item = item["{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador)]
                 if valor_item['tipado'] != exp_der.tipado:
-                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(exp_izq.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(arreglo.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
 
                 if valor_item['valor'] is not None:
                     comparacion = eval(f"valor_item['valor'] {self.operador} exp_der.valor")
                     if comparacion:
                         respuesta.append(item)
 
-            return RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, respuesta, exp_izq.alias)
+            return RetornoArreglo(arreglo.identificador, arreglo.tabla_del_identificador, respuesta, arreglo.alias)
 
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoArreglo):
             return RetornoError("La operación relacional '{} {} {}' es invalida.".format(exp_izq.valor, self.operador, exp_der.identificador))

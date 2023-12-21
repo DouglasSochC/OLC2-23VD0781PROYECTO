@@ -22,7 +22,9 @@ SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_pro
 SELECT id, nombre, total FROM tipo_producto, producto, jugador WHERE jugador.id >= tipo_producto.id; -- ERROR: No se puede realizar una operacion relacional entre dos columnas.
 SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id = jugador.id; -- ERROR: La tabla jugador no se incluye en la clausula FROM
 SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND jugador.id = producto.id; -- ERROR: No retorna nada debido a que la primera condicion no tiene jugador
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND producto.hola > 10; -- ERROR: La columna hola no se encuentra en la tabla producto
 SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id; -- EXITO
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id > 10; -- EXITO
 
 -- SELECT id, nombre, total FROM tipo_producto, producto, jugador WHERE jugador.id >= 1 AND tipo_producto.id >= 1; -- EXITO
 /* SELECT id, nombre, total FROM producto;
