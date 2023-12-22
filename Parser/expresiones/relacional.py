@@ -61,6 +61,10 @@ class Relacional(Expresion):
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoArreglo):
             return RetornoError("La operación relacional '{} {} {}' es invalida.".format(exp_izq.valor, self.operador, exp_der.identificador))
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
+
+            if exp_izq.tipado != exp_der.tipado:
+                return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(exp_izq.valor, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+
             resultado = eval(f"exp_izq.valor {self.operador} exp_der.valor")
             resultado = 1 if resultado else 0
             return RetornoLiteral(resultado, TIPO_DATO.BIT)

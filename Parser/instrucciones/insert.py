@@ -21,7 +21,7 @@ class Insert(Instruccion):
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
         nombre_tabla = res_identificador['identificador']
 
-        # Se verifica que no si se esta construyendo un procedimiento o una funcion
+        # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
         construccion = entorno.obtener("construir_procedimiento")
         construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
         if construccion is not None:
