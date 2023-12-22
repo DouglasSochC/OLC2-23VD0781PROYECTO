@@ -24,7 +24,7 @@ class Relacional(Expresion):
             if self.operador == "==":
                 return RetornoError("No se puede utilizar el operador '==' para aplicar una condicion.")
 
-            return RetornoError("No se puede realizar una operacion relacional entre dos columnas.")
+            return RetornoError("No se puede realizar una operacion relacional entre arreglos de datos.")
 
         elif isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoLiteral):
 
@@ -34,32 +34,80 @@ class Relacional(Expresion):
             # Almacena todos los datos que cumplen con la condicion (lo importante aqui es que posee el indice de cada dato)
             respuesta = []
 
-            # Se busca en la tabla de simbolos el nombre de la variable en el caso que ocurra una condicion
             simbolo = entorno.obtener("condicion")
-            arreglo = None
+
+            # Se basa en el arreglo exp_izq la operacion relacional
             if simbolo is None:
-                arreglo = exp_izq
+
+                for llave, valor in enumerate(exp_izq.lista):
+
+                    # Se definen la llave para obtener los valores
+                    llave_izquierda = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
+
+                    # Se obtiene los valores que seran utilizados para realizar el calculo
+                    valor_izquierdo = exp_izq.lista[llave][llave_izquierda]
+                    valor_derecho = exp_der
+
+                    dominante = None
+                    if valor_izquierdo['tipado'] == TIPO_DATO.DATE and valor_derecho.tipado == TIPO_DATO.DATE:
+                        dominante = TIPO_DATO.DATE
+                    elif valor_izquierdo['tipado'] == TIPO_DATO.DATETIME and valor_derecho.tipado == TIPO_DATO.DATETIME:
+                        dominante = TIPO_DATO.DATETIME
+                    else:
+                        dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho.tipado)
+
+                    if dominante == TIPO_DATO.NULL:
+                        return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(valor_izquierdo['valor'], self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+
+                    # Valores de la llave auxiliar
+                    auxiliar = 0
+                    tipado = dominante
+
+                    try:
+                        if valor_izquierdo['valor'] is None:
+                            auxiliar = None
+                        else:
+                            auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
+                    except Exception as e:
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
+
+                    if auxiliar is not None and auxiliar:
+                        tupla_homologacion = {}
+                        tupla_homologacion.update(valor)
+                        respuesta.append(tupla_homologacion)
+
+                return RetornoArreglo(None, exp_izq.tabla_del_identificador, respuesta, None)
+
             else:
-                arreglo = RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, simbolo.valor)
+                print()
+                # # Se busca en la tabla de simbolos el nombre de la variable en el caso que ocurra una condicion
+                # simbolo = entorno.obtener("condicion")
+                # arreglo = None
+                # if simbolo is None:
+                #     arreglo = exp_izq
+                # else:
+                #     arreglo = RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, simbolo.valor)
 
-            for item in arreglo.lista:
+                # for item in arreglo.lista:
 
-                if "{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador) not in item:
-                    continue
+                #     if "{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador) not in item:
+                #         continue
 
-                valor_item = item["{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador)]
-                if valor_item['tipado'] != exp_der.tipado:
-                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(arreglo.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+                #     valor_item = item["{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador)]
+                #     if valor_item['tipado'] != exp_der.tipado:
+                #         return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(arreglo.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
 
-                if valor_item['valor'] is not None:
-                    comparacion = eval(f"valor_item['valor'] {self.operador} exp_der.valor")
-                    if comparacion:
-                        respuesta.append(item)
+                #     if valor_item['valor'] is not None:
+                #         comparacion = eval(f"valor_item['valor'] {self.operador} exp_der.valor")
+                #         if comparacion:
+                #             respuesta.append(item)
 
-            return RetornoArreglo(arreglo.identificador, arreglo.tabla_del_identificador, respuesta, arreglo.alias)
+                # return RetornoArreglo(arreglo.identificador, arreglo.tabla_del_identificador, respuesta, arreglo.alias)
 
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoArreglo):
+
             return RetornoError("La operación relacional '{} {} {}' es invalida.".format(exp_izq.valor, self.operador, exp_der.identificador))
+
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
 
             if exp_izq.tipado != exp_der.tipado:
@@ -68,6 +116,7 @@ class Relacional(Expresion):
             resultado = eval(f"exp_izq.valor {self.operador} exp_der.valor")
             resultado = 1 if resultado else 0
             return RetornoLiteral(resultado, TIPO_DATO.BIT)
+
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
 
