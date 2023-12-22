@@ -12,7 +12,7 @@ class Drop(Instruccion):
 
     def Ejecutar(self, base_datos, entorno):
 
-         # Se verifica que no se este utilizando este 'DROP' dentro de la creacion de un procedimiento o funcion
+        # Se verifica que no se este utilizando este 'DROP' dentro de la creacion de un procedimiento o funcion
         construccion = entorno.obtener("construir_procedimiento")
         construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
         if construccion is not None:
@@ -38,10 +38,7 @@ class Drop(Instruccion):
         elif self.tipo_eliminacion == 'function':
             respuesta = dll.eliminar_funcion(base_datos.valor, nombre)
 
-        if respuesta.success:
-            return RetornoCorrecto(respuesta.valor)
-        else:
-            return RetornoError(respuesta.valor)
+        return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DROP")
