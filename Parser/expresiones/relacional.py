@@ -33,76 +33,60 @@ class Relacional(Expresion):
 
             # Almacena todos los datos que cumplen con la condicion (lo importante aqui es que posee el indice de cada dato)
             respuesta = []
+            arreglo_izquierdo = None
+            llave_izquierda = None
 
+            # Se basa en los arreglos exp_izq y exp_der para realizar la operacion aritmetica estos arreglos deben tener una misma dimension y deben de ser la misma tabla
             simbolo = entorno.obtener("condicion")
-
-            # Se basa en el arreglo exp_izq la operacion relacional
             if simbolo is None:
-
-                for llave, valor in enumerate(exp_izq.lista):
-
-                    # Se definen la llave para obtener los valores
-                    llave_izquierda = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
-
-                    # Se obtiene los valores que seran utilizados para realizar el calculo
-                    valor_izquierdo = exp_izq.lista[llave][llave_izquierda]
-                    valor_derecho = exp_der
-
-                    dominante = None
-                    if valor_izquierdo['tipado'] == TIPO_DATO.DATE and valor_derecho.tipado == TIPO_DATO.DATE:
-                        dominante = TIPO_DATO.DATE
-                    elif valor_izquierdo['tipado'] == TIPO_DATO.DATETIME and valor_derecho.tipado == TIPO_DATO.DATETIME:
-                        dominante = TIPO_DATO.DATETIME
-                    else:
-                        dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho.tipado)
-
-                    if dominante == TIPO_DATO.NULL:
-                        return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(valor_izquierdo['valor'], self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
-
-                    # Valores de la llave auxiliar
-                    auxiliar = 0
-                    tipado = dominante
-
-                    try:
-                        if valor_izquierdo['valor'] is None:
-                            auxiliar = None
-                        else:
-                            auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
-                    except Exception as e:
-                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
-
-                    if auxiliar is not None and auxiliar:
-                        tupla_homologacion = {}
-                        tupla_homologacion.update(valor)
-                        respuesta.append(tupla_homologacion)
-
-                return RetornoArreglo(None, exp_izq.tabla_del_identificador, respuesta, None)
-
+                # Se setean los valores que seran utilizados para realizar el calculo
+                arreglo_izquierdo = exp_izq
+                llave_izquierda = "{}.{}".format(arreglo_izquierdo.tabla_del_identificador, arreglo_izquierdo.identificador) if arreglo_izquierdo.identificador is not None else "auxiliar"
             else:
-                print()
-                # # Se busca en la tabla de simbolos el nombre de la variable en el caso que ocurra una condicion
-                # simbolo = entorno.obtener("condicion")
-                # arreglo = None
-                # if simbolo is None:
-                #     arreglo = exp_izq
-                # else:
-                #     arreglo = RetornoArreglo(exp_izq.identificador, exp_izq.tabla_del_identificador, simbolo.valor)
+                # Se setean los valores que seran utilizados para realizar el calculo
+                llave_izquierda = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
+                arreglo_izquierdo = exp_izq if llave_izquierda == "auxiliar" else simbolo.valor
 
-                # for item in arreglo.lista:
+            for llave, tupla in enumerate(arreglo_izquierdo.lista):
 
-                #     if "{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador) not in item:
-                #         continue
+                # Se verifica que existan las llaves
+                if llave_izquierda not in tupla:
+                    continue
 
-                #     valor_item = item["{}.{}".format(arreglo.tabla_del_identificador, arreglo.identificador)]
-                #     if valor_item['tipado'] != exp_der.tipado:
-                #         return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(arreglo.identificador, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+                # Se obtiene los valores que seran utilizados para realizar el calculo
+                valor_izquierdo = arreglo_izquierdo.lista[llave][llave_izquierda]
+                valor_derecho = exp_der
 
-                #     if valor_item['valor'] is not None:
-                #         comparacion = eval(f"valor_item['valor'] {self.operador} exp_der.valor")
-                #         if comparacion:
-                #             respuesta.append(item)
+                # Se verifica si el valor es None para no realizar la operacion
+                if valor_izquierdo['valor'] is None:
+                    continue
 
-                # return RetornoArreglo(arreglo.identificador, arreglo.tabla_del_identificador, respuesta, arreglo.alias)
+                # Se verifica si se puede realizar la operacion segun el dominante
+                dominante = None
+                if valor_izquierdo['tipado'] == TIPO_DATO.DATE and valor_derecho.tipado == TIPO_DATO.DATE:
+                    dominante = TIPO_DATO.DATE
+                elif valor_izquierdo['tipado'] == TIPO_DATO.DATETIME and valor_derecho.tipado == TIPO_DATO.DATETIME:
+                    dominante = TIPO_DATO.DATETIME
+                else:
+                    dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho.tipado)
+
+                if dominante == TIPO_DATO.NULL:
+                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(valor_izquierdo['valor'], self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
+
+                # Valores de la llave auxiliar
+                auxiliar = 0
+
+                try:
+                    auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
+                except Exception as e:
+                    return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
+
+                if auxiliar:
+                    tupla_homologacion = {}
+                    tupla_homologacion.update(tupla)
+                    respuesta.append(tupla_homologacion)
+
+            return RetornoArreglo(None, arreglo_izquierdo.tabla_del_identificador, respuesta, None)
 
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoArreglo):
 

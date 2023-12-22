@@ -36,7 +36,7 @@ class Asignacion(Expresion):
                     return RetornoError(datos_identificador.valor)
                 datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], datos_identificador.lista)
             else:
-                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], simbolo.valor)
+                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], simbolo.valor.lista)
 
             # Se obtienen los datos que contiene la 'EXPRESION'
             res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
@@ -49,11 +49,15 @@ class Asignacion(Expresion):
                 respuesta = []
                 for tupla in datos_identificador.lista:
 
-                    valor_tupla = tupla["{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])]
-                    if valor_tupla['tipado'] != res_expresion_ejecutar.tipado:
-                        return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], "=", ('"{}"'.format(res_expresion_ejecutar.valor) if res_expresion_ejecutar.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else res_expresion_ejecutar.valor)))
+                    llave_identificador = "{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])
+                    if llave_identificador not in tupla:
+                        continue
 
-                    if tupla["{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])]['valor'] == res_expresion_ejecutar.valor:
+                    valor_tupla = tupla[llave_identificador]
+                    if valor_tupla['tipado'] != res_expresion_ejecutar.tipado:
+                        return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], ('"{}"'.format(res_expresion_ejecutar.valor) if res_expresion_ejecutar.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else res_expresion_ejecutar.valor)))
+
+                    if tupla[llave_identificador]['valor'] == res_expresion_ejecutar.valor:
                         respuesta.append(tupla)
 
                 return RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], respuesta)
@@ -64,27 +68,37 @@ class Asignacion(Expresion):
                 # Se empieza a homologar la informacion en un solo arreglo
                 arreglo_identificador = datos_identificador
                 arreglo_expresion = res_expresion_ejecutar
-                arreglo_homologacion = []
+                respuesta = []
 
+                llave_identificador = "{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)
                 for tupla_identificador in arreglo_identificador.lista:
 
-                    # Se verifica que exista la llave dentro de la tupla
-                    if "{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador) not in tupla_identificador:
+                    # Se verifica que exista la llave dentro de la tupla del identificador
+                    if llave_identificador not in tupla_identificador:
                         continue
 
+                    llave_expresion = "{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador) if arreglo_expresion.identificador is not None else "auxiliar"
                     for tupla_expresion in arreglo_expresion.lista:
 
+                        # Se verifca que exista la llave dentro de la tupla de la expresion
+                        if llave_expresion not in tupla_expresion:
+                            continue
+
+                        # Se verifica si el valor es None para no realizar la operacion
+                        if tupla_expresion[llave_expresion]['valor'] is None:
+                            continue
+
                         # Se verifica que el tipo de dato sea el mismo
-                        if tupla_identificador["{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)]['tipado'] != tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['tipado']:
+                        if tupla_identificador[llave_identificador]['tipado'] != tupla_expresion[llave_expresion]['tipado']:
                             return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], arreglo_expresion.identificador))
 
-                        if tupla_identificador["{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)]['valor'] == tupla_expresion["{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador)]['valor']:
+                        if tupla_identificador[llave_identificador]['valor'] == tupla_expresion[llave_expresion]['valor']:
                             tupla_homologacion = {}
                             tupla_homologacion.update(tupla_identificador)
                             tupla_homologacion.update(tupla_expresion)
-                            arreglo_homologacion.append(tupla_homologacion)
+                            respuesta.append(tupla_homologacion)
 
-                return RetornoArreglo(None, None, arreglo_homologacion)
+                return RetornoArreglo(None, None, respuesta)
 
             else:
                 return RetornoError("Ha ocurrido un error al realizar la condición (=).")

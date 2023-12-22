@@ -22,10 +22,11 @@ class Condicion(Expresion):
                 return res_exp_izq_ejecutar
             elif isinstance(res_exp_izq_ejecutar, RetornoArreglo):
 
+                # Se crea un nuevo entorno debido que a traves del mismo se podra realizar operaciones relacionales, aritmeticas y de asignacion a la expresion derecha
                 nuevo_entorno = TablaDeSimbolos(entorno)
 
-                # Se crea un nuevo simbolo de datos debido que a traves del mismo se podra realizar operaciones relacionales, aritmeticas y de asignacion a la expresion derecha
-                simbolo_condicion = Simbolo("condicion", res_exp_izq_ejecutar.lista, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DML)
+                # Se crea un nuevo simbolo de datos
+                simbolo_condicion = Simbolo("condicion", res_exp_izq_ejecutar, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DML)
                 nuevo_entorno.agregar(simbolo_condicion)
 
                 # Se ejecuta la expresion derecha y esta contendra todos los indices y la informacion que servira para hacer el 'SELECT'
