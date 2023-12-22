@@ -15,7 +15,7 @@ class Insert(Instruccion):
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
-            return "Para ejecutar el comando 'INSERT', es necesario seleccionar una base de datos."
+            return RetornoError("Para ejecutar el comando 'INSERT', es necesario seleccionar una base de datos.")
 
         # Se obtiene el nombre de la tabla
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)

@@ -12,7 +12,6 @@ from Parser.abstract.retorno import RetornoError
 ts_global_1 = TablaDeSimbolos()
 base_datos_1 = BaseDatosWrapper("bd1")
 instrucciones = parse(
-
 '''
 CREATE DATABASE bd1; -- EXITO
 CREATE DATABASE bd1; -- ERROR: Ya existe la base de datos
@@ -47,11 +46,11 @@ CREATE TABLE jugador (
     nombre NCHAR(200) NOT NULL,
     puntaje INT
 ); -- EXITO
-CREATE PROCEDURE sp_test(@aumento int, @fecha date, @texto nvarchar(10))
+CREATE PROCEDURE procedimiento_test(@aumento int, @fecha date, @texto nvarchar(10))
 AS
 BEGIN
-    -- DECLARE @var nvarchar(100); -- EXITO
-    -- SET @var = 1; -- EXITO
+    DECLARE @var nvarchar(100); -- EXITO
+    SET @var = 1; -- EXITO
     INSERT INTO tipo_producto (id / 2 + "hola mundo", nombre, descripcion) VALUES (1, @hola, "Productos electronicos"); -- EXITO
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
@@ -59,6 +58,13 @@ BEGIN
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+END;
+CREATE FUNCTION funcion_test(@aumento int, @fecha date, @texto nvarchar(10))
+RETURN INT
+AS
+BEGIN
+    DECLARE @var nvarchar(100); -- EXITO
+    SET @var = 1; -- EXITO
 END;
 ''')
 
@@ -75,7 +81,6 @@ if instrucciones is not None:
 ts_global_2 = TablaDeSimbolos()
 base_datos_2 = BaseDatosWrapper("bd2")
 instrucciones = parse(
-
 '''
 CREATE TABLE Libros (
     id INT PRIMARY KEY,

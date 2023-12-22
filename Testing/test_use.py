@@ -7,6 +7,7 @@ from Parser.parser import parse
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoError
 
 ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("")
@@ -25,6 +26,6 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos, ts_global)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
 
 print("BD utilizada despues del USE: {}".format(base_datos.valor))

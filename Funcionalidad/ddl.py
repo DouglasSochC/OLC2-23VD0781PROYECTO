@@ -106,6 +106,118 @@ class DDL:
 
             return Respuesta(True, "La tabla '{}' ha sido creada correctamente".format(nombre_tabla))
 
+    def crear_procedimiento(self, nombre_bd: str, nombre_procedimiento: str, parametros: list, query: str) -> Respuesta:
+        '''
+        Crea un procedimiento nuevo
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_procedimiento (str): Nombre del procedimiento
+            parametros (list): Diccionario que debe llevar la siguiente estructura [{
+                name: str (*),
+                type: str (int | bit | decimal | date | datetime | nchar | nvarchar) (*),
+                length: int (o)
+            }...{}],
+            query (str): Es el query completo
+        Returns:
+            Respuesta
+        '''
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_procedimiento is None:  # Se valida que este el nombre del procedimiento
+            return Respuesta(False, "Por favor, indique el nombre del procedimiento")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+
+        path_procedimiento = self.__path_procedimiento.format(nombre_bd) + nombre_procedimiento + ".xml"
+        if os.path.exists(path_procedimiento): # Se valida que no exista el procedimiento
+            return Respuesta(False, "Ya existe un procedimiento con el mismo nombre.")
+        else:
+
+            # Crea el elemento raiz con el nombre de la tabla
+            root = ET.Element(nombre_procedimiento)
+
+            # Crea el apartado de estructura de la tabla el cual contendra la descripcion de los campos con sus respectivas restricciones
+            estructura = ET.SubElement(root, "estructura")
+
+            # Crea el apartado de los query de la tabla el cual contendra todos los datos de la tabla
+            query_elemento = ET.SubElement(root, "query")
+            query_elemento.text = query
+
+            # Se agrega los campos que lleva la tabla
+            for param in parametros:
+
+                # Se castean todos los atributos a 'str' para que puedan ser almacenados
+                atributos = {clave: str(valor) for clave, valor in param.items()}
+
+                # Se almacena cada campo que tendra la tabla
+                ET.SubElement(estructura, "campo", attrib=atributos)
+
+            # Crea el arbol XML
+            tree = ET.ElementTree(root)
+
+            # Escribe el árbol XML en un archivo
+            with open(path_procedimiento, "wb") as archivo:
+                tree.write(archivo)
+
+            return Respuesta(True, "El procedimiento '{}' ha sido creado correctamente".format(nombre_procedimiento))
+
+    def crear_funcion(self, nombre_bd: str, nombre_funcion: str, parametros: list, query: str) -> Respuesta:
+        '''
+        Crea un procedimiento nuevo
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_funcion (str): Nombre de la funcion
+            parametros (list): Diccionario que debe llevar la siguiente estructura [{
+                name: str (*),
+                type: str (int | bit | decimal | date | datetime | nchar | nvarchar) (*),
+                length: int (o)
+            }...{}],
+            query (str): Es el query completo
+        Returns:
+            Respuesta
+        '''
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_funcion is None:  # Se valida que este el nombre de la funcion
+            return Respuesta(False, "Por favor, indique el nombre de la funcion")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+
+        path_procedimiento = self.__path_funciones.format(nombre_bd) + nombre_funcion + ".xml"
+        if os.path.exists(path_procedimiento): # Se valida que no exista la funcion
+            return Respuesta(False, "Ya existe una funcion con el mismo nombre.")
+        else:
+
+            # Crea el elemento raiz con el nombre de la tabla
+            root = ET.Element(nombre_funcion)
+
+            # Crea el apartado de estructura de la tabla el cual contendra la descripcion de los campos con sus respectivas restricciones
+            estructura = ET.SubElement(root, "estructura")
+
+            # Crea el apartado de los query de la tabla el cual contendra todos los datos de la tabla
+            query_elemento = ET.SubElement(root, "query")
+            query_elemento.text = query
+
+            # Se agrega los campos que lleva la tabla
+            for param in parametros:
+
+                # Se castean todos los atributos a 'str' para que puedan ser almacenados
+                atributos = {clave: str(valor) for clave, valor in param.items()}
+
+                # Se almacena cada campo que tendra la tabla
+                ET.SubElement(estructura, "campo", attrib=atributos)
+
+            # Crea el arbol XML
+            tree = ET.ElementTree(root)
+
+            # Escribe el árbol XML en un archivo
+            with open(path_procedimiento, "wb") as archivo:
+                tree.write(archivo)
+
+            return Respuesta(True, "La funcion '{}' ha sido creada correctamente".format(nombre_funcion))
+
     ##############################################
     ################ SECCION DROP ################
     ##############################################
@@ -177,6 +289,54 @@ class DDL:
 
         os.remove(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml")
         return Respuesta(True, "La tabla '{}' ha sido eliminada correctamente.".format(nombre_tabla))
+
+    def eliminar_procedimiento(self, nombre_bd: str, nombre_procedimiento:str):
+        '''
+        Elimina un procedimiento
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_procedimiento (str): Nombre del procedimiento
+
+        Returns:
+            Respuesta
+        '''
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_procedimiento is None:  # Se valida que este el nombre del procedimiento
+            return Respuesta(False, "Por favor, indique el nombre del procedimiento")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_procedimiento.format(nombre_bd) + nombre_procedimiento + ".xml"): # Se valida que exista el procedimiento
+            return Respuesta(False, "El procedimiento '{}' no se encuentra en la base de datos.".format(nombre_procedimiento))
+
+        os.remove(self.__path_procedimiento.format(nombre_bd) + nombre_procedimiento + ".xml")
+        return Respuesta(True, "La procedimiento '{}' ha sido eliminado correctamente.".format(nombre_procedimiento))
+
+    def eliminar_funcion(self, nombre_bd: str, nombre_funcion:str):
+        '''
+        Elimina una funcion
+
+        Parameters:
+            nombre_bd (str): Nombre de la base de datos
+            nombre_funcion (str): Nombre de la funcion
+
+        Returns:
+            Respuesta
+        '''
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_funcion is None:  # Se valida que este el nombre de la funcion
+            return Respuesta(False, "Por favor, indique el nombre de la funcion")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_funciones.format(nombre_bd) + nombre_funcion + ".xml"): # Se valida que exista la funcion
+            return Respuesta(False, "La funcion '{}' no se encuentra en la base de datos.".format(nombre_funcion))
+
+        os.remove(self.__path_funciones.format(nombre_bd) + nombre_funcion + ".xml")
+        return Respuesta(True, "La funcion '{}' ha sido eliminada correctamente.".format(nombre_funcion))
 
     ##############################################
     ############## SECCION TRUNCATE ##############

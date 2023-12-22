@@ -1,28 +1,29 @@
 from ..abstract.instrucciones import Instruccion
 from ..expresiones.identificador import Identificador
-from ..abstract.retorno import RetornoError
+from ..abstract.retorno import RetornoError, RetornoCorrecto
 from Funcionalidad.ddl import DDL
 
 class Drop(Instruccion):
 
-    def __init__(self, id_nodo, tipo_eliminacion: str, identificador: Identificador):
+    def __init__(self, id_nodo: str, tipo_eliminacion: str, identificador: Identificador):
         self.id_nodo = id_nodo
         self.tipo_eliminacion = tipo_eliminacion
         self.identificador = identificador
 
-    # TODO: Falta implementar lo siguiente
-        # Eliminar un procedimiento
-        # Eliminar una funcion
     def Ejecutar(self, base_datos, entorno):
 
+         # Se verifica que no se este utilizando este 'DROP' dentro de la creacion de un procedimiento o funcion
+        construccion = entorno.obtener("construir_procedimiento")
+        construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
+        if construccion is not None:
+            return RetornoError("No puede utilizar el comando 'DROP' dentro de la creacion de un PROCEDURE o FUNCTION")
+
         if base_datos.valor == "":
-            return "Para ejecutar el comando '{}', es necesario seleccionar una base de datos.".format("DROP")
+            return RetornoError("Para ejecutar el comando 'DROP', es necesario seleccionar una base de datos.")
 
         # Se obtiene el nombre
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
-        if isinstance(res_identificador, RetornoError):
-            return res_identificador.msg
-        nombre = res_identificador.identificador
+        nombre = res_identificador['identificador']
 
         dll = DDL()
         respuesta = None
@@ -33,14 +34,14 @@ class Drop(Instruccion):
         elif self.tipo_eliminacion == 'table':
             respuesta = dll.eliminar_tabla(base_datos.valor, nombre)
         elif self.tipo_eliminacion == 'procedure':
-            return "FALTA IMPLEMENTAR EL PROCEDURE"
+            respuesta = dll.eliminar_procedimiento(base_datos.valor, nombre)
         elif self.tipo_eliminacion == 'function':
-            return "FALTA IMPLEMENTAR EL FUNCTION"
+            respuesta = dll.eliminar_funcion(base_datos.valor, nombre)
 
         if respuesta.success:
-            return respuesta.valor
+            return RetornoCorrecto(respuesta.valor)
         else:
-            return "ERROR: {}".format(respuesta.valor)
+            return RetornoError(respuesta.valor)
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DROP")

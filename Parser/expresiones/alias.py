@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoError, RetornoIdentificador
+from ..abstract.retorno import RetornoError, RetornoArreglo
 
 class Alias(Expresion):
 
@@ -18,7 +18,7 @@ class Alias(Expresion):
         if isinstance(res_ejecutar, RetornoError):
             return res_ejecutar
         else:
-            return RetornoIdentificador(res_ejecutar.identificador, res_ejecutar.tipado, res_ejecutar.lista, self.alias)
+            return RetornoArreglo(res_ejecutar.identificador, res_ejecutar.tipado, res_ejecutar.lista, self.alias)
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALIAS")
