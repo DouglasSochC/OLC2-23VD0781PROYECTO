@@ -20,7 +20,11 @@ IMG_CARPETA = None
 IMG_TABLA = None
 
 # Utilidades
-from Funcionalidad.util import Respuesta
+from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoCorrecto, RetornoError
+class BaseDatosWrapper:
+    def __init__(self, valor):
+        self.valor = valor
 
 # Para variables de entorno
 from dotenv import load_dotenv
@@ -33,6 +37,8 @@ from Funcionalidad.ddl import DDL
 # Variables generales
 TEMA_EDITOR="monokai"
 NOMBRE_TAB = 'query'
+NOMBRE_SALIDA = 'salida'
+INDICE_SALIDA = 1
 TABS_ACTUALES = []
 ANCHO_VENTANA = 1000
 ALTURA_VENTANA = 700
@@ -74,25 +80,34 @@ def ejecutar_query():
     if len(TABS_ACTUALES) <= 0:
         return
 
+    global BD_SELECCIONADA
+
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
+    ts_global = TablaDeSimbolos()
+    base_datos = BaseDatosWrapper(BD_SELECCIONADA)
     salida = parse(texto)
 
     # Se revisa que se haya obtenido una salida
     if salida is not None:
-        
+
+        destruir_elementos_tab_salida()
+
         # Se setea la salida para los errores lexicos y sintacticos
         if isinstance(salida, str):
             mostrar_salida_como_texto(salida)
         else:
             # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
             for elemento in salida:
-                respuesta = elemento.Ejecutar(None)
-                if respuesta != None and isinstance(respuesta, Respuesta):
-                    mensaje = respuesta.msg if respuesta.success else "ERROR: {}".format(respuesta.msg)
-                    mostrar_salida_como_texto(mensaje)
+                respuesta = elemento.Ejecutar(base_datos, ts_global)
+                if isinstance(respuesta, RetornoError):
+                    mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
+                elif isinstance(respuesta, RetornoCorrecto):
+                    mostrar_salida_como_texto(respuesta.msg)
                 else:
-                    print(respuesta)
+                    mostrar_salida_como_tabla(respuesta)
+
+    BD_SELECCIONADA = base_datos.valor
 
 def mostrar_componentes_del_lenguaje():
 
@@ -144,14 +159,14 @@ def mostrar_componentes_del_lenguaje():
                         treeview.insert(nombre_bd + nombre_carpeta, 'end', nombre_bd + nombre_carpeta + nombre_archivo, text=nombre_archivo.rsplit('.', 1)[0], image=IMG_PROCEDIMIENTO, tags=('estilo_carpetas' if len(BD_SELECCIONADA) > 0 and nombre_bd == BD_SELECCIONADA else ''))
 
 def oyente_cambio_texto_tab(codeview, indice_actual, event):
-    # Obtener el código de la tecla presionada
+    # Obtener el codigo de la tecla presionada
     keycode = event.keycode
 
     # Evitar teclas especiales como FIN, INICIO, REPAG, AVEPAG, etc.
     if event.keysym in ['End', 'Home', 'Next', 'Prior']:
         return
 
-    # Evitar las teclas de flechas, Mayúsculas, Shift y Alt
+    # Evitar las teclas de flechas, Mayusculas, Shift y Alt
     if event.keysym in ['Up', 'Down', 'Left', 'Right', 'Shift_L', 'Shift_R', 'Control_L', 'Control_R', 'Alt_L', 'Alt_R']:
         return
 
@@ -188,59 +203,88 @@ def comando_seleccionar_bd(variable, ventana_seleccionar):
     mostrar_componentes_del_lenguaje()
     ventana_seleccionar.destroy()
 
+def destruir_elementos_tab_salida():
+
+    # Se obtiene el numero total de pestanias en el notebook
+    total_pestanas = notebook_inferior.index(tk.END)
+
+    # Itera sobre las pestanias en orden inverso para evitar problemas con el indice al eliminar
+    for i in range(total_pestanas - 1, -1, -1):
+
+        # Se obtiene el objeto de la pestania
+        pestania = notebook_inferior.nametowidget(notebook_inferior.tabs()[i])
+
+        # Destruye la pestania
+        pestania.destroy()
+
+    # Se crea la primera pestania que controla los mensajes de salida
+    global INDICE_SALIDA
+    INDICE_SALIDA = 1
+    tab_salida_tabla = ttk.Frame(notebook_inferior)
+    notebook_inferior.add(tab_salida_tabla, text=NOMBRE_SALIDA + str(INDICE_SALIDA))
+    INDICE_SALIDA += 1
+
 def mostrar_salida_como_texto(texto):
-    # Destruir todos los elementos del tab_salida
-    for widget in tab_salida.winfo_children():
-        widget.destroy()
 
-    # Crea un widget Text y lo agrega al panel para mostrar texto
-    text_widget = tk.Text(tab_salida, wrap="word", height=10, width=50, state="disabled")
-    text_widget.pack(fill="both", expand=True)
+    # Obtiene el objeto de la pestaña actual
+    pestania_actual = notebook_inferior.nametowidget(notebook_inferior.tabs()[notebook_inferior.index("current")])
 
-    # Habilitar el widget Text temporalmente
-    text_widget.config(state="normal")
-    # Insertar texto al final
-    text_widget.insert(tk.END, texto)
-    # Deshabilitar el widget Text nuevamente
-    text_widget.config(state="disabled")
+    # Si el widget Text aun no esta creado, crealo
+    if not hasattr(pestania_actual, 'text_widget'):
+        # Crea un widget Text y lo agrega al panel para mostrar texto
+        text_widget = tk.Text(pestania_actual, wrap="word", height=10, width=50, state="disabled")
+        text_widget.pack(fill="both", expand=True)
+        # Almacena una referencia al widget Text en la pestaña actual
+        pestania_actual.text_widget = text_widget
+
+    # Habilita el widget Text temporalmente
+    pestania_actual.text_widget.config(state="normal")
+    # Inserta texto al final
+    pestania_actual.text_widget.insert(tk.END, "{}\n".format(texto))
+    # Deshabilita el widget Text nuevamente
+    pestania_actual.text_widget.config(state="disabled")
 
 def mostrar_salida_como_tabla(data: dict):
+
+    # Se agrega una nueva pestania
+    global INDICE_SALIDA
+    tab_salida_tabla = ttk.Frame(notebook_inferior)
+    notebook_inferior.add(tab_salida_tabla, text=NOMBRE_SALIDA + str(INDICE_SALIDA))
+    INDICE_SALIDA += 1
 
     if len(data) <= 0:
         mostrar_salida_como_texto("No hay registros por mostrar")
         return
 
-    # Destruir todos los elementos del tab_salida
-    for widget in tab_salida.winfo_children():
-        widget.destroy()
-
-    encabezados = list(data[0].keys())
+    encabezados = data['encabezado']
     columnas = encabezados.copy()
     columnas.pop()
 
-    # Crear el Treeview (tabla) y lo agrega al tab_salida
-    tree = ttk.Treeview(tab_salida, columns=(columnas))
+    # Crear el Treeview (tabla) y lo agrega al tab_salida_tabla
+    tree = ttk.Treeview(tab_salida_tabla, columns=(columnas))
 
     # Configurar las columnas
     for indice, encabezado in enumerate(encabezados):
         tree.heading("#" + str(indice), text=encabezado)
 
-    # Agregar datos
-    for d in data:
-        # Obtener la primera posición
-        primera_posicion = next(iter(d.values()))
-        # Obtener el resto de los valores
-        resto_valores = list(d.values())[1:]
-        # Se agrega la linea a la tabla
-        tree.insert("", "end", text=primera_posicion, values=resto_valores)
+    if len(data['data']) > 0:
+
+        # Agregar datos
+        for d in data['data']:
+            # Obtener la primera posicion
+            primera_posicion = next(iter(d))
+            # Obtener el resto de los valores
+            resto_valores = d[1:]
+            # Se agrega la linea a la tabla
+            tree.insert("", "end", text=primera_posicion, values=resto_valores)
 
     # Configurar Scrollbar vertical
-    yscrollbar = ttk.Scrollbar(tab_salida, orient="vertical", command=tree.yview)
+    yscrollbar = ttk.Scrollbar(tab_salida_tabla, orient="vertical", command=tree.yview)
     tree.configure(yscroll=yscrollbar.set)
     yscrollbar.pack(side="right", fill="y")
 
     # Configurar Scrollbar horizontal
-    xscrollbar = ttk.Scrollbar(tab_salida, orient="horizontal", command=tree.xview)
+    xscrollbar = ttk.Scrollbar(tab_salida_tabla, orient="horizontal", command=tree.xview)
     tree.configure(xscroll=xscrollbar.set)
     xscrollbar.pack(side="bottom", fill="x")
 
@@ -419,7 +463,7 @@ def eliminar_bd():
         # Obtiene todas las bases de datos
         opciones = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
 
-        # Variable para almacenar la opción seleccionada
+        # Variable para almacenar la opcion seleccionada
         variable = tk.StringVar(ventana_eliminar)
         variable.set(opciones[0])  # Establecer el valor predeterminado
 
@@ -427,12 +471,12 @@ def eliminar_bd():
         dropdown = ttk.Combobox(ventana_eliminar, values=opciones, textvariable=variable)
         dropdown.pack(pady=10)
 
-        # Crear el botón OK
+        # Crear el boton OK
         boton_ok = tk.Button(ventana_eliminar, text="OK", command=lambda: comando_eliminar_bd(variable, ventana_eliminar))
         boton_ok.pack()
 
         # Ajustar el tamaño de la ventana_eliminar
-        ventana_eliminar.geometry("300x80")  # Ajusta según tus necesidades
+        ventana_eliminar.geometry("300x80")  # Ajusta segun tus necesidades
 
         # Centrar la ventana_eliminar en la pantalla
         ancho_ventana = ventana_eliminar.winfo_reqwidth()
@@ -455,7 +499,7 @@ def seleccionar_bd():
         # Obtiene todas las bases de datos
         opciones = os.listdir(CARPETA_PARA_BASES_DE_DATOS)
 
-        # Variable para almacenar la opción seleccionada
+        # Variable para almacenar la opcion seleccionada
         variable = tk.StringVar(ventana_seleccionar)
         variable.set(opciones[0])  # Establecer el valor predeterminado
 
@@ -463,12 +507,12 @@ def seleccionar_bd():
         dropdown = ttk.Combobox(ventana_seleccionar, values=opciones, textvariable=variable)
         dropdown.pack(pady=10)
 
-        # Crear el botón OK
+        # Crear el boton OK
         boton_ok = tk.Button(ventana_seleccionar, text="OK", command=lambda: comando_seleccionar_bd(variable, ventana_seleccionar))
         boton_ok.pack()
 
         # Ajustar el tamaño de la ventana_seleccionar
-        ventana_seleccionar.geometry("300x80")  # Ajusta según tus necesidades
+        ventana_seleccionar.geometry("300x80")  # Ajusta segun tus necesidades
 
         # Centrar la ventana_seleccionar en la pantalla
         ancho_ventana = ventana_seleccionar.winfo_reqwidth()
@@ -498,11 +542,11 @@ root.bind('<Control-s>', lambda event: guardar())
 wtotal = root.winfo_screenwidth()
 htotal = root.winfo_screenheight()
 
-#  Aplicamos la siguiente formula para calcular donde debería posicionarse
+#  Aplicamos la siguiente formula para calcular donde deberia posicionarse
 pwidth = round(wtotal/2-ANCHO_VENTANA/2)
 pheight = round(htotal/2-ALTURA_VENTANA/2)
 
-#  Se lo aplicamos a la geometría de la ventana
+#  Se lo aplicamos a la geometria de la ventana
 root.geometry(str(ANCHO_VENTANA)+"x"+str(ALTURA_VENTANA)+"+"+str(pwidth)+"+"+str(pheight))
 
 # Menu en barra
@@ -572,7 +616,8 @@ panel_2.add(notebook_central)
 # Panel inferior dentro del sub panel
 notebook_inferior = ttk.Notebook(panel_2)
 tab_salida = ttk.Frame(notebook_inferior)
-notebook_inferior.add(tab_salida, text="Salida de datos")
+notebook_inferior.add(tab_salida, text=NOMBRE_SALIDA + str(INDICE_SALIDA))
+INDICE_SALIDA += 1
 notebook_inferior.pack(fill="both", expand=True)
 panel_2.add(notebook_inferior)
 

@@ -100,16 +100,13 @@ class Select(Instruccion):
                 else:
                     resultado["encabezado"].append(res_ejecutar_campo.identificador)
 
-                # Se formatea la informacion de la fila obtenida
+                # Se formatea la informacion de la fila obtenida y se almacena en el resultado
                 if res_ejecutar_campo.identificador is None:
-                    res_obtener_fila_auxiliar = dml.obtener_fila_de_auxiliar(res_ejecutar_campo.lista)
-                    resultado["data"].append(res_obtener_fila_auxiliar)
+                    dml.obtener_fila_de_auxiliar(res_ejecutar_campo.lista, resultado)
                 elif res_ejecutar_campo.identificador is not None and res_ejecutar_campo.tabla_del_identificador is not None:
-                    res_obtener_fila_identificador = dml.obtener_fila_de_identificador(condiciones_obtenidas, res_ejecutar_campo.tabla_del_identificador, res_ejecutar_campo.identificador)
-                    resultado["data"].append(res_obtener_fila_identificador)
+                    dml.obtener_fila_de_identificador(condiciones_obtenidas, res_ejecutar_campo.tabla_del_identificador, res_ejecutar_campo.identificador, resultado)
                 elif res_ejecutar_campo.identificador is not None and res_ejecutar_campo.tabla_del_identificador is None:
-                    res_obtener_fila_auxiliar = dml.obtener_fila_de_auxiliar_funcion_nativa(res_ejecutar_campo.lista)
-                    resultado["data"].append(res_obtener_fila_auxiliar)
+                    dml.obtener_fila_de_auxiliar_funcion_nativa(res_ejecutar_campo.lista, resultado)
             else:
                 RetornoError("Ha ocurrido un error al obtener la informacion de la(s) tabla(s).")
 

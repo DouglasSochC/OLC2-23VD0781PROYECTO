@@ -284,32 +284,41 @@ class DML:
         # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
         return Respuesta(True, nombre_tabla, datos[nombre_tabla])
 
-    def obtener_fila_de_auxiliar(self, datos: list) -> list:
+    def obtener_fila_de_auxiliar(self, datos: list, resultado: list) -> list:
 
-        respuesta = []
-        for tupla in datos:
-            respuesta.append(tupla['auxiliar']['valor'])
-        return respuesta
+        for indice, tupla in enumerate(datos):
 
-    def obtener_fila_de_auxiliar_funcion_nativa(self, datos: list) -> list:
+            if indice < len(resultado['data']):
+                resultado['data'][indice].append(tupla['auxiliar']['valor'])
+            else:
+                resultado['data'].append([tupla['auxiliar']['valor']])
 
-        respuesta = []
-        for tupla in datos:
-            respuesta.append(tupla['auxiliar'])
-        return respuesta
+    def obtener_fila_de_auxiliar_funcion_nativa(self, datos: list, resultado: list) -> list:
 
-    def obtener_fila_de_identificador(self, datos_condiciones: list, nombre_tabla: str, nombre_columna: str):
+        for indice, tupla in enumerate(datos):
 
-        respuesta = []
-        for tupla in datos_condiciones:
+            if indice < len(resultado['data']):
+                resultado['data'][indice].append(tupla['auxiliar'])
+            else:
+                resultado['data'].append([tupla['auxiliar']])
+
+    def obtener_fila_de_identificador(self, datos_condiciones: list, nombre_tabla: str, nombre_columna: str, resultado: list):
+
+        for indice, tupla in enumerate(datos_condiciones):
 
             llave = "{}.{}".format(nombre_tabla, nombre_columna)
             if llave in tupla:
-                respuesta.append(tupla[llave]['valor'])
-            else:
-                respuesta.append(None)
 
-        return respuesta
+                if indice < len(resultado['data']):
+                    resultado['data'][indice].append(tupla[llave]['valor'])
+                else:
+                    resultado['data'].append([tupla[llave]['valor']])
+            else:
+
+                if indice < len(resultado['data']):
+                    resultado['data'][indice].append(None)
+                else:
+                    resultado['data'].append([None])
 
     def obtener_informacion_completa(self, datos_condiciones: list):
 
