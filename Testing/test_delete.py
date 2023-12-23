@@ -7,11 +7,11 @@ from Parser.parser import parse
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
+from Parser.abstract.retorno import RetornoError
 
 ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper("bd1")
 instrucciones = parse(
-
 '''
 DELETE FROM producto1 WHERE id > 100; -- ERROR: No existe la tabla en la BD
 DELETE FROM producto WHERE test < 100; -- ERROR: No existe la columna 'test' en la tabla
@@ -27,5 +27,5 @@ if instrucciones is not None:
     else:
         for instr in instrucciones:
             res = instr.Ejecutar(base_datos, ts_global)
-            print(res)
+            print("ERROR: {}".format(res.msg) if isinstance(res, RetornoError) else res.msg)
 

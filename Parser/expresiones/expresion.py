@@ -46,7 +46,7 @@ class Expresion(Expresion):
                         return res_ejecutar
                     else:
                         dml = DML()
-                        datos = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_ejecutar['identificador'], res_ejecutar['referencia_tabla'])
+                        datos = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_ejecutar['identificador'], res_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
                         if datos.success:
                             return RetornoArreglo(res_ejecutar['identificador'], datos.valor, datos.lista)
                         else:

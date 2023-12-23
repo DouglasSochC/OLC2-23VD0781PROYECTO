@@ -221,21 +221,19 @@ class DML:
 
         return Respuesta(True, None, respuesta_datos)
 
-    def verificar_columna_tabla(self, nombre_bd: str, datos: list, nombre_columna:str, nombre_tabla:str = None) -> Respuesta:
+    def verificar_columna_tabla(self, nombre_bd: str, datos: list, nombre_columna:str, nombre_tabla:str = None, tablas_a_verificar: list = []) -> Respuesta:
 
         # Se busca en que tabla se encuentra la columna
         if nombre_tabla is None:
 
-            # Se obtienen todas las tablas existentes de la base de datos
-            tablas = os.listdir(self.__path_tablas.format(nombre_bd))
             # Variable que valida si existe alguna ambiguedad
             ambiguedad = 0
 
             # Se evalua tabla por tabla para verificar que la informacion a eliminar no este enlazada a otra tabla a traves de una llave foranea
-            for tabla in tablas:
+            for tabla in tablas_a_verificar:
 
                 # Se obtienen todos registros que contiene la tabla
-                path_tabla = self.__path_tablas.format(nombre_bd) + tabla
+                path_tabla = self.__path_tablas.format(nombre_bd) + tabla + ".xml"
                 with open(path_tabla, 'r') as archivo:
                     contenido_xml = archivo.read()
 
@@ -248,9 +246,11 @@ class DML:
                     # Se verifica si el campo es igual al que se desea eliminar
                     if campo['@name'] == nombre_columna:
                         ambiguedad += 1
-                        nombre_tabla = tabla.split(".")[0]
+                        nombre_tabla = tabla
 
-            if ambiguedad > 1:
+            if ambiguedad == 0:
+                return Respuesta(False, "La columna '{}' es invalida.".format(nombre_columna), None)
+            elif ambiguedad > 1:
                 return Respuesta(False, "La columna '{}' se encuentra en mas de una tabla, por favor, especifique en que tabla se encuentra.".format(nombre_columna), None)
         else:
 
@@ -266,7 +266,7 @@ class DML:
 
             # Se formatea el XML a un diccionario para manejarlo de mejor forma
             campos = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
-             # Se recorre cada campo de la tabla
+            # Se recorre cada campo de la tabla
             for campo in campos:
 
                 # Se verifica si el campo es igual al que se desea eliminar
@@ -274,13 +274,94 @@ class DML:
                     existe_campo = True
                     break
 
-        if nombre_tabla is None:
-            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla), None)
-        elif existe_campo is False:
-            return Respuesta(False, "La columna '{}' no se encuentra en la tabla '{}'.".format(nombre_columna, nombre_tabla), None)
-        elif nombre_tabla not in datos:
+            if existe_campo is False:
+                return Respuesta(False, "La columna '{}' no se encuentra en la tabla '{}'.".format(nombre_columna, nombre_tabla), None)
+
+        if nombre_tabla not in datos:
             return Respuesta(False, "La consulta 'SELECT' no incluye la tabla '{}' en la cláusula FROM.".format(nombre_tabla), None)
 
-        # # El 'valor' de la respuesta tendra el nombre de la tabla
-        # # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
+        # El 'valor' de la respuesta tendra el nombre de la tabla
+        # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
         return Respuesta(True, nombre_tabla, datos[nombre_tabla])
+
+    ##############################################
+    ############### SECCION DELETE ###############
+    ##############################################
+
+    def eliminar_filas(self, nombre_bd:str, nombre_tabla: str, lista_indices: list):
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se obtiene la raiz del XML
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        cantidad_registros_eliminados = 0
+        for indice in lista_indices:
+
+            # Buscar y eliminar el registro con el indice especificado
+            registro_a_eliminar = root.find(f"./registros/fila[@index='{indice}']")
+            if registro_a_eliminar is not None:
+                root.find('./registros').remove(registro_a_eliminar)
+                cantidad_registros_eliminados += 1
+
+        # Guardar el resultado en un nuevo archivo XML
+        tree.write(path_tabla)
+
+        return Respuesta(True, "DELETE {}".format(cantidad_registros_eliminados))
+
+    def validar_indices(self, nombre_bd: str, nombre_tabla: str, listado_indices: list) -> Respuesta:
+
+        # Se obtienen todos los registros de los indices debido a que es necesario revisar si no esta siendo utilizado en otro lugar algun registro por medio de llave foranea
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Se obtiene la raiz del XML
+        tree = ET.parse(path_tabla)
+        root_tabla_actual = tree.getroot()
+
+        registros = []
+        for indice in listado_indices:
+            fila = root_tabla_actual.find(f".//fila[@index='{indice}']")
+            registros.append(fila)
+
+        # Se obtienen todas las tablas existentes de la base de datos
+        tablas = os.listdir(self.__path_tablas.format(nombre_bd))
+
+        # Se evalua tabla por tabla para verificar
+        for tabla in tablas:
+
+            nombre_tabla_evaluar = tabla.rsplit('.', 1)[0]
+            if  nombre_tabla_evaluar == nombre_tabla:
+                continue
+
+            # Se obtiene la raiz del XML de la tabla
+            tree = ET.parse(self.__path_tablas.format(nombre_bd) + tabla)
+            root_a_evaluar = tree.getroot()
+
+            # Se obtiene los campos de la tabla a verificar que son una llave foranea
+            campos_con_llave_foranea = root_a_evaluar.findall(".//estructura/campo/[@fk_table]")
+
+            # Se verifica que no se elimine un registro que esta siendo utilizado en otra tabla
+            for campo in campos_con_llave_foranea:
+
+                if campo.attrib['fk_table'] == nombre_tabla:
+
+                    for obj in registros:
+
+                        fila = obj.find(campo.attrib['fk_attribute'])
+                        if fila is not None:
+
+                            resultado = root_a_evaluar.find(".//fila[{}='{}']".format(campo.attrib['name'], fila.text))
+                            if resultado is not None:
+                                return Respuesta(False, "No se puede realizar la operación 'DELETE' en la tabla '{}' debido a que el campo '{}' con valor '{}' esta siendo referenciado en la tabla '{}' a través de una llave foranea.".format(nombre_tabla, campo.attrib['fk_attribute'], fila.text, nombre_tabla_evaluar))
+
+        return Respuesta(True, "")
