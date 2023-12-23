@@ -1,2 +1,2 @@
-import Interfaz.main
-
+#mport Interfaz.main
+import Testing.test_graficoAST

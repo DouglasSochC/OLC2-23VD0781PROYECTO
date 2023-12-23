@@ -10,7 +10,7 @@ class Relacional(Expresion):
         self.expresion_derecha = expresion_derecha
 
     def Ejecutar(self, base_datos, entorno):
-
+        
         exp_izq = self.expresion_izquierda.Ejecutar(base_datos, entorno)
         exp_der = self.expresion_derecha.Ejecutar(base_datos, entorno)
 

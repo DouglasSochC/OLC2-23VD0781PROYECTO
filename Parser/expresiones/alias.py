@@ -9,7 +9,7 @@ class Alias(Expresion):
         self.alias = alias
 
     def Ejecutar(self, base_datos, entorno):
-
+        
         # En el caso que sea una instancia de 'RetornoError' se retorna el error encontrado
         if isinstance(self.expresion, RetornoError):
             return self.expresion

@@ -13,18 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-CREATE DATABASE bd1;
-
-USE "db1";
-
-create table tabla1(
-    id int primary key,
-    nombre NVARCHAR(30),
-    edad int
-);
-
-ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
-
+SET variable = 3+3;
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -39,6 +28,7 @@ DROP DATABASE bd1;
 drop column tipotarjeta
 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY
 ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20), bandera int;
 truncate table tbdetallefactura;
 3 > 3 && 3 < 7
 CAST(@NCHAR AS INT)
@@ -48,6 +38,18 @@ CREATE DATABASE bd1;
 
 
 INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
+
+CREATE DATABASE bd1;
+
+USE "db1";
+
+create table tabla1(
+    id int primary key,
+    nombre NVARCHAR(30),
+    edad int
+);
+
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
 '''
 
 # Se revisa que se haya obtenido una instrucciones

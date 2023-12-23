@@ -94,8 +94,9 @@ class Literal(Expresion):
         return label_encabezado + label_valor + union_hijo
 
     def removeQuotes(self, value):
+        print("aqui recibe el valor", value)
         if isinstance(value, str):
             if value.startswith('"') and value.endswith('"'):
-                mundo_without_quotes = value.strip('"')
-            return mundo_without_quotes
+                mundo_without_quotes = value.strip('"')   
+                return mundo_without_quotes
         return value

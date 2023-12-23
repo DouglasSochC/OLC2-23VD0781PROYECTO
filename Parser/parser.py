@@ -86,7 +86,10 @@ def p_set(p):
     '''
     set  : SET identificador IGUAL expresion PUNTOYCOMA
     '''
-    p[0] = Set(None, p[2], p[4])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Set(contador, p[2], p[4])
 
 def p_usar_db(p):
     '''
@@ -435,7 +438,7 @@ def p_expresion(p):
     elif len(p) == 4:
         p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
-        #TODO: por probar
+        #TODO: NO FUNCIONA
         p[0] = Expresion(id_nodo, p[4])
 
 def p_alias(p):
@@ -484,6 +487,7 @@ def p_funcion_nativa(p):
     elif p[1] == 'suma':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'cast':
+        #TODO: NO FUNCIONA
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
 
 def p_aritmeticos(p):
@@ -514,6 +518,7 @@ def p_relacionales(p):
     if len(p) == 4:
         p[0] = Relacional(id_nodo,p[1], p[2], p[3])
     elif len(p) == 5:
+        #TODO: NO FUNCIONA
         p[0] = Relacional(id_nodo,p[2], p[1], p[4])
 
 def p_logicos(p):
@@ -528,6 +533,7 @@ def p_logicos(p):
     if len(p) == 4:
         p[0] = Logico(id_nodo,p[1], p[2], p[3])
     elif len(p) == 3:
+    #TODO: NO FUNCIONA
         p[0] = Logico(id_nodo,None, p[1],p[2])
 
 def p_literal1(p):
