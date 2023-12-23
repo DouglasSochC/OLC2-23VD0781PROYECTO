@@ -1,7 +1,7 @@
 from ..abstract.expresiones import Expresion
 from ..expresiones.identificador import Identificador
 from ..expresiones.expresion import Expresion
-from ..abstract.retorno import RetornoError, RetornoLiteral, RetornoArreglo, TIPO_DATO
+from ..abstract.retorno import RetornoError, RetornoLiteral, RetornoArreglo, RetornoCodigo, TIPO_DATO
 from Funcionalidad.dml import DML
 
 class Asignacion(Expresion):
@@ -18,93 +18,109 @@ class Asignacion(Expresion):
         # Se obtiene el nombre de la variable
         res_identificador_ejecutar = self.identificador.Ejecutar(base_datos, entorno)
 
-        # Se evalua si se esta utilizando la asignacion al hacer un WHERE
-        simbolo_datos_tablas = entorno.obtener("datos_tablas")
-        if simbolo_datos_tablas is None:
-            print("SE ESTA UTILIZANDO EN EL UPDATE!")
+        # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
+        construccion = entorno.obtener("construir_procedimiento")
+        construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
+        if construccion is not None:
+
+            # En el caso que ocurra un error al obtener la expresion
+            res = self.expresion.Ejecutar(base_datos, entorno)
+            if isinstance(res, RetornoError):
+                return res
+            elif isinstance(res, RetornoCodigo):
+                return RetornoCodigo("{} = {}".format(res_identificador_ejecutar['identificador'], res.codigo))
+            else:
+                return RetornoError("Ha ocurrido un error al definir el codigo de la asignacion")
+
         else:
 
-            # Se obtienen los datos que contiene el 'IDENTIFICADOR'
-            dml = DML()
-            datos_identificador = None
-            # Se busca en la tabla de simbolos el nombre de la variable
-            simbolo = entorno.obtener("condicion")
-
-            if simbolo is None:
-                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
-                if datos_identificador.success is False:
-                    return RetornoError(datos_identificador.valor)
-                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, datos_identificador.lista)
+            # Se evalua si se esta utilizando la asignacion al hacer un WHERE
+            simbolo_datos_tablas = entorno.obtener("datos_tablas")
+            if simbolo_datos_tablas is None:
+                print("SE ESTA UTILIZANDO EN EL UPDATE!")
             else:
-                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
-                if datos_identificador.success is False:
-                    return RetornoError(datos_identificador.valor)
-                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, simbolo.valor.lista)
 
-            # Se obtienen los datos que contiene la 'EXPRESION'
-            res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
-            if isinstance(res_expresion_ejecutar, RetornoError):
-                return res_expresion_ejecutar
+                # Se obtienen los datos que contiene el 'IDENTIFICADOR'
+                dml = DML()
+                datos_identificador = None
+                # Se busca en la tabla de simbolos el nombre de la variable
+                simbolo = entorno.obtener("condicion")
 
-            # Si la expresion es un literal se verifica el cumplimiento de la condicion
-            if isinstance(res_expresion_ejecutar, RetornoLiteral):
+                if simbolo is None:
+                    datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
+                    if datos_identificador.success is False:
+                        return RetornoError(datos_identificador.valor)
+                    datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, datos_identificador.lista)
+                else:
+                    datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
+                    if datos_identificador.success is False:
+                        return RetornoError(datos_identificador.valor)
+                    datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, simbolo.valor.lista)
 
-                respuesta = []
-                for tupla in datos_identificador.lista:
+                # Se obtienen los datos que contiene la 'EXPRESION'
+                res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
+                if isinstance(res_expresion_ejecutar, RetornoError):
+                    return res_expresion_ejecutar
 
-                    llave_identificador = "{}.{}".format(datos_identificador.tabla_del_identificador, datos_identificador.identificador)
-                    if llave_identificador not in tupla:
-                        continue
+                # Si la expresion es un literal se verifica el cumplimiento de la condicion
+                if isinstance(res_expresion_ejecutar, RetornoLiteral):
 
-                    valor_tupla = tupla[llave_identificador]
-                    if valor_tupla['tipado'] != res_expresion_ejecutar.tipado:
-                        return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], ('"{}"'.format(res_expresion_ejecutar.valor) if res_expresion_ejecutar.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else res_expresion_ejecutar.valor)))
+                    respuesta = []
+                    for tupla in datos_identificador.lista:
 
-                    if tupla[llave_identificador]['valor'] == res_expresion_ejecutar.valor:
-                        respuesta.append(tupla)
-
-                return RetornoArreglo(datos_identificador.tabla_del_identificador, datos_identificador.identificador, respuesta)
-
-            # Si la expresion es un arreglo, entonces se empezara a homolar la informacion en un solo arreglo
-            elif isinstance(res_expresion_ejecutar, RetornoArreglo):
-
-                # Se empieza a homologar la informacion en un solo arreglo
-                arreglo_identificador = datos_identificador
-                arreglo_expresion = res_expresion_ejecutar
-                respuesta = []
-
-                llave_identificador = "{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)
-                for tupla_identificador in arreglo_identificador.lista:
-
-                    # Se verifica que exista la llave dentro de la tupla del identificador
-                    if llave_identificador not in tupla_identificador:
-                        continue
-
-                    llave_expresion = "{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador) if arreglo_expresion.identificador is not None else "auxiliar"
-                    for tupla_expresion in arreglo_expresion.lista:
-
-                        # Se verifca que exista la llave dentro de la tupla de la expresion
-                        if llave_expresion not in tupla_expresion:
+                        llave_identificador = "{}.{}".format(datos_identificador.tabla_del_identificador, datos_identificador.identificador)
+                        if llave_identificador not in tupla:
                             continue
 
-                        # Se verifica si el valor es None para no realizar la operacion
-                        if tupla_expresion[llave_expresion]['valor'] is None:
+                        valor_tupla = tupla[llave_identificador]
+                        if valor_tupla['tipado'] != res_expresion_ejecutar.tipado:
+                            return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], ('"{}"'.format(res_expresion_ejecutar.valor) if res_expresion_ejecutar.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else res_expresion_ejecutar.valor)))
+
+                        if tupla[llave_identificador]['valor'] == res_expresion_ejecutar.valor:
+                            respuesta.append(tupla)
+
+                    return RetornoArreglo(datos_identificador.tabla_del_identificador, datos_identificador.identificador, respuesta)
+
+                # Si la expresion es un arreglo, entonces se empezara a homolar la informacion en un solo arreglo
+                elif isinstance(res_expresion_ejecutar, RetornoArreglo):
+
+                    # Se empieza a homologar la informacion en un solo arreglo
+                    arreglo_identificador = datos_identificador
+                    arreglo_expresion = res_expresion_ejecutar
+                    respuesta = []
+
+                    llave_identificador = "{}.{}".format(arreglo_identificador.tabla_del_identificador, arreglo_identificador.identificador)
+                    for tupla_identificador in arreglo_identificador.lista:
+
+                        # Se verifica que exista la llave dentro de la tupla del identificador
+                        if llave_identificador not in tupla_identificador:
                             continue
 
-                        # Se verifica que el tipo de dato sea el mismo
-                        if tupla_identificador[llave_identificador]['tipado'] != tupla_expresion[llave_expresion]['tipado']:
-                            return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], arreglo_expresion.identificador))
+                        llave_expresion = "{}.{}".format(arreglo_expresion.tabla_del_identificador, arreglo_expresion.identificador) if arreglo_expresion.identificador is not None else "auxiliar"
+                        for tupla_expresion in arreglo_expresion.lista:
 
-                        if tupla_identificador[llave_identificador]['valor'] == tupla_expresion[llave_expresion]['valor']:
-                            tupla_homologacion = {}
-                            tupla_homologacion.update(tupla_identificador)
-                            tupla_homologacion.update(tupla_expresion)
-                            respuesta.append(tupla_homologacion)
+                            # Se verifca que exista la llave dentro de la tupla de la expresion
+                            if llave_expresion not in tupla_expresion:
+                                continue
 
-                return RetornoArreglo(None, None, respuesta)
+                            # Se verifica si el valor es None para no realizar la operacion
+                            if tupla_expresion[llave_expresion]['valor'] is None:
+                                continue
 
-            else:
-                return RetornoError("Ha ocurrido un error al realizar la condición (=).")
+                            # Se verifica que el tipo de dato sea el mismo
+                            if tupla_identificador[llave_identificador]['tipado'] != tupla_expresion[llave_expresion]['tipado']:
+                                return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], arreglo_expresion.identificador))
+
+                            if tupla_identificador[llave_identificador]['valor'] == tupla_expresion[llave_expresion]['valor']:
+                                tupla_homologacion = {}
+                                tupla_homologacion.update(tupla_identificador)
+                                tupla_homologacion.update(tupla_expresion)
+                                respuesta.append(tupla_homologacion)
+
+                    return RetornoArreglo(None, None, respuesta)
+
+                else:
+                    return RetornoError("Ha ocurrido un error al realizar la condición (=).")
 
     # TODO: Corregir el graficado del arbol debido a que se han modificado los parametros que se solicitan en la asignacion
     def GraficarArbol(self, id_padre):

@@ -1,5 +1,5 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, TIPO_DATO
+from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoCodigo, RetornoError, TIPO_DATO
 
 class Relacional(Expresion):
 
@@ -19,7 +19,10 @@ class Relacional(Expresion):
         elif isinstance(exp_der, RetornoError):
             return exp_der
 
-        if isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
+        if isinstance(exp_izq, RetornoCodigo) and isinstance(exp_der, RetornoCodigo):
+            return RetornoCodigo("{} {} {}".format(exp_izq.codigo, self.operador, exp_der.codigo))
+
+        elif isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
 
             if self.operador == "==":
                 return RetornoError("No se puede utilizar el operador '==' para aplicar una condicion.")
