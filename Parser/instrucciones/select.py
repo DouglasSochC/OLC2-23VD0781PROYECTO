@@ -1,6 +1,6 @@
 from ..abstract.instrucciones import Instruccion
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
-from ..abstract.retorno import RetornoError, RetornoArreglo, TIPO_DATO, TIPO_ENTORNO
+from ..abstract.retorno import RetornoError, RetornoArreglo, RetornoLiteral, RetornoCorrecto, TIPO_DATO, TIPO_ENTORNO
 from ..expresiones.expresion import Expresion
 from ..expresiones.condicion import Condicion
 from Funcionalidad.dml import DML
@@ -14,8 +14,21 @@ class Select(Instruccion):
 
     # TODO: Falta implementar lo siguiente
         # Implementar BETWEEN
-        # Implementar las siguientes funciones nativas
+        # Implementar las siguientes funciones nativas: CONTAR, SUMA, CAS
     def Ejecutar(self, base_datos, entorno):
+
+        if self.lista_tablas is None and self.condicion is None:
+
+            for expresion in self.lista_campos:
+
+                if expresion is not None:
+                    res_ejecutar = expresion.Ejecutar(base_datos, entorno)
+                    if isinstance(res_ejecutar, RetornoError):
+                        return res_ejecutar
+                    elif isinstance(res_ejecutar, RetornoLiteral):
+                        return RetornoCorrecto(res_ejecutar.valor)
+                    else:
+                        return RetornoError("Ha ocurrido un problema durante la ejecución del comando 'SELECT'")
 
         if base_datos.valor == "":
             return "Para ejecutar el comando 'SELECT', es necesario seleccionar una base de datos."
@@ -94,6 +107,9 @@ class Select(Instruccion):
                 elif res_ejecutar_campo.identificador is not None and res_ejecutar_campo.tabla_del_identificador is not None:
                     res_obtener_fila_identificador = dml.obtener_fila_de_identificador(condiciones_obtenidas, res_ejecutar_campo.tabla_del_identificador, res_ejecutar_campo.identificador)
                     resultado["data"].append(res_obtener_fila_identificador)
+                elif res_ejecutar_campo.identificador is not None and res_ejecutar_campo.tabla_del_identificador is None:
+                    res_obtener_fila_auxiliar = dml.obtener_fila_de_auxiliar_funcion_nativa(res_ejecutar_campo.lista)
+                    resultado["data"].append(res_obtener_fila_auxiliar)
             else:
                 RetornoError("Ha ocurrido un error al obtener la informacion de la(s) tabla(s).")
 

@@ -1,7 +1,6 @@
 from ..abstract.expresiones import Expresion
 from ..expresiones.expresion import Expresion as Expresion_Normal
-from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoArreglo, RetornoLiteral, TIPO_DATO, TIPO_ENTORNO
-from ..tablas.tabla_simbolo import Simbolo
+from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoArreglo, RetornoLiteral, TIPO_DATO
 
 class Aritmetica(Expresion):
 

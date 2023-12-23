@@ -4,7 +4,7 @@ import datetime
 
 class Funcion_Nativa(Expresion):
 
-    def __init__(self,id_nodo, accion, expresiones):
+    def __init__(self, id_nodo: str, accion: str, expresiones: any):
         self.id_nodo = id_nodo
         self.accion = accion
         self.expresiones = expresiones
@@ -26,63 +26,91 @@ class Funcion_Nativa(Expresion):
                     if isinstance(res_ejecutar, RetornoError):
                         return res_ejecutar
 
-                    if res_ejecutar.tipado == TIPO_DATO.NCHAR or res_ejecutar.tipado == TIPO_DATO.NVARCHAR:
+                    elif respuesta is None and isinstance(res_ejecutar, RetornoLiteral):
 
-                        if respuesta is None and isinstance(res_ejecutar, RetornoLiteral):
+                        respuesta = str(res_ejecutar.valor)
+                        alias += '"{}",'.format(res_ejecutar.valor)
 
-                            respuesta = res_ejecutar.valor
-                            alias += res_ejecutar.valor
+                    elif respuesta is None and isinstance(res_ejecutar, RetornoArreglo):
 
-                        elif respuesta is None and isinstance(res_ejecutar, RetornoArreglo):
+                        # Se basa en el arreglo res_ejecutar
+                        simbolo_select_datos = entorno.obtener("select_de_datos")
+                        respuesta = []
 
-                            respuesta = res_ejecutar.lista
-                            alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
+                        llave = "{}.{}".format(res_ejecutar.tabla_del_identificador, res_ejecutar.identificador)
 
-                        elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, list):
+                        for tupla in simbolo_select_datos.valor:
 
-                            for valor in respuesta:
-                                valor['temporal'] = valor['temporal'] + res_ejecutar.valor
-                            alias += res_ejecutar.valor
+                            if llave not in tupla:
+                                return RetornoError("No se ha encontrado la columna '{}' en la tabla '{}'.".format(res_ejecutar.identificador, res_ejecutar.tabla_del_identificador))
+                            elif tupla[llave]['valor'] is None:
+                                respuesta.append({'auxiliar': ''})
+                            else:
+                                respuesta.append({'auxiliar': str(tupla[llave]['valor'])})
 
-                        elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, list) is False:
+                        alias += "{" + str(res_ejecutar.identificador) + "},"
 
-                            respuesta += res_ejecutar.valor
-                            alias += res_ejecutar.valor
+                    elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, list):
 
-                        elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, list):
+                        for valor in respuesta:
+                            valor['auxiliar'] = valor['auxiliar'] + str(res_ejecutar.valor)
+                        alias += '"{}",'.format(res_ejecutar.valor)
 
-                            for llave, valor in enumerate(res_ejecutar.lista):
-                                respuesta[llave]['temporal'] = respuesta[llave]['temporal'] + valor['temporal']
-                            alias += "{" + "{}".format(res_ejecutar.identificador) + "}"
+                    elif isinstance(res_ejecutar, RetornoLiteral) and isinstance(respuesta, str):
 
-                        elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, list) is False:
+                        respuesta += str(res_ejecutar.valor)
+                        alias += '"{}",'.format(res_ejecutar.valor)
 
-                            for valor in res_ejecutar.lista:
-                                valor['temporal'] = respuesta + valor['temporal']
-                            respuesta = []
-                            respuesta = res_ejecutar.lista
-                            alias = "{" + "{}".format(res_ejecutar.identificador) + "}"
+                    elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, list):
 
-                        elif isinstance(res_ejecutar, RetornoError):
-                            return res_ejecutar
+                        # Se basa en el arreglo res_ejecutar
+                        simbolo_select_datos = entorno.obtener("select_de_datos")
 
-                    elif isinstance(res_ejecutar, RetornoArreglo):
-                        return RetornoError("La concatenación no puede llevarse a cabo con la columna '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.identificador))
-                    elif isinstance(res_ejecutar, RetornoLiteral):
-                        return RetornoError("La concatenación no puede llevarse a cabo con el valor '{}' debido a que no es un tipo de dato válido.".format(res_ejecutar.valor))
+                        llave = "{}.{}".format(res_ejecutar.tabla_del_identificador, res_ejecutar.identificador)
 
+                        for indice, tupla in enumerate(simbolo_select_datos.valor):
+
+                            if llave not in tupla:
+                                return RetornoError("No se ha encontrado la columna '{}' en la tabla '{}'.".format(res_ejecutar.identificador, res_ejecutar.tabla_del_identificador))
+                            elif tupla[llave]['valor'] is None:
+                                respuesta[indice]['auxiliar'] += ''
+                            else:
+                                respuesta[indice]['auxiliar'] += str(tupla[llave]['valor'])
+
+                        alias += "{" + str(res_ejecutar.identificador) + "},"
+
+                    elif isinstance(res_ejecutar, RetornoArreglo) and isinstance(respuesta, str):
+
+                        # Se basa en el arreglo res_ejecutar
+                        simbolo_select_datos = entorno.obtener("select_de_datos")
+                        temporal_str = respuesta
+                        respuesta = []
+
+                        llave = "{}.{}".format(res_ejecutar.tabla_del_identificador, res_ejecutar.identificador)
+
+                        for indice, tupla in enumerate(simbolo_select_datos.valor):
+
+                            if llave not in tupla:
+                                return RetornoError("No se ha encontrado la columna '{}' en la tabla '{}'.".format(res_ejecutar.identificador, res_ejecutar.tabla_del_identificador))
+                            elif tupla[llave]['valor'] is None:
+                                respuesta.append({'auxiliar': temporal_str})
+                            else:
+                                respuesta.append({'auxiliar': temporal_str + str(tupla[llave]['valor'])})
+
+                        alias += "{" + str(res_ejecutar.identificador) + "},"
 
                 if isinstance(respuesta, list):
-                    return RetornoArreglo(alias, TIPO_DATO.NVARCHAR, respuesta)
+                    return RetornoArreglo("CONCATENAR({})".format(alias[:-1]), None, respuesta)
                 else:
                     return RetornoLiteral(respuesta, TIPO_DATO.NVARCHAR)
 
             elif(self.accion == "substraer"):
 
-                respuesta = None
+                respuesta = []
+                alias = ""
 
                 if len(self.expresiones) != 3:
-                    return RetornoError("ERROR: No se puede realizar la operacion SUBSTRAER debido a que la cantidad de parametros no son adecuados (3).")
+                    return RetornoError("No se puede realizar la operacion SUBSTRAER debido a que la cantidad de parametros no son adecuados (3).")
 
                 listado = []
                 for exp in self.expresiones:
@@ -102,9 +130,9 @@ class Funcion_Nativa(Expresion):
                 if isinstance(texto, RetornoLiteral):
 
                     if isinstance(inicial, RetornoLiteral) is False:
-                        return RetornoError("ERROR: El valor del inicial debe de ser entero")
+                        return RetornoError("El valor del inicial debe de ser entero")
                     elif isinstance(longitud, RetornoLiteral)  is False:
-                        return RetornoError("ERROR: El valor de la longitud debe de ser entero")
+                        return RetornoError("El valor de la longitud debe de ser entero")
 
                     texto.valor = texto.valor[inicial.valor:longitud.valor]
                     return RetornoLiteral(texto.valor, TIPO_DATO.NVARCHAR)
@@ -112,16 +140,26 @@ class Funcion_Nativa(Expresion):
                 elif isinstance(texto, RetornoArreglo):
 
                     if isinstance(inicial, RetornoLiteral) is False:
-                        return RetornoError("ERROR: El valor del inicial debe de ser entero")
+                        return RetornoError("El valor del inicial debe de ser entero")
                     elif isinstance(longitud, RetornoLiteral)  is False:
-                        return RetornoError("ERROR: El valor de la longitud debe de ser entero")
+                        return RetornoError("El valor de la longitud debe de ser entero")
 
-                    for valor in texto.lista:
-                        valor['temporal'] = valor['temporal'][inicial.valor:longitud.valor]
+                    # Se basa en el arreglo res_ejecutar
+                    simbolo_select_datos = entorno.obtener("select_de_datos")
+                    llave = "{}.{}".format(texto.tabla_del_identificador, texto.identificador) if texto.tabla_del_identificador is not None else "auxiliar"
 
-                    return RetornoArreglo(texto.identificador, TIPO_DATO.NVARCHAR, texto.lista)
+                    for indice, tupla in enumerate(simbolo_select_datos.valor):
 
-                return RetornoError("ERROR: Ha ocurrido un error al realizar la operacion SUBSTRAER.")
+                        if llave == "auxiliar":
+                            respuesta.append({'auxiliar': texto.lista[indice][llave][inicial.valor:longitud.valor]})
+                        else:
+                            respuesta.append({'auxiliar': tupla[llave]['valor'][inicial.valor:longitud.valor]})
+
+                    alias += "SUBSTRAER({},{},{})".format(texto.identificador, inicial.valor, longitud.valor)
+
+                    return RetornoArreglo(alias, None, respuesta)
+
+                return RetornoError("Ha ocurrido un error al realizar la operacion SUBSTRAER.")
 
             # elif(self.accion == "contar"):
 
@@ -144,7 +182,7 @@ class Funcion_Nativa(Expresion):
                 return RetornoLiteral(fecha_hora_formateada, TIPO_DATO.DATETIME)
 
 
-        return RetornoError("ERROR: Ha ocurrido un error al realizar la funcion nativa")
+        return RetornoError("Ha ocurrido un error al realizar la funcion nativa")
 
 
     def GraficarArbol(self, id_padre):
@@ -157,7 +195,6 @@ class Funcion_Nativa(Expresion):
           return label_encabezado+ label_operador + union_enca_operador
 
         if isinstance(self.expresiones, list):
-            print("es lista")
             for exp in self.expresiones:
                 union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
                 resultado_izquierda = exp.GraficarArbol(self.id_nodo)
