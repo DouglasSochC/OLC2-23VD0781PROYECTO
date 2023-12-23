@@ -33,84 +33,138 @@ class Aritmetica(Expresion):
             llave_izquierda = None
             llave_derecha = None
 
-            # Se basa en los arreglos exp_izq y exp_der para realizar la operacion aritmetica estos arreglos deben tener una misma dimension y deben de ser la misma tabla
-            simbolo = entorno.obtener("condicion")
-            if simbolo is None:
+            # Se basa en el arreglo exp_izq y la exp_der la operacion aritmetica
+            simbolo_select_datos = entorno.obtener("select_de_datos")
+            if simbolo_select_datos is None:
 
-                if len(exp_izq.lista) != len(exp_der.lista):
-                    return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a que no poseen el mismo tamaño.".format(exp_izq.identificador, self.operador, exp_der.identificador))
-                elif exp_izq.tabla_del_identificador != exp_der.tabla_del_identificador:
-                    return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a que no pertenecen a la misma tabla.".format(exp_izq.identificador, self.operador, exp_der.identificador))
+                # Se basa en los arreglos exp_izq y exp_der para realizar la operacion aritmetica estos arreglos deben tener una misma dimension y deben de ser la misma tabla
+                simbolo = entorno.obtener("condicion")
+                if simbolo is None:
 
-                # Se definen los arreglos
-                arreglo_izquierdo = exp_izq
-                arreglo_derecho = exp_der
+                    if len(exp_izq.lista) != len(exp_der.lista):
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a que no poseen el mismo tamaño.".format(exp_izq.identificador, self.operador, exp_der.identificador))
+                    elif exp_izq.tabla_del_identificador != exp_der.tabla_del_identificador:
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a que no pertenecen a la misma tabla.".format(exp_izq.identificador, self.operador, exp_der.identificador))
 
-                # Se definen las llaves para obtener los valores
-                llave_izquierda = "{}.{}".format(arreglo_izquierdo.tabla_del_identificador, arreglo_izquierdo.identificador) if arreglo_izquierdo.identificador is not None else "auxiliar"
-                llave_derecha = "{}.{}".format(arreglo_derecho.tabla_del_identificador, arreglo_derecho.identificador) if arreglo_derecho.identificador is not None else "auxiliar"
+                    # Se definen los arreglos
+                    arreglo_izquierdo = exp_izq
+                    arreglo_derecho = exp_der
+
+                    # Se definen las llaves para obtener los valores
+                    llave_izquierda = "{}.{}".format(arreglo_izquierdo.tabla_del_identificador, arreglo_izquierdo.identificador) if arreglo_izquierdo.identificador is not None else "auxiliar"
+                    llave_derecha = "{}.{}".format(arreglo_derecho.tabla_del_identificador, arreglo_derecho.identificador) if arreglo_derecho.identificador is not None else "auxiliar"
+
+                else:
+
+                    # Se definen las llaves para obtener los valores
+                    llave_izquierda = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
+                    llave_derecha = "{}.{}".format(exp_der.tabla_del_identificador, exp_der.identificador) if exp_der.identificador is not None else "auxiliar"
+
+                    # Se definen los arreglos
+                    arreglo_izquierdo = exp_izq if llave_izquierda == "auxiliar" else simbolo.valor
+                    arreglo_derecho = exp_der if llave_derecha == "auxiliar" else simbolo.valor
+
+                for llave, tupla in enumerate(arreglo_izquierdo.lista):
+
+                    # Se verifica que existan las llaves
+                    if llave_izquierda not in arreglo_izquierdo.lista[llave] or llave_derecha not in arreglo_derecho.lista[llave]:
+                        tupla_homologacion = {}
+                        tupla_homologacion.update(tupla)
+                        tupla_homologacion.update({ "auxiliar": { 'valor': None, 'tipado': TIPO_DATO.NULL } })
+                        respuesta.append(tupla_homologacion)
+                        continue
+
+                    # Se obtiene los valores que seran utilizados para realizar el calculo
+                    valor_izquierdo = arreglo_izquierdo.lista[llave][llave_izquierda]
+                    valor_derecho = arreglo_derecho.lista[llave][llave_derecha]
+
+                    # Se verifica si el valor es None para no realizar la operacion
+                    if valor_izquierdo['valor'] is None or valor_derecho['valor'] is None:
+                        tupla_homologacion = {}
+                        tupla_homologacion.update(tupla)
+                        tupla_homologacion.update({ "auxiliar": { 'valor': None, 'tipado': TIPO_DATO.NULL } })
+                        respuesta.append(tupla_homologacion)
+                        continue
+
+                    # Se verifica si se puede realizar la operacion segun el dominante
+                    dominante = None
+                    if self.operador == '*':
+                        dominante = self.DominanteMultiplicacion(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                    elif self.operador == '/':
+                        dominante = self.DominanteDivision(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                    elif self.operador == '+':
+                        dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                    elif self.operador == '-':
+                        dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho['tipado'])
+
+                    if dominante == TIPO_DATO.NULL:
+                        return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
+
+                   # Valores de la llave auxiliar
+                    auxiliar_valor = 0
+                    auxiliar_tipado = dominante
+
+                    try:
+                        auxiliar_valor = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho['valor']")
+                    except Exception as e:
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
+
+                    tupla_homologacion = {}
+                    tupla_homologacion.update(tupla)
+                    tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
+                    respuesta.append(tupla_homologacion)
+
+                return RetornoArreglo(None, arreglo_izquierdo.tabla_del_identificador, respuesta, None)
 
             else:
 
-                # Se definen las llaves para obtener los valores
-                llave_izquierda = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
-                llave_derecha = "{}.{}".format(exp_der.tabla_del_identificador, exp_der.identificador) if exp_der.identificador is not None else "auxiliar"
+                respuesta = []
+                identificador_izquierdo = "{}.{}".format(exp_izq.tabla_del_identificador, exp_izq.identificador) if exp_izq.identificador is not None else "auxiliar"
+                identificador_derecho = "{}.{}".format(exp_der.tabla_del_identificador, exp_der.identificador) if exp_der.identificador is not None else "auxiliar"
+                arreglo_izquierdo = exp_izq.lista if identificador_izquierdo == "auxiliar" else simbolo_select_datos.valor
+                arreglo_derecho = exp_der.lista if identificador_derecho == "auxiliar" else simbolo_select_datos.valor
 
-                # Se definen los arreglos
-                arreglo_izquierdo = exp_izq if llave_izquierda == "auxiliar" else simbolo.valor
-                arreglo_derecho = exp_der if llave_derecha == "auxiliar" else simbolo.valor
+                for indice, tupla in enumerate(arreglo_derecho):
 
-            for llave, tupla in enumerate(arreglo_izquierdo.lista):
+                    if identificador_izquierdo not in arreglo_izquierdo[indice]:
+                        texto_izquierdo = identificador_izquierdo if identificador_izquierdo != "auxiliar" else arreglo_izquierdo[indice]['auxiliar']
+                        texto_derecho = identificador_derecho if identificador_derecho != "auxiliar" else arreglo_derecho[indice]['auxiliar']
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}'. debido a que no existe la columna '{}' en la tabla '{}'.".format(texto_izquierdo, self.operador, texto_derecho, texto_izquierdo, exp_izq.tabla_del_identificador))
+                    elif identificador_derecho not in arreglo_derecho[indice]:
+                        texto_izquierdo = identificador_izquierdo if identificador_izquierdo != "auxiliar" else arreglo_izquierdo[indice]['auxiliar']
+                        texto_derecho = identificador_derecho if identificador_derecho != "auxiliar" else arreglo_derecho[indice]['auxiliar']
+                        return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}'. debido a que no existe la columna '{}' en la tabla '{}'.".format(texto_izquierdo, self.operador, texto_derecho, texto_derecho, exp_der.tabla_del_identificador))
 
-                # Se verifica que existan las llaves
-                if llave_izquierda not in arreglo_izquierdo.lista[llave] or llave_derecha not in arreglo_derecho.lista[llave]:
-                    tupla_homologacion = {}
-                    tupla_homologacion.update(tupla)
-                    tupla_homologacion.update({ "auxiliar": { 'valor': None, 'tipado': TIPO_DATO.NULL } })
-                    respuesta.append(tupla_homologacion)
-                    continue
+                    valor_izquierdo = arreglo_izquierdo[indice][identificador_izquierdo]
+                    valor_derecho = arreglo_derecho[indice][identificador_derecho]
 
-                # Se obtiene los valores que seran utilizados para realizar el calculo
-                valor_izquierdo = arreglo_izquierdo.lista[llave][llave_izquierda]
-                valor_derecho = arreglo_derecho.lista[llave][llave_derecha]
+                    if valor_izquierdo['valor'] is not None and valor_derecho['valor'] is not None:
 
-                # Se verifica si el valor es None para no realizar la operacion
-                if valor_izquierdo['valor'] is None or valor_derecho['valor'] is None:
-                    tupla_homologacion = {}
-                    tupla_homologacion.update(tupla)
-                    tupla_homologacion.update({ "auxiliar": { 'valor': None, 'tipado': TIPO_DATO.NULL } })
-                    respuesta.append(tupla_homologacion)
-                    continue
+                        # Se verifica si se puede realizar la operacion segun el dominante
+                        dominante = None
+                        if self.operador == '*':
+                            dominante = self.DominanteMultiplicacion(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                        elif self.operador == '/':
+                            dominante = self.DominanteDivision(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                        elif self.operador == '+':
+                            dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                        elif self.operador == '-':
+                            dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                        if dominante == TIPO_DATO.NULL:
+                            return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
 
-                # Se verifica si se puede realizar la operacion segun el dominante
-                dominante = None
-                if self.operador == '*':
-                    dominante = self.DominanteMultiplicacion(valor_izquierdo['tipado'], valor_derecho['tipado'])
-                elif self.operador == '/':
-                    dominante = self.DominanteDivision(valor_izquierdo['tipado'], valor_derecho['tipado'])
-                elif self.operador == '+':
-                    dominante = self.DominanteSuma(valor_izquierdo['tipado'], valor_derecho['tipado'])
-                elif self.operador == '-':
-                    dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho['tipado'])
+                        # Valores de la llave auxiliar
+                        auxiliar_valor = 0
+                        auxiliar_tipado = dominante
 
-                if dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
+                        try:
+                            auxiliar_valor = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho['valor']")
+                        except Exception as e:
+                            return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_izquierdo['valor']))
 
-                # Valores de la llave auxiliar
-                auxiliar = 0
-                tipado = dominante
+                    respuesta.append({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
 
-                try:
-                    auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho['valor']")
-                except Exception as e:
-                    return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
-
-                tupla_homologacion = {}
-                tupla_homologacion.update(tupla)
-                tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar, 'tipado': tipado } })
-                respuesta.append(tupla_homologacion)
-
-            return RetornoArreglo(None, arreglo_izquierdo.tabla_del_identificador, respuesta, None)
+                return RetornoArreglo(None, exp_izq.tabla_del_identificador, respuesta)
 
         elif isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoLiteral):
 
@@ -169,17 +223,17 @@ class Aritmetica(Expresion):
                         return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
                     # Valores de la llave auxiliar
-                    auxiliar = 0
-                    tipado = dominante
+                    auxiliar_valor = 0
+                    auxiliar_tipado = dominante
 
                     try:
-                        auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
+                        auxiliar_valor = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
                     except Exception as e:
                         return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
                     tupla_homologacion = {}
                     tupla_homologacion.update(tupla)
-                    tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar, 'tipado': tipado } })
+                    tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
                     respuesta.append(tupla_homologacion)
 
                 return RetornoArreglo(None, arreglo_izquierdo.tabla_del_identificador, respuesta, None)
@@ -212,13 +266,16 @@ class Aritmetica(Expresion):
                         if dominante == TIPO_DATO.NULL:
                             return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
+                        # Valores de la llave auxiliar
+                        auxiliar_valor = 0
+                        auxiliar_tipado = dominante
+
                         try:
-                            valor_izquierdo['valor'] = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
-                            auxiliar_tipado = dominante
+                            auxiliar_valor = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
                         except Exception as e:
                             return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
-                    respuesta.append({ "auxiliar": { 'valor': valor_izquierdo['valor'], 'tipado': auxiliar_tipado } })
+                    respuesta.append({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
 
                 return RetornoArreglo(None, exp_izq.tabla_del_identificador, respuesta)
 
@@ -279,17 +336,17 @@ class Aritmetica(Expresion):
                         return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
 
                     # Valores de la llave auxiliar
-                    auxiliar = 0
-                    tipado = dominante
+                    auxiliar_valor = 0
+                    auxiliar_tipado = dominante
 
                     try:
-                        auxiliar = eval(f"valor_izquierdo.valor {self.operador} valor_derecho['valor']")
+                        auxiliar_valor = eval(f"valor_izquierdo.valor {self.operador} valor_derecho['valor']")
                     except Exception as e:
                         return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
 
                     tupla_homologacion = {}
                     tupla_homologacion.update(tupla)
-                    tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar, 'tipado': tipado } })
+                    tupla_homologacion.update({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
                     respuesta.append(tupla_homologacion)
 
                 return RetornoArreglo(None, arreglo_derecho.tabla_del_identificador, respuesta, None)
@@ -323,13 +380,16 @@ class Aritmetica(Expresion):
                         if dominante == TIPO_DATO.NULL:
                             return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
 
+                        # Valores de la llave auxiliar
+                        auxiliar_valor = 0
+                        auxiliar_tipado = dominante
+
                         try:
-                            valor_derecho['valor'] = eval(f"valor_izquierdo.valor {self.operador} valor_derecho['valor']")
-                            auxiliar_tipado = dominante
+                            auxiliar_valor = eval(f"valor_izquierdo.valor {self.operador} valor_derecho['valor']")
                         except Exception as e:
                             return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_izquierdo.valor))
 
-                    respuesta.append({ "auxiliar": { 'valor': valor_derecho['valor'], 'tipado': auxiliar_tipado } })
+                    respuesta.append({ "auxiliar": { 'valor': auxiliar_valor, 'tipado': auxiliar_tipado } })
 
                 return RetornoArreglo(None, exp_der.tabla_del_identificador, respuesta)
 
