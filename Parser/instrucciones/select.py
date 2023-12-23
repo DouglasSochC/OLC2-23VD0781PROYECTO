@@ -13,9 +13,8 @@ class Select(Instruccion):
         self.condicion = condicion
 
     # TODO: Falta implementar lo siguiente
-        # Implementar el que se puedan obtener muchas tablas
         # Implementar BETWEEN
-        # Implementar las siguientes funciones nativas CONTAR, SUMA, CAS
+        # Implementar las siguientes funciones nativas
     def Ejecutar(self, base_datos, entorno):
 
         if base_datos.valor == "":
@@ -41,18 +40,64 @@ class Select(Instruccion):
             else:
                 return RetornoError("Ha ocurrido un error al obtener la informacion de la(s) tabla(s).")
 
+        # Se crea un nuevo entorno para almacenar la informacion de cada tabla y asi poder acceder a esas tablas desde el identificador cuando se este realizando la(s) condicion(es)
         nuevo_entorno = TablaDeSimbolos(entorno)
-
-        # Se almacena la informacion de cada tabla para poder acceder a ella desde el identificador
         simbolo = Simbolo('datos_tablas', informacion, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DML)
         nuevo_entorno.agregar(simbolo)
 
         # Se obtienen todos los index's que cumplen con las condiciones dadas
-        res_ejecutar_condicion = self.condicion.Ejecutar(base_datos, nuevo_entorno)
-        if isinstance (res_ejecutar_condicion, RetornoError):
-            return res_ejecutar_condicion
+        condiciones_obtenidas = []
+        if len(informacion) > 1 and self.condicion is None:
+            return RetornoError("Debido a que hay mas de una tabla por mostrar y no se ha dado una condicion especifica.")
 
-        return res_ejecutar_condicion.lista
+        # Se obtienen todos los campos segun las condiciones dadas
+        elif self.condicion is not None:
+            res_ejecutar_condicion = self.condicion.Ejecutar(base_datos, nuevo_entorno)
+            if isinstance (res_ejecutar_condicion, RetornoError):
+                return res_ejecutar_condicion
+            condiciones_obtenidas = res_ejecutar_condicion.lista
+
+        # Se obtienen todos los campos de la tabla indicada en el caso que no hayan condiciones
+        elif len(informacion) == 1 and self.condicion is None:
+            condiciones_obtenidas = informacion[list(informacion.keys())[0]]
+
+        # Se crea un nuevo entorno para obtener la informacion de cada columna
+        simbolo = Simbolo('select_de_datos', condiciones_obtenidas, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DML)
+        nuevo_entorno.agregar(simbolo)
+
+        # Se obtienen los campos que se van a mostrar a traves de los datos obtenidos por medio de las condiciones dadas
+        resultado = { "encabezado": [], "data": []}
+        indice_encabezado = 0
+        for campo in self.lista_campos:
+
+            if campo == '*':
+                resultado = dml.obtener_informacion_completa(condiciones_obtenidas)
+                continue
+
+            res_ejecutar_campo = campo.Ejecutar(base_datos, nuevo_entorno)
+            if isinstance (res_ejecutar_campo, RetornoError):
+                return res_ejecutar_campo
+            elif isinstance(res_ejecutar_campo, RetornoArreglo):
+
+                # Se define el encabezado de la fila
+                if res_ejecutar_campo.alias is None and res_ejecutar_campo.identificador is None:
+                    resultado["encabezado"].append("encabezado{}".format(indice_encabezado))
+                elif res_ejecutar_campo.alias is not None:
+                    resultado["encabezado"].append(res_ejecutar_campo.alias)
+                else:
+                    resultado["encabezado"].append(res_ejecutar_campo.identificador)
+
+                # Se formatea la informacion de la fila obtenida
+                if res_ejecutar_campo.identificador is None:
+                    res_obtener_fila_auxiliar = dml.obtener_fila_de_auxiliar(res_ejecutar_campo.lista)
+                    resultado["data"].append(res_obtener_fila_auxiliar)
+                elif res_ejecutar_campo.identificador is not None and res_ejecutar_campo.tabla_del_identificador is not None:
+                    res_obtener_fila_identificador = dml.obtener_fila_de_identificador(condiciones_obtenidas, res_ejecutar_campo.tabla_del_identificador, res_ejecutar_campo.identificador)
+                    resultado["data"].append(res_obtener_fila_identificador)
+            else:
+                RetornoError("Ha ocurrido un error al obtener la informacion de la(s) tabla(s).")
+
+        return resultado
 
     def GraficarArbol(self, id_padre):
         return ""

@@ -284,6 +284,46 @@ class DML:
         # La 'lista' de la respuesta tendra todo el contenido que tiene la tabla
         return Respuesta(True, nombre_tabla, datos[nombre_tabla])
 
+    def obtener_fila_de_auxiliar(self, datos: list) -> list:
+
+        respuesta = []
+        for tupla in datos:
+            respuesta.append(tupla['auxiliar']['valor'])
+        return respuesta
+
+    def obtener_fila_de_identificador(self, datos_condiciones: list, nombre_tabla: str, nombre_columna: str):
+
+        respuesta = []
+        for tupla in datos_condiciones:
+
+            llave = "{}.{}".format(nombre_tabla, nombre_columna)
+            if llave in tupla:
+                respuesta.append(tupla[llave]['valor'])
+            else:
+                respuesta.append(None)
+
+        return respuesta
+
+    def obtener_informacion_completa(self, datos_condiciones: list):
+
+        respuesta = { "encabezado": [], "data": []}
+        
+        for tupla in datos_condiciones:
+
+            fila = []
+            encabezado = []
+
+            for llave, valor in tupla.items():
+
+                if "@index" not in llave:
+                    encabezado.append(llave)
+                    fila.append(valor['valor'])
+            
+            respuesta['data'].append(fila)
+            respuesta['encabezado'] = encabezado
+
+        return respuesta
+
     ##############################################
     ############### SECCION DELETE ###############
     ##############################################
