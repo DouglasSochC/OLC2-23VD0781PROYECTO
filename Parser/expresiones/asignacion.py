@@ -31,12 +31,15 @@ class Asignacion(Expresion):
             simbolo = entorno.obtener("condicion")
 
             if simbolo is None:
-                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'])
+                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
                 if datos_identificador.success is False:
                     return RetornoError(datos_identificador.valor)
-                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], datos_identificador.lista)
+                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, datos_identificador.lista)
             else:
-                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], simbolo.valor.lista)
+                datos_identificador = dml.verificar_columna_tabla(base_datos.valor, simbolo_datos_tablas.valor, res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], list(simbolo_datos_tablas.valor.keys()))
+                if datos_identificador.success is False:
+                    return RetornoError(datos_identificador.valor)
+                datos_identificador = RetornoArreglo(res_identificador_ejecutar['identificador'], datos_identificador.valor, simbolo.valor.lista)
 
             # Se obtienen los datos que contiene la 'EXPRESION'
             res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
@@ -49,7 +52,7 @@ class Asignacion(Expresion):
                 respuesta = []
                 for tupla in datos_identificador.lista:
 
-                    llave_identificador = "{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador'])
+                    llave_identificador = "{}.{}".format(datos_identificador.tabla_del_identificador, datos_identificador.identificador)
                     if llave_identificador not in tupla:
                         continue
 
@@ -60,7 +63,7 @@ class Asignacion(Expresion):
                     if tupla[llave_identificador]['valor'] == res_expresion_ejecutar.valor:
                         respuesta.append(tupla)
 
-                return RetornoArreglo(res_identificador_ejecutar['identificador'], res_identificador_ejecutar['referencia_tabla'], respuesta)
+                return RetornoArreglo(datos_identificador.tabla_del_identificador, datos_identificador.identificador, respuesta)
 
             # Si la expresion es un arreglo, entonces se empezara a homolar la informacion en un solo arreglo
             elif isinstance(res_expresion_ejecutar, RetornoArreglo):
