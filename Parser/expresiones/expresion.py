@@ -7,9 +7,10 @@ from Funcionalidad.dml import DML
 # Esta clase se encarga de retornar una instancia 'RetornoXYZ' y atraves de esto pueda validarse cada comando o instruccion del lenguaje
 class Expresion(Expresion):
 
-    def __init__(self, id_nodo: str, expresion: any):
+    def __init__(self, id_nodo: str, expresion: any, entre_parentesis: bool = False):
         self.id_nodo = id_nodo
         self.expresion = expresion
+        self.entre_parentesis = entre_parentesis
 
     def Ejecutar(self, base_datos, entorno):
 
@@ -21,16 +22,20 @@ class Expresion(Expresion):
             if isinstance(self.expresion, Identificador):
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
                 codigo_identificador = "{}.{}".format(res_expresion['referencia_tabla'], res_expresion['identificador']) if res_expresion['referencia_tabla'] != None else res_expresion['identificador']
-                return RetornoCodigo(codigo_identificador)
+                con_sin_parentesis = "({})".format(codigo_identificador) if self.entre_parentesis else codigo_identificador
+                return RetornoCodigo(con_sin_parentesis)
             elif isinstance(self.expresion, Literal):
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
                 if self.expresion.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR):
-                    return RetornoCodigo("'{}'".format(res_expresion.valor))
+                    con_sin_parentesis = "({})".format(res_expresion.valor) if self.entre_parentesis else res_expresion.valor
+                    return RetornoCodigo("'{}'".format(con_sin_parentesis))
                 else:
-                    return RetornoCodigo(str(res_expresion.valor))
+                    con_sin_parentesis = "({})".format(res_expresion.valor) if self.entre_parentesis else res_expresion.valor
+                    return RetornoCodigo(str(con_sin_parentesis))
             else:
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
-                return RetornoCodigo(res_expresion.codigo)
+                con_sin_parentesis = "({})".format(res_expresion.codigo) if self.entre_parentesis else res_expresion.codigo
+                return RetornoCodigo(con_sin_parentesis)
         else:
 
             if isinstance(self.expresion, Identificador):
