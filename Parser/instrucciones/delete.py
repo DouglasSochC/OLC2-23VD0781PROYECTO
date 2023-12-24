@@ -82,22 +82,14 @@ class Delete(Instruccion):
             return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
     def GraficarArbol(self, id_padre):
-        return ""
-        # label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DELETE")
-        # label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        # result = label_encabezado + label_identificador
-        # label_lista_condiciones = ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DELETE")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        result = label_encabezado + label_identificador
 
-        # if isinstance(self.lista_condiciones, list) and self.lista_condiciones:
-        #     primer_elemento = self.lista_condiciones[0]
-        #     if isinstance(primer_elemento, Expresion):
-        #         for condicion in self.lista_condiciones:
-        #             label_condicion = condicion.GraficarArbol(self.id_nodo)
-        #             union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, condicion.id_nodo)
-        #             result += label_condicion + union_tipo_accion_campo
-        #     else:
-        #         label_lista_condiciones = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "LC", self.lista_condiciones)
-        #         union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "LC")
-        #         result += label_lista_condiciones + union_tipo_accion_campo
+        if self.condicion is not None and isinstance(self.condicion, Condicion):
 
-        # return result
+            label_condicion = self.condicion.GraficarArbol(self.id_nodo)
+            union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.condicion.id_nodo)
+            result += label_condicion + union_tipo_accion_campo
+            
+        return result

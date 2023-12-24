@@ -13,7 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-variable > 5 AND variable < 10
+INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
 
 ''')
 '''
@@ -51,6 +51,7 @@ create table tabla1(
 );
 
 ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+UPDATE producto SET nombre = 'NUEVO NOMBRE' WHERE id = 1;
 '''
 
 # Se revisa que se haya obtenido una instrucciones
