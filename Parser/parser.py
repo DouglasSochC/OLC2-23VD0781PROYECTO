@@ -21,6 +21,7 @@ from .expresiones.condicion import Condicion
 from .instrucciones.use import Use
 from .instrucciones.select import Select
 from .instrucciones.insert import Insert
+from .instrucciones.update import Update
 from .instrucciones.create import Create
 from .instrucciones.drop import Drop
 from .instrucciones.truncate import Truncate
@@ -350,7 +351,10 @@ def p_update(p):
     '''
         update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Update(id_nodo, p[2], p[4], p[6])
 
 def p_delete(p):
     '''

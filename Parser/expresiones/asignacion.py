@@ -37,7 +37,14 @@ class Asignacion(Expresion):
             # Se evalua si se esta utilizando la asignacion al hacer un WHERE
             simbolo_datos_tablas = entorno.obtener("datos_tablas")
             if simbolo_datos_tablas is None:
-                print("SE ESTA UTILIZANDO EN EL UPDATE!")
+
+                res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
+                if isinstance(res_expresion_ejecutar, RetornoError):
+                    return res_expresion_ejecutar
+                elif isinstance(res_expresion_ejecutar, RetornoLiteral):
+                    return RetornoLiteral(res_expresion_ejecutar.valor, res_expresion_ejecutar.tipado, res_identificador_ejecutar['identificador'])
+                else:
+                    return RetornoError("La asignacion se debe de realizar unicamente con un literal.")
             else:
 
                 # Se obtienen los datos que contiene el 'IDENTIFICADOR'

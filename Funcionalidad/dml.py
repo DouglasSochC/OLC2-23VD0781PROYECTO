@@ -168,6 +168,87 @@ class DML:
             return Respuesta(False, val_estructura_tupla)
 
     ##############################################
+    ############### SECCION UPDATE ###############
+    ##############################################
+
+    def actualizar_datos_tabla(self, nombre_bd: str, nombre_tabla: str, campos_a_actualizar: list, indices_a_actualizar: list) -> Respuesta:
+
+        if nombre_bd is None: # Se valida que haya seleccionado una base de datos
+            return Respuesta(False, "No ha seleccionado una base de datos para realizar la transaccion")
+        elif nombre_tabla is None:  # Se valida que este el nombre de la tabla
+            return Respuesta(False, "Por favor, indique el nombre de la tabla")
+        elif not os.path.exists(self.__path_bds.format(nombre_bd)): # Se valida que exista la base de datos
+            return Respuesta(False, "No existe la base de datos seleccionada")
+        elif not os.path.exists(self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"): # Se valida que exista la tabla
+            return Respuesta(False, "La tabla '{}' no se encuentra en la base de datos.".format(nombre_tabla))
+
+        path_tabla = self.__path_tablas.format(nombre_bd) + nombre_tabla + ".xml"
+
+        # Parsear el archivo XML
+        tree = ET.parse(path_tabla)
+        root = tree.getroot()
+
+        # Se almacenan los campos con llaves foraneas para verificar que exista el valor en la tabla de referencia
+        campos_con_llaves_foraneas = {}
+
+        # Se verifica cada campo exista
+        for nombre_campo in campos_a_actualizar:
+
+            campo_encontrado = root.find('.//estructura/campo[@name="{}"]'.format(nombre_campo['columna']))
+
+            if campo_encontrado is None:
+                return Respuesta(False, "El campo '{}' no existe en la tabla '{}'.".format(nombre_campo['columna'], nombre_tabla))
+
+            # Se verifica que cada campo tengan el formato y tipo de dato correcto
+            elif campo_encontrado is not None and self.__convertir_a_literal(-1, campo_encontrado.attrib['type'])['tipo'] != nombre_campo['tipado']:
+                return Respuesta(False, "El campo '{}' no es del tipo de dato '{}'.".format(nombre_campo['columna'], campo_encontrado.attrib['type']))
+
+            if "fk_table" in campo_encontrado.attrib:
+                campos_con_llaves_foraneas[nombre_campo['columna']] = { "tabla": campo_encontrado.attrib["fk_table"], "id": campo_encontrado.attrib['fk_attribute']}
+
+        cantidad_registros_actualizados = 0
+        for indice in indices_a_actualizar:
+
+            # Encontrar la fila con cierto index
+            fila_a_editar = root.find('.//fila[@index="{}"]'.format(indice))
+
+            # Verificar si se encontro la fila
+            if fila_a_editar is not None:
+
+                for campo in campos_a_actualizar:
+
+                    elemento = fila_a_editar.find(campo['columna'])
+
+                    # Se verifica si el campo es una llave foranea
+                    if campo['columna'] in campos_con_llaves_foraneas:
+
+                        # Se obtiene la raiz de la tabla de referencia
+                        tree_tabla_referencia = ET.parse(self.__path_tablas.format(nombre_bd) + campos_con_llaves_foraneas[campo['columna']]['tabla'] + ".xml")
+                        root_tabla_referencia = tree_tabla_referencia.getroot()
+
+                        # Se busca y se valida que exista el valor
+                        campos = root_tabla_referencia.findall('.//fila[{}="{}"]'.format(campos_con_llaves_foraneas[campo['columna']]['id'], campo['valor']))
+                        if len(campos) <= 0:
+                            return Respuesta(False, "La clave '{}' no se encuentra en la tabla '{}'.".format(campo['valor'], campos_con_llaves_foraneas[campo['columna']]['tabla']))
+
+                    # Verificar si el elemento existe en la fila
+                    if elemento is not None:
+                        # Actualizar el valor del elemento
+                        elemento.text = str(campo['valor'])
+                    else:
+                        # Si el elemento no existe, crearlo y actualizar su valor
+                        nuevo_elemento = ET.Element(campo['columna'])
+                        nuevo_elemento.text = str(campo['valor'])
+                        fila_a_editar.append(nuevo_elemento)
+
+                cantidad_registros_actualizados += 1
+
+        # Guardar los cambios de vuelta en el archivo
+        tree.write(path_tabla)
+
+        return Respuesta(True, "UPDATE {}".format(cantidad_registros_actualizados))
+
+    ##############################################
     ############### SECCION SELECT ###############
     ##############################################
 
