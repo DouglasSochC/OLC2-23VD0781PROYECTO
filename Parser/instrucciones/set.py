@@ -59,7 +59,8 @@ class Set(Instruccion):
             return RetornoCorrecto()
 
     def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DECLARE")
-        constr_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
-        constr_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        return label_encabezado + constr_identificador + constr_tipo_dato
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "SET")
+        constr_tipo_dato = self.identificador.GraficarArbol(self.id_nodo)
+        unir_encabezado_tipo_dato = "\"{}\"->\"{}\"\n".format(self.id_nodo, self.expresion.id_nodo)
+        constr_identificador = self.expresion.GraficarArbol(self.id_nodo)
+        return label_encabezado + constr_identificador  + constr_tipo_dato + unir_encabezado_tipo_dato

@@ -13,7 +13,8 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-use "db1";
+
+
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -57,6 +58,26 @@ SELECT (producto.id + producto.total) + 2 as total FROM producto;
 SELECT (1+2) < 1;
 SELECT (producto.id, producto.nombre)  FROM producto;
 SELECT (producto.id, producto.nombre)  FROM producto WHERE producto.id = 1;
+SET cuaderno = 1;
+CREATE TABLE producto (
+    id INT PRIMARY KEY,
+    esta_bueno BIT,
+    total DECIMAL,
+    fecha DATE,
+    fecha_hora DATETIME,
+    nombre NCHAR(200) NOT NULL,
+    descripcion NVARCHAR(1000),
+    id_tipo_producto INT REFERENCES tipo_producto (id)
+);
+
+IF (@texto == "ab")
+BEGIN
+    DECLARE @funciono AS INT;
+END
+ELSE
+BEGIN
+    DECLARE @no_funciono AS INT;
+END
 '''
 
 # Se revisa que se haya obtenido una instrucciones

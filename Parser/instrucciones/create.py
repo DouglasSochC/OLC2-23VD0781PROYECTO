@@ -118,22 +118,22 @@ class Create(Instruccion):
         # Graficar un procedimiento
         # Graficar una funcion
     def GraficarArbol(self, id_padre):
-        return ""
-        # label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CREATE")
-        # label_instruccion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "CR", self.instruccion)
-        # union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "CR")
-        # label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        # result = label_encabezado + label_instruccion + union_encabezado_instruccion + label_identificador
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CREATE")
+        label_instruccion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "CR", self.instruccion)
+        union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "CR")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        result = label_encabezado + label_instruccion + union_encabezado_instruccion + label_identificador
+        
+       
+        if isinstance(self.campos_table, list) and self.campos_table:
+            primer_elemento = self.campos_table[0]
+            if isinstance(primer_elemento, Campo_Table):
+                 for campo in self.campos_table:
+                    label_campo = campo.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
+                    result += label_campo + union_tipo_accion_campo
+            else:
+                label_tipo_dato = self.campos_table.GraficarArbol(self.id_nodo)
+                result += label_tipo_dato
 
-        # if isinstance(self.campos_table, list) and self.campos_table:
-        #     primer_elemento = self.campos_table[0]
-        #     if isinstance(primer_elemento, Campo_Table):
-        #         for campo in self.campos_table:
-        #             label_campo = campo.GraficarArbol(self.id_nodo)
-        #             union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
-        #             result += label_campo + union_tipo_accion_campo
-        #     else:
-        #         label_tipo_dato = self.campos_table.GraficarArbol(self.id_nodo)
-        #         result += label_tipo_dato
-
-        # return result
+        return result

@@ -87,7 +87,10 @@ def p_set(p):
     '''
     set  : SET identificador IGUAL expresion PUNTOYCOMA
     '''
-    p[0] = Set(None, p[2], p[4])
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Set(id_nodo, p[2], p[4])
 
 def p_usar_db(p):
     '''
@@ -194,8 +197,10 @@ def p_create(p):
     elif len(p) == 8:
         p[0] = Create(id_nodo, p[2].lower(), p[3], p[5], None, None, None)
     elif len(p) == 12:
+        #TODO: POR HACER GRAFICAMENTE
         p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[9], None)
     elif len(p) == 14:
+        #TODO: POR HACER GRAFICAMENTE
         p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[11], p[8])
 
 def p_campos_table(p):
@@ -227,16 +232,20 @@ def p_parametros(p):
                    | parametros COMA identificador tipo_dato
                    | identificador tipo_dato
     '''
+    global contador
+    elemento_hashable = p[3] if len(p) > 3 else p[1]
+    id_nodo = str(abs(hash(elemento_hashable)) + contador)
+    contador += 1
     if len(p) == 6:
-        p[1].append(Parametro(p[3], p[5]))
+        p[1].append(Parametro(id_nodo,p[3], p[5]))
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = [Parametro(p[1], p[3])]
+        p[0] = [Parametro(id_nodo,p[1], p[3])]
     elif len(p) == 5:
-        p[1].append(Parametro(p[3], p[4]))
+        p[1].append(Parametro(id_nodo,p[3], p[4]))
         p[0] = p[1]
     elif len(p) == 3:
-        p[0] = [Parametro(p[1], p[2])]
+        p[0] = [Parametro(id_nodo,p[1], p[2])]
 
 def p_constraint(p):
     '''
