@@ -12,7 +12,6 @@ from Parser.abstract.retorno import RetornoError
 ts_global_1 = TablaDeSimbolos()
 base_datos_1 = BaseDatosWrapper("bd1")
 instrucciones = parse(
-
 '''
 INSERT INTO test (id, nombre) VALUES (1000, "Dummy"); -- ERROR: No existe la tabla
 INSERT INTO producto (id, nombre, nombre) VALUES (1000, "Dummy", "Dummy"); -- ERROR: Doble parametro

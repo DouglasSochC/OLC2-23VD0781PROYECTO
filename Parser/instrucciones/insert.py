@@ -34,7 +34,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     campos.append(res.codigo)
                 else:
-                    return RetornoError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Ha ocurrido un error al definir el 'INSERT' dentro de la creacion de un PROCEDURE o FUNCTION")
 
             valores = []
             for valor in self.lista_valores:
@@ -44,7 +44,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     valores.append(res.codigo)
                 else:
-                    return RetornoError("Ha ocurrido un error al definir el INSERT dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Ha ocurrido un error al definir el 'INSERT' dentro de la creacion de un PROCEDURE o FUNCTION")
 
             return RetornoCodigo("INSERT INTO {} ({}) VALUES ({});\n".format(nombre_tabla, ", ".join(campos), ", ".join(valores)))
 
@@ -61,7 +61,7 @@ class Insert(Instruccion):
                 elif isinstance(res, dict):
                     campos.append(res['identificador'])
                 else:
-                    return RetornoError("Hay un error al definir los campos del INSERT")
+                    return RetornoError("Hay un error al definir los campos del 'INSERT'")
 
             valores = []
             for valor in self.lista_valores:
@@ -75,10 +75,10 @@ class Insert(Instruccion):
                 valores.append(res.valor)
 
             if len(campos) != len(valores):
-                return RetornoError("La cantidad de columnas especificada en la declaración INSERT no coincide con la cantidad de valores proporcionados en la cláusula VALUES.")
+                return RetornoError("La cantidad de columnas especificada en el comando 'INSERT' no coincide con la cantidad de valores proporcionados en la cláusula VALUES.")
 
             if len(campos) != len(set(campos)):
-                return RetornoError("Una o más columnas han sido especificadas más de una vez en la declaración INSERT, lo cual no está permitido.")
+                return RetornoError("Una o más columnas han sido especificadas más de una vez en la declaración 'INSERT', lo cual no está permitido.")
 
             tupla = dict(zip(campos, valores))
             dml = DML()
