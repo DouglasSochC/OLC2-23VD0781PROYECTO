@@ -52,4 +52,23 @@ class If_I(Instruccion):
                 return RetornoError("Ha ocurrido un error al evaluar la instrucción If")
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "IF")
+        label_expresion = self.expresion.GraficarArbol(self.id_nodo)
+        union_encabezado_expresion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
+        result = label_encabezado + label_expresion + union_encabezado_expresion
+        
+        # Se grafica instrucciones_list
+        if self.instrucciones_then is not None:
+            for instruccion in self.instrucciones_then:
+                instrucciones_then = instruccion.GraficarArbol(self.id_nodo)
+                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                result += instrucciones_then + union_encabezado_instruccion
+
+        # Se grafica instrucciones_else
+        if self.instrucciones_else is not None:
+            for instruccion in self.instrucciones_else:
+                instrucciones_else = instruccion.GraficarArbol(self.id_nodo)
+                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                result += instrucciones_else + union_encabezado_instruccion
+        
+        return result
