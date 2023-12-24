@@ -478,17 +478,17 @@ def p_funcion_nativa(p):
     contador += 1
     p[1] = p[1].lower()
     if p[1] == 'concatena':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
     elif p[1] == 'substraer':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
     elif p[1] == 'hoy':
-        p[0] = Funcion_Nativa(id_nodo,p[1], None)
+        p[0] = Funcion_Nativa(id_nodo,p[1], None, None)
     elif p[1] == 'contar':
-        p[0] = Funcion_Nativa(id_nodo,p[1], None)
+        p[0] = Funcion_Nativa(id_nodo,p[1], None, None)
     elif p[1] == 'suma':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
+        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
     elif p[1] == 'cast':
-        p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
+        p[0] = Funcion_Nativa(id_nodo, p[1], p[3], p[5])
 
 def p_aritmeticos(p):
     '''
