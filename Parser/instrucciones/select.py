@@ -7,7 +7,8 @@ from Funcionalidad.dml import DML
 
 class Select(Instruccion):
 
-    def __init__(self, lista_tablas: list[Expresion], lista_campos: list[Expresion], condicion: Condicion):
+    def __init__(self, id_nodo,lista_tablas: list[Expresion], lista_campos: list[Expresion], condicion: Condicion):
+        self.id_nodo = id_nodo
         self.lista_tablas = lista_tablas
         self.lista_campos = lista_campos
         self.condicion = condicion
@@ -110,7 +111,45 @@ class Select(Instruccion):
             else:
                 RetornoError("Ha ocurrido un error al obtener la informacion de la(s) tabla(s).")
 
-        return resultado
+        return resultado 
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "SELECT")
+        resultado = label_encabezado
+
+
+        if self.lista_campos is not None:
+            label_from = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"col", "COLUMNAS")
+            unir_from = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.id_nodo+"col")
+            resultado += label_from + unir_from
+            if isinstance(self.lista_campos, list):
+                aux = self.lista_campos[0]
+                if(isinstance(aux, Expresion)):
+                    for campo in self.lista_campos:
+                        label_campo = campo.GraficarArbol(self.id_nodo)
+                        unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo+"col", campo.id_nodo)
+                        resultado += label_campo + unir_campo
+                else:
+                    label_campo = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"todo", aux)
+                    unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo+"col", self.id_nodo+"todo")
+                    resultado += label_campo + unir_campo
+            else:
+                print("No es una lista")
+        
+        if self.lista_tablas is not None:
+            label_from = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"from", "FROM")
+            unir_from = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.id_nodo+"from")
+            resultado += label_from + unir_from
+            for tabla in self.lista_tablas:
+                label_campo = tabla.GraficarArbol(self.id_nodo)
+                unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, tabla.id_nodo)
+                resultado += label_campo + unir_campo
+            
+       
+        if self.condicion is not None:
+
+            label_condicion = self.condicion.GraficarArbol(self.id_nodo)
+            unir_condicion = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.condicion.id_nodo)
+            resultado += label_condicion + unir_condicion
+        
+        return resultado

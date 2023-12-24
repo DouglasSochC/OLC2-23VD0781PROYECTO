@@ -323,20 +323,23 @@ def p_select(p):
                | SELECT lista_expresiones FROM lista_expresiones WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
     '''
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
     if len(p) == 4:
-        p[0] = Select(None, p[2], None)
+        p[0] = Select(id_nodo,None, p[2], None)
     elif len(p) == 6 and p[2] == '*':
-        p[0] = Select(p[4], [p[2]], None)
+        p[0] = Select(id_nodo,p[4], [p[2]], None)
     elif len(p) == 6 and p[3].lower() == 'from':
-        p[0] = Select(p[4], p[2], None)
+        p[0] = Select(id_nodo,p[4], p[2], None)
     elif len(p) == 8 and p[2] == '(':
-        p[0] = Select(p[6], p[3], None)
+        p[0] = Select(id_nodo,p[6], p[3], None)
     elif len(p) == 8 and p[2] == '*':
-        p[0] = Select(p[4], [p[2]], p[6])
+        p[0] = Select(id_nodo,p[4], [p[2]], p[6])
     elif len(p) == 8 and p[3].lower() == 'from':
-        p[0] = Select(p[4], p[2], p[6])
+        p[0] = Select(id_nodo,p[4], p[2], p[6])
     elif len(p) == 10 and p[2] == '(':
-        p[0] = Select(p[6], p[3], p[8])
+        p[0] = Select(id_nodo,p[6], p[3], p[8])
 
 def p_insert(p):
     '''
