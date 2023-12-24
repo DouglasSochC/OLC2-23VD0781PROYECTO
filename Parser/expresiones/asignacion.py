@@ -131,24 +131,23 @@ class Asignacion(Expresion):
 
     # TODO: Corregir el graficado del arbol debido a que se han modificado los parametros que se solicitan en la asignacion
     def GraficarArbol(self, id_padre):
-        return ""
-        # label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "FUNCION NATIVA")
-        # label_exp_izq = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "AIZQ", self.expresion_izquierda)
-        # union_enca_exp_izq = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "AIZQ")
+        
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ASIGNACION")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
 
-        # label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "op", self.operador)
-        # union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "op")
-        # resultado_exp = ""
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "op", "=")
+        union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "op")
+        resultado_exp = ""
 
-        # if isinstance(self.expresion, list):
-        #     print("es lista")
-        #     for exp in self.expresion:
-        #         union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-        #         resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-        #         resultado_exp += union_hijo_izquierdo + resultado_izquierda
-        # else:
-        #     union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-        #     resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
-        #     resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        if isinstance(self.expresion, list):
+            print("es lista")
+            for exp in self.expresion:
+                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
+                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
+                resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        else:
+            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
+            resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
+            resultado_exp += union_hijo_izquierdo + resultado_izquierda
 
-        # return label_encabezado+ label_exp_izq+union_enca_exp_izq +label_operador + union_enca_operador+ resultado_exp
+        return label_encabezado+ label_identificador +label_operador + union_enca_operador+ resultado_exp

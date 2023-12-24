@@ -23,18 +23,11 @@ class Alias(Expresion):
 
     def GraficarArbol(self, id_padre):
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALIAS")
-
         resultado_exp = ""
 
-        if isinstance(self.expresion, list):
-            for exp in self.expresiones:
-                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-                resultado_exp += union_hijo_izquierdo + resultado_izquierda
-        else:
-            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-            resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
-            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
+        resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
+        resultado_exp += union_hijo_izquierdo + resultado_izquierda
 
         label_alias = "\"{}\"[label=\"{}\"];\n".format(self.alias, self.alias)
         union_alias = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.alias)

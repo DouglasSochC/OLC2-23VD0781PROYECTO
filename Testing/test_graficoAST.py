@@ -13,17 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-CREATE DATABASE bd1;
-
-USE "db1";
-
-create table tabla1(
-    id int primary key,
-    nombre NVARCHAR(30),
-    edad int
-);
-
-ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
+variable > 5 AND variable < 10
 
 ''')
 '''
@@ -48,6 +38,19 @@ CREATE DATABASE bd1;
 
 
 INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
+
+
+CREATE DATABASE bd1;
+
+USE "db1";
+
+create table tabla1(
+    id int primary key,
+    nombre NVARCHAR(30),
+    edad int
+);
+
+ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
 '''
 
 # Se revisa que se haya obtenido una instrucciones
