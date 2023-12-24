@@ -12,8 +12,6 @@ class DML:
     def __init__(self):
         self.__path_bds = os.path.join(os.environ.get("CARPETA_PARA_BASES_DE_DATOS")) + "{}"
         self.__path_tablas = self.__path_bds + os.path.join(self.__path_bds, os.environ.get("CARPETA_PARA_TABLAS"))
-        self.__path_funciones = self.__path_bds + os.path.join(self.__path_bds, os.environ.get("CARPETA_PARA_FUNCIONES"))
-        self.__path_procedimiento = self.__path_bds + os.path.join(self.__path_bds, os.environ.get("CARPETA_PARA_PROCEDIMIENTOS"))
 
     def __validar_estructura_tupla(self, nombre_bd: str, path_tabla: str, tupla: list) -> str | dict:
 
@@ -58,7 +56,7 @@ class DML:
 
                 # Si es una llave primaria se valida que no se repita su valor
                 if 'pk' in campo.attrib:
-                    encontrado = root.findall(".//registros/fila[id='" + tupla[campo_nombre] + "']")
+                    encontrado = root.findall(".//registros/fila[{}='{}']".format(campo_nombre, tupla[campo_nombre]))
                     if len(encontrado) > 0:
                         return "No se pueden duplicar valores en la clave primaria"
 
