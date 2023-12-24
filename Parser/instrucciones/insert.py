@@ -21,10 +21,14 @@ class Insert(Instruccion):
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
         nombre_tabla = res_identificador['identificador']
 
-        # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
-        construccion = entorno.obtener("construir_procedimiento")
-        construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
-        if construccion is not None:
+        # Se verifica que no se este utilizando el comando 'INSERT' dentro de la creacion de una funcion
+        construir_funcion = entorno.obtener("construir_funcion")
+        if construir_funcion is not None:
+            return RetornoError("No es posible realizar una instrucción 'INSERT' dentro del cuerpo del FUNCTION.")
+
+        # Se verifica si el comando 'INSERT' esta siendo utilizado en la creacion de un procedimiento
+        construir_procedimiento = entorno.obtener("construir_procedimiento")
+        if construir_procedimiento is not None:
 
             campos = []
             for campo in self.lista_campos:
@@ -34,7 +38,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     campos.append(res.codigo)
                 else:
-                    return RetornoError("Ha ocurrido un error al definir el 'INSERT' dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Se produjo un error al intentar definir la instrucción 'INSERT' dentro de la creación del PROCEDURE.")
 
             valores = []
             for valor in self.lista_valores:
@@ -44,7 +48,7 @@ class Insert(Instruccion):
                 if isinstance(res, RetornoCodigo):
                     valores.append(res.codigo)
                 else:
-                    return RetornoError("Ha ocurrido un error al definir el 'INSERT' dentro de la creacion de un PROCEDURE o FUNCTION")
+                    return RetornoError("Se produjo un error al intentar definir la instrucción 'INSERT' dentro de la creación del PROCEDURE.")
 
             return RetornoCodigo("INSERT INTO {} ({}) VALUES ({});\n".format(nombre_tabla, ", ".join(campos), ", ".join(valores)))
 

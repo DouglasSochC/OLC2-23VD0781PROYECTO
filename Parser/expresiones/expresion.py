@@ -20,7 +20,8 @@ class Expresion(Expresion):
 
             if isinstance(self.expresion, Identificador):
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
-                return RetornoCodigo(res_expresion['identificador'])
+                codigo_identificador = "{}.{}".format(res_expresion['referencia_tabla'], res_expresion['identificador']) if res_expresion['referencia_tabla'] != None else res_expresion['identificador']
+                return RetornoCodigo(codigo_identificador)
             elif isinstance(self.expresion, Literal):
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
                 if self.expresion.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR):
@@ -61,7 +62,7 @@ class Expresion(Expresion):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "EXPRESION")
         resultado_exp = ""
         if isinstance(self.expresion, list):
-            
+
             for exp in self.expresion:
                 union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
                 resultado_izquierda = exp.GraficarArbol(self.id_nodo)
@@ -70,5 +71,5 @@ class Expresion(Expresion):
             union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
             resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
             resultado_exp += union_hijo_izquierdo + resultado_izquierda
-            
+
         return label_encabezado + resultado_exp

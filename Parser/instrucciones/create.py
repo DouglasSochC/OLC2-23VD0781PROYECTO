@@ -79,11 +79,11 @@ class Create(Instruccion):
                     elif isinstance(res_instr_ejecutar, RetornoCodigo):
                         query += res_instr_ejecutar.codigo
                     else:
-                        return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion de un PROCEDURE o FUNCTION")
+                        return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion del PROCEDURE")
 
                 respuesta = ddl.crear_procedimiento(base_datos.valor, nombre, lista_parametros, query)
                 return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
-            
+
             elif self.instruccion == 'function':
 
                 # Se almacenan los parametros que utiliza el function
@@ -96,7 +96,7 @@ class Create(Instruccion):
                 nuevo_entorno = TablaDeSimbolos(entorno)
 
                 # Se agrega en la tabla de simbolos una variable que indica que se esta creando un function y no se esta analizando el funcionamiento del mismo
-                simbolo_variable = Simbolo("construir_procedimiento", None, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DDL)
+                simbolo_variable = Simbolo("construir_funcion", None, TIPO_DATO.NULL, -1, TIPO_ENTORNO.SENTENCIA_DDL)
                 nuevo_entorno.agregar(simbolo_variable)
 
                 query = ""
@@ -109,7 +109,7 @@ class Create(Instruccion):
                     elif isinstance(res_instr_ejecutar, RetornoCodigo):
                         query += res_instr_ejecutar.codigo
                     else:
-                        return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion de un PROCEDURE o FUNCTION")
+                        return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion del FUNCTION")
 
                 respuesta = ddl.crear_funcion(base_datos.valor, nombre, lista_parametros, query)
                 return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
@@ -123,8 +123,8 @@ class Create(Instruccion):
         union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "CR")
         label_identificador = self.identificador.GraficarArbol(self.id_nodo)
         result = label_encabezado + label_instruccion + union_encabezado_instruccion + label_identificador
-        
-       
+
+
         if isinstance(self.campos_table, list) and self.campos_table:
             primer_elemento = self.campos_table[0]
             if isinstance(primer_elemento, Campo_Table):
