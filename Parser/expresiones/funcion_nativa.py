@@ -195,6 +195,7 @@ class Funcion_Nativa(Expresion):
           return label_encabezado+ label_operador + union_enca_operador
 
         if isinstance(self.expresiones, list):
+            print("es lista")
             for exp in self.expresiones:
                 union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
                 resultado_izquierda = exp.GraficarArbol(self.id_nodo)

@@ -49,7 +49,6 @@ class Logico(Expresion):
         union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
 
         if self.expresion_derecha is not None:
-            print("NO ES NONE")
             union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
             resultado_derecha = self.expresion_derecha.GraficarArbol(id_padre)
         else:

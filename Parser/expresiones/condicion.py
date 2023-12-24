@@ -64,4 +64,16 @@ class Condicion(Expresion):
                     RetornoError("Ha ocurrido un error al ejecutar la condicion.")
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CONDICION")
+        label_expresion_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
+        union_encabezado_expresion_izquierda = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion_izquierda.id_nodo)
+       
+        if self.tipo_operador is None and self.expresion_derecha is None:
+            return label_encabezado + label_expresion_izquierda + union_encabezado_expresion_izquierda
+
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "1", self.tipo_operador)
+        union_encabezado_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "1")
+        label_expresion_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
+        label_union_encabezado_expresion_derecha = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion_derecha.id_nodo)
+
+        return label_encabezado + label_expresion_izquierda + union_encabezado_expresion_izquierda + label_operador + union_encabezado_operador + label_expresion_derecha + label_union_encabezado_expresion_derecha

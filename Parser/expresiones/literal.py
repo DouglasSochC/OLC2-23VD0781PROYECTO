@@ -97,5 +97,5 @@ class Literal(Expresion):
         if isinstance(value, str):
             if value.startswith('"') and value.endswith('"'):
                 mundo_without_quotes = value.strip('"')
-            return mundo_without_quotes
+                return mundo_without_quotes
         return value

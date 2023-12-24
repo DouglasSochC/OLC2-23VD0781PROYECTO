@@ -439,8 +439,8 @@ def p_expresion(p):
     elif len(p) == 4:
         p[0] = Expresion(id_nodo, p[2])
     elif len(p) == 5:
-        #TODO: por probar
-        p[0] = Expresion(id_nodo, p[4])
+        #TODO: por probar se cambio 3 xx 4
+        p[0] = Expresion(id_nodo, p[3])
 
 def p_alias(p):
     '''
@@ -488,6 +488,7 @@ def p_funcion_nativa(p):
     elif p[1] == 'suma':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3])
     elif p[1] == 'cast':
+        #TODO: no funciona
         p[0] = {'accion': p[1], 'valor': p[3], 'tipo_dato': p[5]}
 
 def p_aritmeticos(p):
@@ -532,6 +533,7 @@ def p_logicos(p):
     if len(p) == 4:
         p[0] = Logico(id_nodo,p[1], p[2], p[3])
     elif len(p) == 3:
+        #TODO: no funciona
         p[0] = Logico(id_nodo,None, p[1],p[2])
 
 def p_literal1(p):

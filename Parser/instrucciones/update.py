@@ -61,4 +61,20 @@ class Update(Instruccion):
         return RetornoCorrecto(res_actualizar.valor) if res_actualizar.success else RetornoError(res_actualizar.valor)
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "UPDATE")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        resultado = label_encabezado + label_identificador
+
+        if self.lista_expresiones is not None:
+            for campo in self.lista_expresiones:
+                label_campo = campo.GraficarArbol(self.id_nodo)
+                unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, campo.id_nodo)
+                resultado += label_campo + unir_campo
+        
+        if self.condicion is not None and isinstance(self.condicion, Condicion):
+
+            label_condicion = self.condicion.GraficarArbol(self.id_nodo)
+            union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.condicion.id_nodo)
+            resultado += label_condicion + union_tipo_accion_campo
+        
+        return resultado
