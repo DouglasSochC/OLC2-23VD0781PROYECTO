@@ -9,22 +9,38 @@ class Logico(Expresion):
         self.expresion_derecha = expresion_derecha
 
     def Ejecutar(self, base_datos, entorno):
-
-        exp_izq = self.expresion_izquierda.Ejecutar(base_datos, entorno)
-        exp_der = self.expresion_derecha.Ejecutar(base_datos, entorno)
-
-        if isinstance(exp_izq, RetornoError):
-            return exp_izq
-        elif isinstance(exp_der, RetornoError):
-            return exp_der
-
+        if(self.expresion_izquierda != None):
+            exp_izq = self.expresion_izquierda.Ejecutar(base_datos, entorno)
+            if isinstance(exp_izq, RetornoError):
+                return exp_izq
+        if(self.expresion_derecha != None):
+            exp_der = self.expresion_derecha.Ejecutar(base_datos, entorno)
+            if isinstance(exp_der, RetornoError):
+                return exp_der
+        ret = None
         if self.operador == "&&":
-            if isinstance(exp_izq, RetornoArreglo) and isinstance(exp_der, RetornoArreglo):
-                for indice, diccionario in enumerate(exp_izq.lista):
-
-                    diccionario['temporal'] = diccionario['temporal'] and exp_der.lista[indice]['temporal']
-
-                return RetornoArreglo(exp_izq.identificador, TIPO_DATO.BOOLEAN, exp_izq.lista)
+            print("AND")
+            if((exp_izq.tipado == TIPO_DATO.BIT)and(exp_der.tipado == TIPO_DATO.BIT)):
+                ret = exp_izq.valor and exp_der.valor
+            else:
+                return RetornoError("ERROR EN LA OPERACION LOGICA &&")
+        elif self.operador == "||":
+            print("OR")
+            if((exp_izq.tipado == TIPO_DATO.BIT)and(exp_der.tipado == TIPO_DATO.BIT)):
+                ret = exp_izq.valor or exp_der.valor
+            else:
+                return RetornoError("ERROR EN LA OPERACION LOGICA ||")
+        elif self.operador == "!":
+            print("NOT")
+            if(exp_der.tipado == TIPO_DATO.BIT):
+                ret = not exp_der.valor
+                if(ret):
+                    ret = 1
+                else:
+                    ret = 0
+            else:
+                return RetornoError("ERROR EN LA OPERACION LOGICA !")
+        return RetornoLiteral(ret, TIPO_DATO.BIT, None)
             
     def GraficarArbol(self, id_padre):
         id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
