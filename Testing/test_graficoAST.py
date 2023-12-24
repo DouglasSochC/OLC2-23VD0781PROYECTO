@@ -13,8 +13,7 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-INSERT INTO tbvalores (id,nombre,bandera) VALUES(1,"JULIO LOPEZ",1);
-
+use "db1";
 ''')
 '''
 DECLARE tabla1.columna INT;
@@ -52,6 +51,12 @@ create table tabla1(
 
 ALTER TABLE tabla1 ADD COLUMN tipotarjeta NVARCHAR(20) PRIMARY KEY;
 UPDATE producto SET nombre = 'NUEVO NOMBRE' WHERE id = 1;
+SELECT * FROM tabla1;
+SELECT producto.id FROM producto, tipo_producto WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id > 10;
+SELECT (producto.id + producto.total) + 2 as total FROM producto;
+SELECT (1+2) < 1;
+SELECT (producto.id, producto.nombre)  FROM producto;
+SELECT (producto.id, producto.nombre)  FROM producto WHERE producto.id = 1;
 '''
 
 # Se revisa que se haya obtenido una instrucciones
