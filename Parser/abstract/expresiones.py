@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractclassmethod
-from ..tablas.tabla_tipos import TablaSuma, TablaResta, TablaMultiplicacion, TablaDivision
+from ..tablas.tabla_tipos import TablaSuma, TablaResta, TablaMultiplicacion, TablaDivision, TablaAsignacion
 
 class Expresion(metaclass=ABCMeta):
 
@@ -24,4 +24,8 @@ class Expresion(metaclass=ABCMeta):
 
     def DominanteDivision(self, tipo1, tipo2):
         tipado = TablaDivision[tipo1.value[0]][tipo2.value[0]]
+        return tipado
+
+    def DominanteAsignacion(self, tipo1, tipo2):
+        tipado = TablaAsignacion[tipo1.value[0]][tipo2.value[0]]
         return tipado
