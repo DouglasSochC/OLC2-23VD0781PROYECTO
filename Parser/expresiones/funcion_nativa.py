@@ -1,13 +1,15 @@
 from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral, RetornoArreglo
 from ..abstract.expresiones import Expresion
+from ..expresiones.tipo_dato import Tipo_Dato
 import datetime
 
 class Funcion_Nativa(Expresion):
 
-    def __init__(self, id_nodo: str, accion: str, expresiones: any):
+    def __init__(self, id_nodo: str, accion: str, expresiones: any, tipo_dato: Tipo_Dato | None):
         self.id_nodo = id_nodo
         self.accion = accion
         self.expresiones = expresiones
+        self.tipo_dato = tipo_dato
 
     def Ejecutar(self, base_datos, entorno):
 
