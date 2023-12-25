@@ -53,11 +53,15 @@ BEGIN
     SET @var = 1; -- EXITO
     INSERT INTO tipo_producto (id / 2 + "hola mundo", nombre, descripcion) VALUES (1, @hola, "Productos electronicos"); -- EXITO
     INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
-    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
-    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
-    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
-    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
-    INSERT INTO tipo_producto (id, nombre, descripcion) VALUES (1, "Electronico", "Productos electronicos"); -- EXITO
+    DELETE FROM tipo_producto WHERE id = "1" and hola >= 1 and test <= 1; -- EXITO
+    DELETE FROM tipo_producto; -- EXITO
+    UPDATE producto SET nombre = 'TESTING', campo_x = 'Hola :D' WHERE id_tipo_producto = 1; -- ERROR: No existe el campo 'campo_x'
+    UPDATE producto SET nombre = 'NUEVO NOMBRE' WHERE id = @aumento; -- CORRECTO
+    SELECT * FROM producto;
+    SELECT producto.id FROM producto;
+    SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto > "2"; -- ERROR: Diferentes tipos de dato
+    SELECT producto.id * 2 + producto.id as testing, tipo_producto.id FROM producto, tipo_producto, jugador WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id = jugador.id; -- EXITO
+    SELECT (1+2) * 3 + ("1") + "ab";
 END;
 CREATE FUNCTION funcion_test(@aumento int, @fecha date, @texto nvarchar(10))
 RETURN INT

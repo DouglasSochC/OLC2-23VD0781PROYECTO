@@ -449,7 +449,7 @@ def p_expresion(p):
     if len(p) == 2:
         p[0] = Expresion(id_nodo, p[1])
     elif len(p) == 4:
-        p[0] = Expresion(id_nodo, p[2])
+        p[0] = Expresion(id_nodo, p[2], True)
     elif len(p) == 5:
         #TODO: por probar se cambio 3 xx 4
         p[0] = Expresion(id_nodo, p[3])

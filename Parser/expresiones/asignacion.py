@@ -28,7 +28,8 @@ class Asignacion(Expresion):
             if isinstance(res, RetornoError):
                 return res
             elif isinstance(res, RetornoCodigo):
-                return RetornoCodigo("{} = {}".format(res_identificador_ejecutar['identificador'], res.codigo))
+                codigo_identificador = "{}.{}".format(res_identificador_ejecutar['referencia_tabla'], res_identificador_ejecutar['identificador']) if res_identificador_ejecutar['referencia_tabla'] != None else res_identificador_ejecutar['identificador']
+                return RetornoCodigo("{} = {}".format(codigo_identificador, res.codigo))
             else:
                 return RetornoError("Ha ocurrido un error al definir el codigo de la asignacion")
 
@@ -131,7 +132,7 @@ class Asignacion(Expresion):
 
     # TODO: Corregir el graficado del arbol debido a que se han modificado los parametros que se solicitan en la asignacion
     def GraficarArbol(self, id_padre):
-        
+
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ASIGNACION")
         label_identificador = self.identificador.GraficarArbol(self.id_nodo)
 

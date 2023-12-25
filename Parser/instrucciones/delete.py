@@ -21,23 +21,23 @@ class Delete(Instruccion):
         res_identificador = self.identificador.Ejecutar(base_datos, entorno)
         nombre_tabla = res_identificador['identificador']
 
-        # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
-        construccion = entorno.obtener("construir_procedimiento")
-        construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
-        if construccion is not None:
+        # Se verifica que no se este utilizando el comando 'DELETE' dentro de la creacion de una funcion
+        construir_funcion = entorno.obtener("construir_funcion")
+        if construir_funcion is not None:
+            return RetornoError("No es posible realizar una instrucción 'DELETE' dentro del cuerpo del FUNCTION.")
+
+        # Se verifica si el comando 'DELETE' esta siendo utilizado en la creacion de un procedimiento
+        construir_procedimiento = entorno.obtener("construir_procedimiento")
+        if construir_procedimiento is not None:
 
             if self.condicion is not None:
 
-                codigo_condicion = ""
-
                 # En el caso que ocurra un error al obtener el listado de campos
-                res = self.condicion.Ejecutar(base_datos, entorno)
-                if isinstance(res, RetornoCodigo):
-                    codigo_condicion = res.codigo
+                res_condicion_codigo = self.condicion.Ejecutar(base_datos, entorno)
+                if isinstance(res_condicion_codigo, RetornoCodigo):
+                    return RetornoCodigo("DELETE FROM {} WHERE {};\n".format(nombre_tabla, res_condicion_codigo.codigo))
                 else:
-                    return RetornoError("Ha ocurrido un error al definir el 'DELETE' dentro de la creacion de un PROCEDURE o FUNCTION")
-
-                return RetornoCodigo("DELETE FROM {} WHERE {};\n".format(nombre_tabla, codigo_condicion))
+                    return RetornoError("Se produjo un error al intentar definir la instrucción 'DELETE' dentro de la creación del PROCEDURE.")
 
             return RetornoCodigo("DELETE FROM {};\n".format(nombre_tabla))
 
@@ -91,5 +91,5 @@ class Delete(Instruccion):
             label_condicion = self.condicion.GraficarArbol(self.id_nodo)
             union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.condicion.id_nodo)
             result += label_condicion + union_tipo_accion_campo
-            
+
         return result
