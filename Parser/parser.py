@@ -31,7 +31,7 @@ from .instrucciones.declare import Declare
 from .instrucciones.set import Set
 from .instrucciones.if_i import If_I
 from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
-#from .instrucciones.listaGrafico.instruccionesLista import InstruccionesLista
+
 contador = 0
 
 # Operadores de precedencia
@@ -58,20 +58,11 @@ def p_instrucciones_lista(p):
     '''
     p[1].append(p[2])
     p[0] = p[1]
-    #global contador
-    #id_nodo = str(abs(hash("InstruccionesLista")) + contador)
-    #contador += 1
-    #p[1].append(InstruccionesLista(id_nodo, p[2]))
-    #p[0] = p[1]
-
+   
 def p_instrucciones_lista2(p):
     '''
         instrucciones : instruccion
     '''
-    #global contador
-    #id_nodo = str(abs(hash("InstruccionesLista")) + contador)
-    #contador += 1
-    #p[0] = [InstruccionesLista(id_nodo, p[1])]
     p[0] = [p[1]]
 def p_instruccion(p):
     '''
