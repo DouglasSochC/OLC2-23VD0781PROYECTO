@@ -207,5 +207,8 @@ class Funcion_Nativa(Expresion):
             resultado_izquierda = self.expresiones.GraficarArbol(self.id_nodo)
             resultado_exp += union_hijo_izquierdo + resultado_izquierda
 
+        if self.tipo_dato is not None:
+            label_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
+            resultado_exp += label_tipo_dato 
 
         return label_encabezado+ label_operador + union_enca_operador+ resultado_exp
