@@ -128,10 +128,6 @@ t_NOT_OP = r'\!'
 t_IZQPAREN = r'\('
 t_DERPAREN = r'\)'
 
-# Literal
-t_LFECHA = r'\d{2}-\d{2}-\d{4}'
-t_LFECHAHORA = r'\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}'
-
 # Otros
 t_IGUAL = r'\='
 t_COMA = r'\,'
@@ -155,6 +151,16 @@ def t_ID(t):
     r'[A-Za-z_][A-Za-z0-9_]*'
     t.value = t.value.lower()
     t.type = reservadas.get(t.value.lower(), 'ID')
+    return t
+
+def t_LFECHA(t):
+    r'(\'\d{2}-\d{2}-\d{4}\'|\"\d{2}-\d{2}-\d{4}\")'
+    t.value = t.value[1:-1] # Se remueven las comillas
+    return t
+
+def t_LFECHAHORA(t):
+    r'(\'\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}\'|\"\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}\")'
+    t.value = t.value[1:-1] # Se remueven las comillas
     return t
 
 def t_LVARCHAR(t):

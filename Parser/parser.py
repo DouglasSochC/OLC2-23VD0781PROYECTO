@@ -25,6 +25,7 @@ from .instrucciones.update import Update
 from .instrucciones.create import Create
 from .instrucciones.drop import Drop
 from .instrucciones.truncate import Truncate
+from .instrucciones.exec import Exec
 from .instrucciones.delete import Delete
 from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
@@ -58,7 +59,7 @@ def p_instrucciones_lista(p):
     '''
     p[1].append(p[2])
     p[0] = p[1]
-   
+
 def p_instrucciones_lista2(p):
     '''
         instrucciones : instruccion
@@ -312,7 +313,10 @@ def p_exec(p):
     '''
         exec : EXEC identificador lista_expresiones PUNTOYCOMA
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = Exec(id_nodo, p[2], p[3])
 
 def p_sentencia_dml(p):
     '''
