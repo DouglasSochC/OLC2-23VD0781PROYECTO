@@ -13,6 +13,23 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
+CREATE DATABASE db1;
+use "db1";
+
+CREATE TABLE producto (
+    id INT PRIMARY KEY,
+    esta_bueno BIT,
+    total DECIMAL,
+    fecha DATE,
+    fecha_hora DATETIME,
+    nombre NCHAR(200) NOT NULL,
+    descripcion NVARCHAR(1000),
+    id_tipo_producto INT REFERENCES tipo_producto (id)
+);
+
+DROP TABLE producto;
+
+
 
 
 ''')

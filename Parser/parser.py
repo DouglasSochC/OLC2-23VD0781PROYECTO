@@ -30,6 +30,8 @@ from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.set import Set
 from .instrucciones.if_i import If_I
+from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
+
 contador = 0
 
 # Operadores de precedencia
@@ -56,13 +58,12 @@ def p_instrucciones_lista(p):
     '''
     p[1].append(p[2])
     p[0] = p[1]
-
+   
 def p_instrucciones_lista2(p):
     '''
         instrucciones : instruccion
     '''
     p[0] = [p[1]]
-
 def p_instruccion(p):
     '''
         instruccion : declare
@@ -72,7 +73,10 @@ def p_instruccion(p):
                     | comando_sql
                     | RETURN expresion PUNTOYCOMA
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash("InstruccionRaiz")) + contador)
+    contador += 1
+    p[0] = InstruccionGeneral(id_nodo, p[1])
 
 def p_comando_sql(p):
     '''
