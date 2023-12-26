@@ -52,9 +52,9 @@ class Literal(Expresion):
                 fecha_minima = datetime(year=1753, month=1, day=1)
                 fecha_maxima = datetime(year=9999, month=12, day=31)
                 if fecha_minima <= fecha_obj <= fecha_maxima:
-                    return RetornoLiteral(fecha_obj, TIPO_DATO.DATE, self.identificador)
+                    return RetornoLiteral(str(self.value), TIPO_DATO.DATE, self.identificador)
                 else:
-                    return RetornoLiteral(fecha_obj, TIPO_DATO.NULL, self.identificador)
+                    return RetornoLiteral(str(self.value), TIPO_DATO.NULL, self.identificador)
             except ValueError:
                 return RetornoLiteral(self.value, TIPO_DATO.NULL, self.identificador)
 
@@ -65,9 +65,9 @@ class Literal(Expresion):
                 fecha_minima = datetime(year=1753, month=1, day=1)
                 fecha_maxima = datetime(year=9999, month=12, day=31, hour=23, minute=59, second=59)
                 if fecha_minima <= fecha_hora_obj <= fecha_maxima:
-                    return RetornoLiteral(fecha_hora_obj, TIPO_DATO.DATETIME, self.identificador)
+                    return RetornoLiteral(str(self.value), TIPO_DATO.DATETIME, self.identificador)
                 else:
-                    return RetornoLiteral(fecha_hora_obj, TIPO_DATO.NULL, self.identificador)
+                    return RetornoLiteral(str(self.value), TIPO_DATO.NULL, self.identificador)
             except ValueError:
                 return RetornoLiteral(self.value, TIPO_DATO.NULL, self.identificador)
 

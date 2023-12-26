@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from Parser.abstract.retorno import TIPO_DATO
 
 class Respuesta:
     def __init__(self, success: bool, valor: str, lista: list = []):
@@ -106,3 +107,20 @@ def validar_tipo_dato(campo: str, valor: str, tipo: str, longitud: int = None):
             return "El campo '" + campo + "' debe de contener por lo menos 1 caracter"
         elif len(valor) > int(longitud):
             return "El campo '" + campo + "' debe de contener menos de " + longitud + " caracteres"
+
+def convertir_a_literal(valor: any, tipo_dato: str) -> any:
+
+    if tipo_dato == 'int':
+        return {'valor': int(valor), 'tipo': TIPO_DATO.INT}
+    elif tipo_dato == 'decimal':
+        return {'valor': float(valor), 'tipo': TIPO_DATO.DECIMAL}
+    elif tipo_dato == 'bit':
+        return {'valor': int(valor), 'tipo': TIPO_DATO.BIT}
+    elif tipo_dato == 'date':
+        return {'valor': str(valor), 'tipo': TIPO_DATO.DATE}
+    elif tipo_dato == 'datetime':
+        return {'valor': str(valor), 'tipo': TIPO_DATO.DATETIME}
+    elif tipo_dato == 'nchar':
+        return {'valor': str(valor), 'tipo': TIPO_DATO.NCHAR}
+    elif tipo_dato == 'nvarchar':
+        return {'valor': str(valor), 'tipo': TIPO_DATO.NVARCHAR}
