@@ -41,6 +41,16 @@ SELECT CONCATENA("id_producto: ", producto.id, " nombre_producto: ", producto.no
 SELECT CONCATENA("id_producto: ", id, " nombre_producto: ", nombre) FROM producto; -- EXITO
 SELECT SUBSTRAER(nombre, 1, 3) FROM producto;
 SELECT SUBSTRAER(CONCATENA(producto.id, "ABCDEF"), 0, 3) FROM producto;
+
+-- SELECT A FUNCIONES PERSONALIZADAS
+SELECT test(); -- ERROR: No existe la funcion test
+SELECT funcion_test(); -- ERROR: Debe de llevar los parametros solicitados
+SELECT funcion_test(1); -- ERROR: No estan completos los parametros solicitados
+SELECT funcion_test("a", '01-01-2020', 'hola mundo'); -- ERROR: En el valor de un parametro
+SELECT impuesto(total, "ABC") FROM producto; -- ERROR: Cantidad de parametros enviados incorrectos
+SELECT funcion_test(1, '01-01-2020', 'hola mundo'); -- ERROR: En la semantica
+SELECT id, total, impuesto(total, "Total: ") FROM producto;
+SELECT impuesto(123.5, "Total: ");
 ''')
 
 # Se revisa que se haya obtenido una instrucciones

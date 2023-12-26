@@ -30,7 +30,7 @@ class Tipo_Dato(Expresion):
 
     def GraficarArbol(self, id_padre):
         label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TIPO_DATO")
-        label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "T", "INT")
+        label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "T", self.tipo_dato.name)
         union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "T")
         union_padre = "\"{}\"->\"{}\";\n".format(id_padre, self.id_nodo)
         return label_encabezado + label_valor + union_hijo + union_padre

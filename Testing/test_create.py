@@ -70,6 +70,14 @@ BEGIN
     DECLARE @var nvarchar(100); -- EXITO
     SET @var = 1; -- EXITO
 END;
+CREATE FUNCTION impuesto(@total AS DECIMAL, @mensaje AS NVARCHAR(100))
+RETURN INT
+AS
+BEGIN
+    SET @total = @total * 0.12;
+    SET @mensaje = SUBSTRAER(@mensaje, 1, 3);
+    RETURN concatena(@mensaje, @total);
+END;
 ''')
 
 # Se revisa que se haya obtenido una instrucciones
