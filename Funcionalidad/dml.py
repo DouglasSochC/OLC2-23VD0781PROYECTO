@@ -1,8 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
-from .util import Respuesta, validar_tipo_dato
+from .util import Respuesta, validar_tipo_dato, convertir_a_literal
 from dotenv import load_dotenv
-from Parser.abstract.retorno import TIPO_DATO
 import xmltodict
 
 load_dotenv()
@@ -83,23 +82,6 @@ class DML:
             return "Los siguientes campos son invalidas: {}".format(campos_invalidos)
 
         return tupla_respuesta
-
-    def __convertir_a_literal(self, valor: any, tipo_dato: str) -> any:
-
-            if tipo_dato == 'int':
-                return {'valor': int(valor), 'tipo': TIPO_DATO.INT}
-            elif tipo_dato == 'decimal':
-                return {'valor': float(valor), 'tipo': TIPO_DATO.DECIMAL}
-            elif tipo_dato == 'bit':
-                return {'valor': int(valor), 'tipo': TIPO_DATO.BIT}
-            elif tipo_dato == 'date':
-                return {'valor': str(valor), 'tipo': TIPO_DATO.DATE}
-            elif tipo_dato == 'datetime':
-                return {'valor': str(valor), 'tipo': TIPO_DATO.DATETIME}
-            elif tipo_dato == 'nchar':
-                return {'valor': str(valor), 'tipo': TIPO_DATO.NCHAR}
-            elif tipo_dato == 'nvarchar':
-                return {'valor': str(valor), 'tipo': TIPO_DATO.NVARCHAR}
 
     ##############################################
     ############### SECCION INSERT ###############
@@ -198,7 +180,7 @@ class DML:
                 return Respuesta(False, "El campo '{}' no existe en la tabla '{}'.".format(nombre_campo['columna'], nombre_tabla))
 
             # Se verifica que cada campo tengan el formato y tipo de dato correcto
-            elif campo_encontrado is not None and self.__convertir_a_literal(-1, campo_encontrado.attrib['type'])['tipo'] != nombre_campo['tipado']:
+            elif campo_encontrado is not None and convertir_a_literal(-1, campo_encontrado.attrib['type'])['tipo'] != nombre_campo['tipado']:
                 return Respuesta(False, "El campo '{}' no es del tipo de dato '{}'.".format(nombre_campo['columna'], campo_encontrado.attrib['type']))
 
             if "fk_table" in campo_encontrado.attrib:
@@ -290,10 +272,10 @@ class DML:
 
                 fila_tipada['{}.@index'.format(nombre_tabla)] = fila['@index']
                 if tipado['@name'] in fila:
-                    conversion_literal = self.__convertir_a_literal(fila[tipado['@name']], tipado['@type'])
+                    conversion_literal = convertir_a_literal(fila[tipado['@name']], tipado['@type'])
                     fila_tipada[nombre_tabla + "." + tipado['@name']] = { 'valor': conversion_literal['valor'], 'tipado': conversion_literal['tipo'] }
                 else:
-                    conversion_literal = self.__convertir_a_literal(-1, tipado['@type'])
+                    conversion_literal = convertir_a_literal(-1, tipado['@type'])
                     fila_tipada[nombre_tabla + "." + tipado['@name']] = { 'valor': None, 'tipado': conversion_literal['tipo'] }
 
             respuesta_datos.append(fila_tipada)
