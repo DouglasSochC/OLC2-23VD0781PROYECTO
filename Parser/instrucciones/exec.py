@@ -3,7 +3,6 @@ from ..expresiones.expresion import Expresion
 from ..expresiones.identificador import Identificador
 from ..abstract.retorno import RetornoError, RetornoLiteral, RetornoCorrecto
 from ..tablas.tabla_simbolo import TablaDeSimbolos
-from ..abstract.retorno import TIPO_DATO
 from Funcionalidad.ssl import SSL
 
 class Exec(Instruccion):
@@ -33,7 +32,7 @@ class Exec(Instruccion):
             if isinstance(res_expresion, RetornoError):
                 return res_expresion
             elif isinstance(res_expresion, RetornoLiteral):
-                valores_parametros.append({'valor': str(res_expresion.valor), 'tipado': res_expresion.tipado, 'longitud': None if res_expresion.tipado not in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else len(res_expresion.valor)})
+                valores_parametros.append({'valor': str(res_expresion.valor), 'tipado': res_expresion.tipado})
             else:
                 return RetornoError("El valor de un parametro debe ser un literal.")
 
