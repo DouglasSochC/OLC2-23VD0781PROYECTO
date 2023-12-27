@@ -1,6 +1,6 @@
 from ..abstract.instrucciones import Instruccion
 from ..expresiones.expresion import Expresion
-from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoLiteral, RetornoCorrecto
+from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoLiteral, RetornoCorrecto, RetornoMultiplesInstrucciones
 from ..tablas.tabla_simbolo import TablaDeSimbolos
 
 class If_I(Instruccion):
@@ -23,6 +23,10 @@ class If_I(Instruccion):
 
         else:
 
+            # Variables para el retorno del If
+            arreglo_mensajes = []
+            arreglo_arreglos = []
+
             # Se obtiene la expresion
             res_expresion = self.expresion.Ejecutar(base_datos, entorno)
             if isinstance(res_expresion, RetornoError):
@@ -34,7 +38,18 @@ class If_I(Instruccion):
                     nuevo_entorno = TablaDeSimbolos(entorno)
                     for instruccion in self.instrucciones_then:
                         res_instruccion_ejecutar = instruccion.Ejecutar(base_datos, nuevo_entorno)
-                        print("INSTRUCCIONES THEN: ", res_instruccion_ejecutar)
+                        if isinstance(res_instruccion_ejecutar, RetornoError):
+                            arreglo_mensajes.append("ERROR: {}".format(res_instruccion_ejecutar.msg))
+                        elif isinstance(res_instruccion_ejecutar, RetornoCorrecto) and res_instruccion_ejecutar.msg is not None:
+                            arreglo_mensajes.append(res_instruccion_ejecutar.msg)
+                        elif isinstance(res_instruccion_ejecutar, RetornoCorrecto) and res_instruccion_ejecutar.msg is None:
+                            pass
+                        elif isinstance(res_instruccion_ejecutar, dict):
+                            arreglo_arreglos.append(res_instruccion_ejecutar)
+                        elif isinstance(res_instruccion_ejecutar, RetornoLiteral):
+                            return res_instruccion_ejecutar
+                        else:
+                            return RetornoError("Ha ocurrido un error al evaluar la instrucción If-Then")
 
                 # Se realiza las instrucciones ELSE del IF
                 else:
@@ -45,9 +60,20 @@ class If_I(Instruccion):
                     nuevo_entorno = TablaDeSimbolos(entorno)
                     for instruccion in self.instrucciones_else:
                         res_instruccion_ejecutar = instruccion.Ejecutar(base_datos, nuevo_entorno)
-                        print("INSTRUCCIONES ELSE: ",res_instruccion_ejecutar)
+                        if isinstance(res_instruccion_ejecutar, RetornoError):
+                            arreglo_mensajes.append("ERROR: {}".format(res_instruccion_ejecutar.msg))
+                        elif isinstance(res_instruccion_ejecutar, RetornoCorrecto) and res_instruccion_ejecutar.msg is not None:
+                            arreglo_mensajes.append(res_instruccion_ejecutar.msg)
+                        elif isinstance(res_instruccion_ejecutar, RetornoCorrecto) and res_instruccion_ejecutar.msg is None:
+                            pass
+                        elif isinstance(res_instruccion_ejecutar, dict):
+                            arreglo_arreglos.append(res_instruccion_ejecutar)
+                        elif isinstance(res_instruccion_ejecutar, RetornoLiteral):
+                            return res_instruccion_ejecutar
+                        else:
+                            return RetornoError("Ha ocurrido un error al evaluar la instrucción If-Else")
 
-                return RetornoCorrecto()
+                return RetornoMultiplesInstrucciones(arreglo_mensajes, arreglo_arreglos)
             else:
                 return RetornoError("Ha ocurrido un error al evaluar la instrucción If")
 
@@ -56,7 +82,7 @@ class If_I(Instruccion):
         label_expresion = self.expresion.GraficarArbol(self.id_nodo)
         union_encabezado_expresion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
         result = label_encabezado + label_expresion + union_encabezado_expresion
-        
+
         # Se grafica instrucciones_list
         if self.instrucciones_then is not None:
             for instruccion in self.instrucciones_then:
@@ -70,5 +96,5 @@ class If_I(Instruccion):
                 instrucciones_else = instruccion.GraficarArbol(self.id_nodo)
                 union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
                 result += instrucciones_else + union_encabezado_instruccion
-        
+
         return result
