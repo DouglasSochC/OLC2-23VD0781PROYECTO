@@ -76,7 +76,11 @@ AS
 BEGIN
     SET @total = @total * 0.12;
     SET @mensaje = SUBSTRAER(@mensaje, 1, 3);
-    RETURN concatena(@mensaje, @total);
+    IF (@total > 100) THEN
+        RETURN concatena(@total);
+    ELSE
+        RETURN concatena(@mensaje, @total);
+    END IF;
 END;
 ''')
 
