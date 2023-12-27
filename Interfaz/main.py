@@ -1,6 +1,6 @@
 # Para realizar el analisis
 from Parser.parser import parse
-
+import graphviz
 # Para la construccion de la interfaz
 import tkinter as tk
 from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebox, ttk
@@ -15,6 +15,7 @@ from .utils.createTransform import create_table_sql
 
 # Para obtener las imagenes
 import os
+
 thisdir = os.path.dirname(__file__)
 IMG_BASE_DE_DATOS = None
 IMG_BASE_DE_DATO = None
@@ -37,6 +38,8 @@ load_dotenv()
 # Funciones DDL
 import re
 from Funcionalidad.ddl import DDL
+
+
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -633,8 +636,59 @@ def crear_dump():
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
+#metodo para generar el arbol AST
+def generate_graph(dot_string, folder='Reportes', filename='ast_graph', format='png'):
+    messagebox.showinfo("Informacion", "Graficar arbol")
 
 
+    try:
+        # Check if the folder exists, create it if not
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        # Create a Graph object from the DOT string
+        graph = graphviz.Source(dot_string)
+
+        # Specify the full path for the output file
+        full_path = os.path.join(folder, filename)
+
+        # Render the graph to an image file
+        graph.render(filename=full_path, format=format, cleanup=True)
+
+        print(f"Graph successfully generated and saved as {full_path}.{format}")
+
+    except graphviz.ExecutableNotFound:
+        print("Graphviz executable not found. Please install Graphviz (https://graphviz.gitlab.io/download/) and ensure it's in your system's PATH.")
+
+    except graphviz.Source.InvalidDot as e:
+        print(f"Invalid DOT string:\n{e}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+#metodo para llamar al metodo que genera el arbol AST
+def graficar_arbol():
+    #TODO: falta validar que la entrada este correcta para poder graficar el arbol
+    if len(TABS_ACTUALES) <= 0:
+        messagebox.showinfo("Informacion", "Debe ejecutar un query para poder graficar el arbol")
+        return
+
+    indice_actual = notebook_central.index(notebook_central.select())
+    texto = obtener_contenido_tab(indice_actual)
+
+    salida = parse(texto)
+    if salida is not None:
+        body_string=""
+        if isinstance(salida, str):
+            print("SALIDA STRING: {}".format(salida))
+        else:
+            for instr in salida:
+                body_string+= instr.GraficarArbol(None)
+
+    header_string = "digraph G {\n"
+    footer_string = "}"
+    dot_string = header_string + body_string + footer_string
+    generate_graph(dot_string)
 
 # Creacion de ventana principal
 root = tk.Tk()
@@ -695,8 +749,15 @@ tool_menu.add_cascade(label="SQL", menu=submenu_sql)
 tool_menu.add_command(label="Exportar", command=exportar)
 tool_menu.add_command(label="Importar")
 
+
+tool_reporte = tk.Menu(menubar)
+tool_reporte.add_command(label="Reporte arbol AST", command=graficar_arbol)
+
+
 menubar.add_cascade(menu=file_menu, label="Archivo")
 menubar.add_cascade(menu=tool_menu, label="Herramientas")
+menubar.add_cascade(menu=tool_reporte, label="Reportes")
+
 
 root.config(menu=menubar)
 
