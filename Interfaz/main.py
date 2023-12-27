@@ -91,7 +91,7 @@ def ejecutar_query():
 
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
-    ts_global = TablaDeSimbolos()
+    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
     base_datos = BaseDatosWrapper(BD_SELECCIONADA)
     salida = parse(texto)
 
@@ -712,7 +712,7 @@ def graficar_tabla_simbolos():
 
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
-    ts_global = TablaDeSimbolos()
+    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
     base_datos = BaseDatosWrapper(BD_SELECCIONADA)
     salida = parse(texto)
 
@@ -728,25 +728,32 @@ def graficar_tabla_simbolos():
                 respuesta = elemento.Ejecutar(base_datos, ts_global)
                 if isinstance(respuesta, RetornoError):
                     mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
+                elif isinstance(respuesta, RetornoMultiplesInstrucciones):
+                    for mensaje in respuesta.arreglo_mensajes:
+                        mostrar_salida_como_texto(mensaje)
 
-        dot_string = "digraph G { rankdir=LR node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global) + " \n}"
+        dot_string = ""
+        dot_string += "digraph G { rankdir=LR node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global, [0]) + " \n}"
         generate_graph(dot_string)
 
-def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice_padre: int = -1):
+def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
 
-    if indice_padre == -1:
-        indice_padre = 1
+    cuerpo = f"tabla{indice[0]}[label=<<table border='1' cellspacing='0'>"
 
-    inicial = f"tabla{indice_padre}[label=<<table border='1' cellspacing='0'>"
+    cuerpo += f'''
+    <tr>
+        <td BGCOLOR="#1c3166" colspan="5"><font color="white">Creado En Instrucción: {tabla_simbolo.realizado_en}</font></td>
+    </tr>
+    '''
 
     # Se define el encabezado
-    cuerpo = '''
+    cuerpo += '''
     <tr>
-        <td BGCOLOR='#BDC2EB'>Identificador</td>
-        <td BGCOLOR='#BDC2EB'>Valor</td>
-        <td BGCOLOR='#BDC2EB'>Tipo de Dato</td>
-        <td BGCOLOR='#BDC2EB'>Dimensión</td>
-        <td BGCOLOR='#BDC2EB'>Ámbito</td>
+        <td BGCOLOR='#00a9d4'>Identificador</td>
+        <td BGCOLOR='#00a9d4'>Valor</td>
+        <td BGCOLOR='#00a9d4'>Tipo de Dato</td>
+        <td BGCOLOR='#00a9d4'>Dimensión</td>
+        <td BGCOLOR='#00a9d4'>Ámbito</td>
     </tr>
     '''
 
@@ -762,9 +769,20 @@ def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice_padre: int = 
         </tr>
         '''
 
-    final = "</table>>]"
+    cuerpo += "</table>>] \n"
 
-    return inicial + cuerpo + final
+    # Se crea una nueva tabla de simbolos y se enlaza
+    enlace = ""
+    if len(tabla_simbolo.hijo) > 0:
+
+        indice_padre = indice[0]
+        for tabla in tabla_simbolo.hijo:
+            indice[0] += 1
+            indice_hijo = indice[0]
+            cuerpo += construir_tabla_simbolo(tabla, indice)
+            enlace += f"tabla{indice_padre} -> tabla{indice_hijo} \n"
+
+    return cuerpo + enlace
 
 # Creacion de ventana principal
 root = tk.Tk()

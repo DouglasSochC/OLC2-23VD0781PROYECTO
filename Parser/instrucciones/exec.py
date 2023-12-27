@@ -47,7 +47,7 @@ class Exec(Instruccion):
         query = validar_parametros.valor
 
         # Se genera un nuevo entorno para el procedimiento
-        entorno_nuevo = TablaDeSimbolos(entorno)
+        nuevo_entorno = TablaDeSimbolos(entorno, [], "EXEC")
 
         # Se realiza el parseo del query que tiene el procedimiento
         from Parser.parser import parse
@@ -65,7 +65,7 @@ class Exec(Instruccion):
                 arreglo_arreglos = []
 
                 for instr in instrucciones:
-                    res = instr.Ejecutar(base_datos, entorno_nuevo)
+                    res = instr.Ejecutar(base_datos, nuevo_entorno)
                     if isinstance(res, RetornoError):
                         arreglo_mensajes.append("ERROR: {}".format(res.msg))
                     elif isinstance(res, RetornoCorrecto) and res.msg is not None:
@@ -76,11 +76,16 @@ class Exec(Instruccion):
                         arreglo_arreglos.append(res)
                     elif isinstance(res, RetornoLiteral):
                         return res
+                    elif isinstance(res, RetornoMultiplesInstrucciones):
+                        arreglo_mensajes += res.arreglo_mensajes
+                        arreglo_arreglos += res.arreglo_arreglos
                     else:
                             return RetornoError("Ha ocurrido un error al evaluar la instrucción EXEC")
 
+                entorno.agregar_hijo(nuevo_entorno)
                 return RetornoMultiplesInstrucciones(arreglo_mensajes, arreglo_arreglos)
 
+        entorno.agregar_hijo(nuevo_entorno)
         return RetornoCorrecto("El procedimiento '{}' se ha ejecutado correctamente.".format(nombre_procedimiento))
 
     def GraficarArbol(self, id_padre):
