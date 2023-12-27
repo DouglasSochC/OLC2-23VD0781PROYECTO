@@ -33,6 +33,7 @@ DROP TABLE producto;
 
 
 ''')
+
 '''
 DECLARE tabla1.columna INT;
 DECLARE var1 DATE;
@@ -104,6 +105,6 @@ if instrucciones is not None:
         print("SALIDA STRING: {}".format(instrucciones))
     else:
         for instr in instrucciones:
-            res = instr.Ejecutar(base_datos, ts_global)
+            #res = instr.Ejecutar(base_datos, ts_global)
             graficar = instr.GraficarArbol(None)
             print(graficar)
