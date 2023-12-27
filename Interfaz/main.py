@@ -733,7 +733,7 @@ def graficar_tabla_simbolos():
                         mostrar_salida_como_texto(mensaje)
 
         dot_string = ""
-        dot_string += "digraph G { rankdir=LR node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global, [0]) + " \n}"
+        dot_string += "digraph G { rankdir=TB node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global, [0]) + " \n}"
         generate_graph(dot_string)
 
 def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
