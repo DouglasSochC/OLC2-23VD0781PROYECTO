@@ -24,7 +24,7 @@ IMG_TABLA = None
 
 # Utilidades
 from Parser.tablas.tabla_simbolo import TablaDeSimbolos
-from Parser.abstract.retorno import RetornoCorrecto, RetornoError
+from Parser.abstract.retorno import RetornoCorrecto, RetornoError, RetornoMultiplesInstrucciones
 class BaseDatosWrapper:
     def __init__(self, valor):
         self.valor = valor
@@ -105,8 +105,15 @@ def ejecutar_query():
                 respuesta = elemento.Ejecutar(base_datos, ts_global)
                 if isinstance(respuesta, RetornoError):
                     mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
-                elif isinstance(respuesta, RetornoCorrecto):
+                elif isinstance(respuesta, RetornoCorrecto) and respuesta.msg is not None:
                     mostrar_salida_como_texto(respuesta.msg)
+                elif isinstance(respuesta, RetornoCorrecto) and respuesta.msg is None:
+                    pass
+                elif isinstance(respuesta, RetornoMultiplesInstrucciones):
+                    for mensaje in respuesta.arreglo_mensajes:
+                        mostrar_salida_como_texto(mensaje)
+                    for arreglo in respuesta.arreglo_arreglos:
+                        mostrar_salida_como_tabla(arreglo)
                 else:
                     mostrar_salida_como_tabla(respuesta)
 
@@ -535,7 +542,7 @@ def exportar():
     else:
         messagebox.showinfo("Error", "Selecciona un item en el Treeview.")
         return
-    
+
     carpeta_principal = f'databases/{nombre_item}'
     try:
         # Buscar la carpeta que coincide

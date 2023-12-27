@@ -60,3 +60,8 @@ class RetornoError:
 class RetornoCorrecto:
     def __init__(self, msg: str = None):
         self.msg = msg
+
+class RetornoMultiplesInstrucciones:
+    def __init__(self, arreglo_mensajes: list, arreglo_arreglos: list):
+        self.arreglo_mensajes = arreglo_mensajes
+        self.arreglo_arreglos = arreglo_arreglos
