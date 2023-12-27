@@ -31,6 +31,7 @@ from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.set import Set
 from .instrucciones.if_i import If_I
+from .instrucciones.while_i import While_I
 from .instrucciones.return_i import Return_I
 from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
 
@@ -416,7 +417,10 @@ def p_while(p):
     '''
         while : WHILE expresion BEGIN instrucciones END
     '''
-    p[0] = p[1]
+    global contador
+    id_nodo = str(abs(hash(p[1])) + contador)
+    contador += 1
+    p[0] = While_I(id_nodo, p[2], p[4])
 
 def p_condicion(p):
     '''
@@ -631,7 +635,10 @@ def p_identificador(p):
         p[0] = Identificador(id_nodo, p[3], p[1])
 
 def p_error(p):
-    errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
+    if p is None:
+        errores.append("No hay codigo por analizar.")
+    else:
+        errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
 
 def parse(input):
 

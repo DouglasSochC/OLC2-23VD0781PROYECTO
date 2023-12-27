@@ -1,6 +1,6 @@
 # Para realizar el analisis
 from Parser.parser import parse
-
+import graphviz
 # Para la construccion de la interfaz
 import tkinter as tk
 from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebox, ttk
@@ -15,6 +15,7 @@ from .utils.createTransform import create_table_sql
 
 # Para obtener las imagenes
 import os
+
 thisdir = os.path.dirname(__file__)
 IMG_BASE_DE_DATOS = None
 IMG_BASE_DE_DATO = None
@@ -37,6 +38,8 @@ load_dotenv()
 # Funciones DDL
 import re
 from Funcionalidad.ddl import DDL
+
+
 
 # Variables generales
 TEMA_EDITOR="monokai"
@@ -535,8 +538,12 @@ def seleccionar_bd():
         # Iniciar el bucle principal
         ventana_seleccionar.mainloop()
 
-#metodo para exportar INSERTS de las tablas de una bd
 def exportar():
+
+    '''
+    Exporta los INSERT's de las tablas de la base de datos seleccionada.
+    '''
+
     selected_item = treeview.selection()
     if selected_item:
         nombre_item = treeview.item(selected_item)["text"]
@@ -583,7 +590,6 @@ def exportar():
 
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-
 
 def crear_dump():
     selected_item = treeview.selection()
@@ -633,8 +639,69 @@ def crear_dump():
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
+# OPCIONES PARA EL MENU DE REPORTES
 
+def generate_graph(dot_string):
 
+    '''
+    Generar el AST en formato PNG o SVG
+    '''
+
+    try:
+        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG (*.png)", "*.png"), ("SVG (*.svg)", "*.svg"), ("Todos los archivos", "*.*")])
+        if file_path:
+
+            # Create a Graph object from the DOT string
+            graph = graphviz.Source(dot_string)
+
+            # Specify the full path for the output file
+            folder = os.path.dirname(file_path)
+            filename = os.path.splitext(os.path.basename(file_path))[0]
+            format = os.path.splitext(os.path.basename(file_path))[1][1:]
+            full_path = os.path.join(folder, filename)
+
+            # Render the graph to an image file
+            graph.render(filename=full_path, format=format, cleanup=True)
+
+            messagebox.showinfo("Informacion", "Grafico generado y guardado correctamente")
+
+    except graphviz.ExecutableNotFound:
+        print("Graphviz executable not found. Please install Graphviz (https://graphviz.gitlab.io/download/) and ensure it's in your system's PATH.")
+
+    except graphviz.Source.InvalidDot as e:
+        print(f"Invalid DOT string:\n{e}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def graficar_arbol():
+
+    '''
+    Se encarga de llamar al metodo 'GraficarArbol' y así generar el arbol AST
+    '''
+
+    #TODO: falta validar que la entrada este correcta para poder graficar el arbol
+    if len(TABS_ACTUALES) <= 0:
+        messagebox.showinfo("Informacion", "Debe ejecutar un query para poder graficar el arbol")
+        return
+
+    indice_actual = notebook_central.index(notebook_central.select())
+    texto = obtener_contenido_tab(indice_actual)
+
+    salida = parse(texto)
+    if salida is not None:
+        if isinstance(salida, str):
+            mostrar_salida_como_texto(salida)
+        else:
+            body_string=""
+
+            for instr in salida:
+                body_string+= instr.GraficarArbol(None)
+
+            header_string = "digraph G {\n"
+            footer_string = "}"
+            dot_string = header_string + body_string + footer_string
+            generate_graph(dot_string)
 
 # Creacion de ventana principal
 root = tk.Tk()
@@ -695,8 +762,15 @@ tool_menu.add_cascade(label="SQL", menu=submenu_sql)
 tool_menu.add_command(label="Exportar", command=exportar)
 tool_menu.add_command(label="Importar")
 
+
+tool_reporte = tk.Menu(menubar)
+tool_reporte.add_command(label="Reporte arbol AST", command=graficar_arbol)
+
+
 menubar.add_cascade(menu=file_menu, label="Archivo")
 menubar.add_cascade(menu=tool_menu, label="Herramientas")
+menubar.add_cascade(menu=tool_reporte, label="Reportes")
+
 
 root.config(menu=menubar)
 
