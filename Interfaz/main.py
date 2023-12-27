@@ -91,7 +91,7 @@ def ejecutar_query():
 
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
-    ts_global = TablaDeSimbolos()
+    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
     base_datos = BaseDatosWrapper(BD_SELECCIONADA)
     salida = parse(texto)
 
@@ -648,7 +648,7 @@ def generate_graph(dot_string):
     '''
 
     try:
-        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG (*.png)", "*.png"), ("SVG (*.svg)", "*.svg"), ("Todos los archivos", "*.*")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".svg", filetypes=[("SVG (*.svg)", "*.svg"), ("PNG (*.png)", "*.png"), ("Todos los archivos", "*.*")])
         if file_path:
 
             # Create a Graph object from the DOT string
@@ -703,6 +703,87 @@ def graficar_arbol():
             dot_string = header_string + body_string + footer_string
             generate_graph(dot_string)
 
+def graficar_tabla_simbolos():
+
+    if len(TABS_ACTUALES) <= 0:
+        return
+
+    global BD_SELECCIONADA
+
+    indice_actual = notebook_central.index(notebook_central.select())
+    texto = obtener_contenido_tab(indice_actual)
+    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
+    base_datos = BaseDatosWrapper(BD_SELECCIONADA)
+    salida = parse(texto)
+
+    # Se revisa que se haya obtenido una salida
+    if salida is not None:
+
+        # Se setea la salida para los errores lexicos y sintacticos
+        if isinstance(salida, str):
+            mostrar_salida_como_texto(salida)
+        else:
+            # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
+            for elemento in salida:
+                respuesta = elemento.Ejecutar(base_datos, ts_global)
+                if isinstance(respuesta, RetornoError):
+                    mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
+                elif isinstance(respuesta, RetornoMultiplesInstrucciones):
+                    for mensaje in respuesta.arreglo_mensajes:
+                        mostrar_salida_como_texto(mensaje)
+
+        dot_string = ""
+        dot_string += "digraph G { rankdir=TB node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global, [0]) + " \n}"
+        generate_graph(dot_string)
+
+def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
+
+    cuerpo = f"tabla{indice[0]}[label=<<table border='1' cellspacing='0'>"
+
+    cuerpo += f'''
+    <tr>
+        <td BGCOLOR="#1c3166" colspan="5"><font color="white">Creado En Instrucción: {tabla_simbolo.realizado_en}</font></td>
+    </tr>
+    '''
+
+    # Se define el encabezado
+    cuerpo += '''
+    <tr>
+        <td BGCOLOR='#00a9d4'>Identificador</td>
+        <td BGCOLOR='#00a9d4'>Valor</td>
+        <td BGCOLOR='#00a9d4'>Tipo de Dato</td>
+        <td BGCOLOR='#00a9d4'>Dimensión</td>
+        <td BGCOLOR='#00a9d4'>Ámbito</td>
+    </tr>
+    '''
+
+    # Se agregan los simbolos
+    for clave, atributos in tabla_simbolo.simbolos.items():
+        cuerpo += f'''
+        <tr>
+            <td>&nbsp;&nbsp;{str(clave)}&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;{str(atributos.valor)}&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;{str(atributos.tipo_dato.name)}&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;{str(atributos.dimension)}&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;{str(atributos.tipo_ambito.name if atributos.tipo_ambito is not None else atributos.tipo_ambito)}&nbsp;&nbsp;</td>
+        </tr>
+        '''
+
+    cuerpo += "</table>>] \n"
+
+    # Se crea una nueva tabla de simbolos y se enlaza
+    enlace = ""
+    if len(tabla_simbolo.hijo) > 0:
+
+        indice_padre = indice[0]
+        for tabla in tabla_simbolo.hijo:
+            indice[0] += 1
+            indice_hijo = indice[0]
+            cuerpo += construir_tabla_simbolo(tabla, indice)
+            enlace += f"tabla{indice_padre} -> tabla{indice_hijo} \n"
+
+    return cuerpo + enlace
+
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
@@ -754,17 +835,20 @@ submenu_bd.add_separator()
 submenu_bd.add_command(label="Actualizar", command=mostrar_componentes_del_lenguaje)
 tool_menu.add_cascade(label="Base de datos", menu=submenu_bd)
 
+# Submenu 'SQL'
 submenu_sql = tk.Menu(tool_menu)
 submenu_sql.add_command(label="Nuevo query", command=crear_tab_nuevo)
 submenu_sql.add_command(label="Ejecutar query (F6)", command=ejecutar_query)
 tool_menu.add_cascade(label="SQL", menu=submenu_sql)
 
+# Otras opciones
 tool_menu.add_command(label="Exportar", command=exportar)
 tool_menu.add_command(label="Importar")
 
-
+# Menu de reportes
 tool_reporte = tk.Menu(menubar)
-tool_reporte.add_command(label="Reporte arbol AST", command=graficar_arbol)
+tool_reporte.add_command(label="AST", command=graficar_arbol)
+tool_reporte.add_command(label="Tabla de Simbolos", command=graficar_tabla_simbolos)
 
 
 menubar.add_cascade(menu=file_menu, label="Archivo")

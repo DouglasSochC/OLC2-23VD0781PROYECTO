@@ -382,7 +382,7 @@ class Funcion_Nativa(Expresion):
         query = validar_parametros.valor
 
         # Se genera un nuevo entorno para la funcion
-        entorno_nuevo = TablaDeSimbolos(entorno)
+        nuevo_entorno = TablaDeSimbolos(entorno, [], "FUNCION")
 
         # Se realiza el parseo del query que tiene el funcion
         from Parser.parser import parse
@@ -395,10 +395,12 @@ class Funcion_Nativa(Expresion):
                 return RetornoError(instrucciones)
             else:
                 for instr in instrucciones:
-                    res = instr.Ejecutar(base_datos, entorno_nuevo)
+                    res = instr.Ejecutar(base_datos, nuevo_entorno)
                     if isinstance(res, RetornoError):
                         return RetornoError(res.msg)
                     elif isinstance(res, RetornoLiteral):
+                        entorno.agregar_hijo(nuevo_entorno)
                         return {'valor': res.valor, 'tipado': res.tipado}
 
+                entorno.agregar_hijo(nuevo_entorno)
                 return RetornoError("La funcion '{}' no retorna ningun valor.".format(nombre_funcion))

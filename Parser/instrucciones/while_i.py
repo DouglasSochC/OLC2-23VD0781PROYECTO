@@ -48,9 +48,10 @@ class While_I(Instruccion):
                 return res_expresion
             elif isinstance(res_expresion, RetornoLiteral):
 
+                nuevo_entorno = TablaDeSimbolos(entorno, [], "WHILE")
+
                 while res_expresion.valor == 1:
 
-                    nuevo_entorno = TablaDeSimbolos(entorno)
                     for instruccion in self.lista_instrucciones:
                         res_instruccion_ejecutar = instruccion.Ejecutar(base_datos, nuevo_entorno)
                         if isinstance(res_instruccion_ejecutar, RetornoError):
@@ -63,11 +64,15 @@ class While_I(Instruccion):
                             arreglo_arreglos.append(res_instruccion_ejecutar)
                         elif isinstance(res_instruccion_ejecutar, RetornoLiteral):
                             return res_instruccion_ejecutar
+                        elif isinstance(res_instruccion_ejecutar, RetornoMultiplesInstrucciones):
+                            arreglo_mensajes += res_instruccion_ejecutar.arreglo_mensajes
+                            arreglo_arreglos += res_instruccion_ejecutar.arreglo_arreglos
                         else:
                             return RetornoError("Ha ocurrido un error al evaluar la instrucción While")
 
                     res_expresion = self.expresion.Ejecutar(base_datos, entorno)
 
+                entorno.hijo.append(nuevo_entorno)
                 return RetornoMultiplesInstrucciones(arreglo_mensajes, arreglo_arreglos)
             else:
                 return RetornoError("Ha ocurrido un error al evaluar la condición del While")
