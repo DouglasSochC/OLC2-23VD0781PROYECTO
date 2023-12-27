@@ -15,7 +15,7 @@ El menú principal se presenta en forma de árbol, mostrando cada base de datos 
 
 *(Captura del menú desplegado, mostrando las bases de datos y sus componentes.)*
 
-![panel-inicial.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/panel-inicial.png)
+![panel-inicial.png](imagenes/panel-inicial.png)
 
 ### **Opciones de Archivo**
 
@@ -25,17 +25,17 @@ El menú "Archivo" ofrece diversas opciones para el manejo de archivos y sesione
 
 *(Capturas de las opciones: Nuevo, Abrir, Guardar, Guardar como, Cerrar, Salir en el menú de Archivo.)*
 
-![menu-archivo.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/menu-archivo.png)
+![menu-archivo.png](imagenes/menu-archivo.png)
 
-![opcion-nuevo.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/opcion-nuevo.png)
+![opcion-nuevo.png](imagenes/opcion-nuevo.png)
 
-![opcion-guardarcomo.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/opcion-guardarcomo.png)
+![opcion-guardarcomo.png](imagenes/opcion-guardarcomo.png)
 
 ### **Herramientas**
 
 El menú "Herramientas" proporciona funcionalidades clave para la administración de bases de datos.
 
-![menu-herramientas.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/menu-herramientas.png)
+![menu-herramientas.png](imagenes/menu-herramientas.png)
 
 ### Base de Datos
 
@@ -45,7 +45,7 @@ Este submenú permite la gestión de bases de datos: creación, eliminación, cr
 
 *(Capturas de las opciones: Crear una nueva base de datos, Eliminar base de datos, Crear DUMP, Seleccionar Base de datos, Exportar, Importar.)*
 
-![submanu-basedatos.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/submanu-basedatos.png)
+![submanu-basedatos.png](imagenes/submanu-basedatos.png)
 
 ### Manejo de base de datos por medio de query
 
@@ -55,9 +55,9 @@ Este submenu nos permite la administración de bases de datos por medio de query
 
 *(Capturas de las opciones: SQL, Nuevo Query, Ejecutar Query.)*
 
-![submenu-sql.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/submenu-sql.png)
+![submenu-sql.png](imagenes/submenu-sql.png)
 
-![ejecutar.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/ejecutar.png)
+![ejecutar.png](imagenes/ejecutar.png)
 
 ### Editor de Texto
 
@@ -67,7 +67,7 @@ El editor de texto está diseñado para ingresar código XSQL, con resaltado de 
 
 *(Captura del editor de texto con código XSQL y funcionalidades destacadas como resaltado de sintaxis y opción para guardar querys.)*
 
-![editor.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/editor.png)
+![editor.png](imagenes/editor.png)
 
 ### Salida de Datos
 
@@ -77,4 +77,4 @@ El área de salida muestra los datos recuperados en forma de tabla, o el encabez
 
 *(Captura del área de salida, mostrando datos recuperados o encabezados de tabla, y ejemplo de cómo se informan los errores con precisión.)*
 
-![salida.png](Manual%20de%20Usuario%20OLC2%209068a8ca06604bc2b739f49c7e32eaf0/salida.png)
+![salida.png](imagenes/salida.png)
