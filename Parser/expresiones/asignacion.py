@@ -81,7 +81,8 @@ class Asignacion(Expresion):
                             continue
 
                         valor_tupla = tupla[llave_identificador]
-                        if valor_tupla['tipado'] != res_expresion_ejecutar.tipado:
+                        valor_tupla['tipado'] = self.expresion.DominanteAsignacion(valor_tupla['tipado'], res_expresion_ejecutar.tipado)
+                        if valor_tupla['tipado'] == TIPO_DATO.NULL:
                             return RetornoError("No se puede realizar la operacion relacional '{} = {}' debido a que no poseen el mismo tipo de dato.".format(res_identificador_ejecutar['identificador'], ('"{}"'.format(res_expresion_ejecutar.valor) if res_expresion_ejecutar.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else res_expresion_ejecutar.valor)))
 
                         if tupla[llave_identificador]['valor'] == res_expresion_ejecutar.valor:

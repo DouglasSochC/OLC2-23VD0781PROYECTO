@@ -31,6 +31,7 @@ from .instrucciones.alter import Alter
 from .instrucciones.declare import Declare
 from .instrucciones.set import Set
 from .instrucciones.if_i import If_I
+from .instrucciones.return_i import Return_I
 from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
 
 contador = 0
@@ -77,7 +78,10 @@ def p_instruccion(p):
     global contador
     id_nodo = str(abs(hash("InstruccionRaiz")) + contador)
     contador += 1
-    p[0] = InstruccionGeneral(id_nodo, p[1])
+    if len(p) == 2:
+        p[0] = InstruccionGeneral(id_nodo, p[1])
+    elif len(p) == 4:
+        p[0] = Return_I(id_nodo, p[2])
 
 def p_comando_sql(p):
     '''
@@ -492,11 +496,13 @@ def p_funcion_nativa(p):
                        | CONTAR IZQPAREN POR DERPAREN
                        | SUMA IZQPAREN expresion DERPAREN
                        | CAST IZQPAREN expresion AS tipo_dato DERPAREN
+                       | identificador IZQPAREN lista_expresiones DERPAREN
+                       | identificador IZQPAREN DERPAREN
     '''
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
-    p[1] = p[1].lower()
+    p[1] = p[1].lower() if isinstance(p[1], str) else p[1]
     if p[1] == 'concatena':
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
     elif p[1] == 'substraer':
@@ -509,6 +515,11 @@ def p_funcion_nativa(p):
         p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
     elif p[1] == 'cast':
         p[0] = Funcion_Nativa(id_nodo, p[1], p[3], p[5])
+    else:
+        if len(p) == 5:
+            p[0] = Funcion_Nativa(id_nodo, p[1], p[3], None)
+        elif len(p) == 4:
+            p[0] = Funcion_Nativa(id_nodo, p[1], None, None)
 
 def p_aritmeticos(p):
     '''
