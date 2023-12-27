@@ -635,7 +635,10 @@ def p_identificador(p):
         p[0] = Identificador(id_nodo, p[3], p[1])
 
 def p_error(p):
-    errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
+    if p is None:
+        errores.append("No hay codigo por analizar.")
+    else:
+        errores.append("Sintaxis incorrecta cerca '{}', en linea {}.".format(p.value, p.lineno))
 
 def parse(input):
 
