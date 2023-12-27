@@ -452,7 +452,7 @@ identificador : ID
 
 ## Diagrama de clases
 
-![DiagramaClasesXSQL.jpg](Manual%20Te%CC%81cnico%20OLC2%2055240a3e3789405f91a65ec25bbb88b6/DiagramaClasesXSQL.jpg)
+![DiagramaClasesXSQL.jpg](imagenes/DiagramaClasesXSQL.jpg)
 
 ## Archivos de entrada
 
