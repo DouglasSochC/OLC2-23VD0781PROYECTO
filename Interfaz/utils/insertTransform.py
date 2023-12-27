@@ -21,8 +21,15 @@ def xml_to_insert_statements(xml_file):
             campo_name = campo_element.tag
             campo_value = campo_element.text
 
+            # Obtener el tipo de dato del campo
+            campo_type = root.find(f".//estructura/campo[@name='{campo_name}']").attrib['type']
+
+            # Determinar si agregar comillas o no
+            if campo_type.lower() in ['nvarchar','date', 'datetime' ,'nchar', 'varchar', 'char', 'text']:
+                campo_value = f"'{campo_value}'"
+
             columns_list.append(campo_name)
-            values_list.append(f"'{campo_value}'")
+            values_list.append(campo_value)
 
         columns_str = ', '.join(columns_list)
         values_str = ', '.join(values_list)
