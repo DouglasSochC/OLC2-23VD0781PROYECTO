@@ -1,7 +1,7 @@
 from ..abstract.instrucciones import Instruccion
 from ..expresiones.expresion import Expresion
 from ..expresiones.identificador import Identificador
-from ..abstract.retorno import RetornoError, RetornoLiteral, RetornoCorrecto
+from ..abstract.retorno import RetornoError, RetornoLiteral, RetornoCorrecto, RetornoMultiplesInstrucciones
 from ..tablas.tabla_simbolo import TablaDeSimbolos
 from Funcionalidad.ssl import SSL
 
@@ -59,15 +59,27 @@ class Exec(Instruccion):
             if isinstance(instrucciones, str):
                 return RetornoError("No se pudo ejecutar el procedimiento '{}' debido al siguiente error: {}.".format(nombre_procedimiento, instrucciones))
             else:
+
+                # Variables para el retorno del If
+                arreglo_mensajes = []
+                arreglo_arreglos = []
+
                 for instr in instrucciones:
                     res = instr.Ejecutar(base_datos, entorno_nuevo)
                     if isinstance(res, RetornoError):
-                        return RetornoError("No se pudo ejecutar por completo el procedimiento '{}' debido al siguiente error - {}.".format(nombre_procedimiento, res.msg))
-                    elif isinstance(res, RetornoCorrecto):
-                        if res.msg is not None:
-                            print(res.msg)
+                        arreglo_mensajes.append("ERROR: {}".format(res.msg))
+                    elif isinstance(res, RetornoCorrecto) and res.msg is not None:
+                        arreglo_mensajes.append(res.msg)
+                    elif isinstance(res, RetornoCorrecto) and res.msg is None:
+                        pass
+                    elif isinstance(res, dict):
+                        arreglo_arreglos.append(res)
+                    elif isinstance(res, RetornoLiteral):
+                        return res
                     else:
-                        print(res)
+                            return RetornoError("Ha ocurrido un error al evaluar la instrucción EXEC")
+
+                return RetornoMultiplesInstrucciones(arreglo_mensajes, arreglo_arreglos)
 
         return RetornoCorrecto("El procedimiento '{}' se ha ejecutado correctamente.".format(nombre_procedimiento))
 

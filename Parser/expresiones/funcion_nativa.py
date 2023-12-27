@@ -311,8 +311,11 @@ class Funcion_Nativa(Expresion):
 
             lista_parametros = []
             es_un_literal = False
+            # Esto significa que no trae ningun parametro
+            if respuesta is None:
+                lista_parametros.append([])
             # Esto significa que es un literal
-            if 'auxiliar' not in respuesta[0]:
+            elif 'auxiliar' not in respuesta[0]:
                 es_un_literal = True
                 lista_parametros.append(respuesta)
             # Significa que es un arreglo

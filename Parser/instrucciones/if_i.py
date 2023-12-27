@@ -11,7 +11,6 @@ class If_I(Instruccion):
         self.instrucciones_then = instrucciones_then
         self.instrucciones_else = instrucciones_else
 
-    # TODO: Se debe verificar que si se esta ejecutando unicamente para analizar la semantica o para ejecutar su funcionalidad
     def Ejecutar(self, base_datos, entorno):
 
         # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
@@ -19,7 +18,39 @@ class If_I(Instruccion):
         construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
         if construccion is not None:
 
-            RetornoCodigo("If")
+            # Variables
+            expresion = ""
+            sentencia_then = ""
+            sentencia_else = ""
+
+            res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
+            if isinstance(res_expresion_ejecutar, RetornoCodigo):
+                expresion = res_expresion_ejecutar.codigo
+            else:
+                return RetornoError("Se produjo un error al intentar definir la 'EXPRESION' de la instrucción 'IF' dentro de la creación del PROCEDURE o FUNCTION.")
+
+            for then_ in self.instrucciones_then:
+
+                res_then_ejecutar = then_.Ejecutar(base_datos, entorno)
+                if isinstance(res_then_ejecutar, RetornoCodigo):
+                    sentencia_then += res_then_ejecutar.codigo
+                else:
+                    return RetornoError("Se produjo un error al intentar definir la sentencia 'THEN' de la instrucción 'IF' dentro de la creación del PROCEDURE o FUNCTION.")
+
+            if self.instrucciones_else is not None:
+
+                for else_ in self.instrucciones_else:
+
+                        res_else_ejecutar = else_.Ejecutar(base_datos, entorno)
+                        if isinstance(res_else_ejecutar, RetornoCodigo):
+                            sentencia_else += res_else_ejecutar.codigo
+                        else:
+                            return RetornoError("Se produjo un error al intentar definir la sentencia 'ELSE' de la instrucción 'IF' dentro de la creación del PROCEDURE o FUNCTION.")
+
+            if sentencia_else == "":
+                return RetornoCodigo("IF {} THEN\n{}END IF;\n".format(expresion, sentencia_then))
+            else:
+                return RetornoCodigo("IF {} THEN\n{}ELSE\n{}END IF;\n".format(expresion, sentencia_then, sentencia_else))
 
         else:
 
