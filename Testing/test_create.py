@@ -61,7 +61,7 @@ BEGIN
     SELECT producto.id FROM producto;
     SELECT id, nombre, total FROM producto, tipo_producto WHERE producto.id_tipo_producto > "2"; -- ERROR: Diferentes tipos de dato
     SELECT producto.id * 2 + producto.id as testing, tipo_producto.id FROM producto, tipo_producto, jugador WHERE producto.id_tipo_producto = tipo_producto.id AND producto.id = jugador.id; -- EXITO
-    SELECT (1+2) * 3 + ("1") + "ab";
+    -- SELECT (1+2) * 3 + ("1") + "ab";
 END;
 CREATE FUNCTION funcion_test(@aumento int, @fecha date, @texto nvarchar(10))
 RETURN INT

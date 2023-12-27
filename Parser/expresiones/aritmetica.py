@@ -97,7 +97,7 @@ class Aritmetica(Expresion):
                         dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho['tipado'])
 
                     if dominante == TIPO_DATO.NULL:
-                        return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
+                        return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
 
                    # Valores de la llave auxiliar
                     auxiliar_valor = 0
@@ -150,7 +150,7 @@ class Aritmetica(Expresion):
                         elif self.operador == '-':
                             dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho['tipado'])
                         if dominante == TIPO_DATO.NULL:
-                            return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
+                            return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho['valor']))
 
                         # Valores de la llave auxiliar
                         auxiliar_valor = 0
@@ -219,7 +219,7 @@ class Aritmetica(Expresion):
                     elif self.operador == '-':
                         dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho.tipado)
                     if dominante == TIPO_DATO.NULL:
-                        return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
+                        return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
                     # Valores de la llave auxiliar
                     auxiliar_valor = 0
@@ -263,7 +263,7 @@ class Aritmetica(Expresion):
                         elif self.operador == '-':
                             dominante = self.DominanteResta(valor_izquierdo['tipado'], valor_derecho.tipado)
                         if dominante == TIPO_DATO.NULL:
-                            return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
+                            return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
                         # Valores de la llave auxiliar
                         auxiliar_valor = 0
@@ -332,7 +332,7 @@ class Aritmetica(Expresion):
                     elif self.operador == '-':
                         dominante = self.DominanteResta(valor_izquierdo.tipado, valor_derecho['tipado'])
                     if dominante == TIPO_DATO.NULL:
-                        return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
+                        return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
 
                     # Valores de la llave auxiliar
                     auxiliar_valor = 0
@@ -377,7 +377,7 @@ class Aritmetica(Expresion):
                         elif self.operador == '-':
                             dominante = self.DominanteResta(valor_izquierdo.tipado, valor_derecho['tipado'])
                         if dominante == TIPO_DATO.NULL:
-                            return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
+                            return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(valor_izquierdo.valor, self.operador, valor_derecho['valor']))
 
                         # Valores de la llave auxiliar
                         auxiliar_valor = 0
@@ -408,7 +408,7 @@ class Aritmetica(Expresion):
                 dominante = self.DominanteResta(exp_izq.tipado, exp_der.tipado)
 
             if dominante == TIPO_DATO.NULL:
-                    return RetornoError("ERROR: No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(representacion_izquierda, self.operador, representacion_derecha))
+                    return RetornoError("No se puede realizar la operacion '{} {} {}' debido a que no son tipos de datos similares".format(representacion_izquierda, self.operador, representacion_derecha))
 
             return RetornoLiteral(eval(f"exp_izq.valor {self.operador} exp_der.valor"), dominante, None)
 
