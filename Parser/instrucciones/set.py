@@ -32,7 +32,7 @@ class Set(Instruccion):
             if isinstance(expresion, RetornoCodigo):
                 return RetornoCodigo("SET {} = {};\n".format(nombre_variable, expresion.codigo))
             else:
-                return RetornoError("Ha ocurrido un error al SETEAR un literal a la variable '{}'.".format(nombre_variable))
+                return RetornoError("Se produjo un error al intentar definir la instrucción 'SET' dentro de la creación del PROCEDURE o FUNCTION.".format(nombre_variable))
 
         else:
 
