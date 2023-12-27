@@ -43,15 +43,15 @@ class Set(Instruccion):
 
             if isinstance(expresion, RetornoLiteral):
 
-                simbolo_variable.tipo_dato = self.expresion.DominanteAsignacion(simbolo_variable.tipo_dato, expresion.tipado)
-                if(simbolo_variable.tipo_dato == TIPO_DATO.NULL):
+                dominante = self.expresion.DominanteAsignacion(simbolo_variable.tipo_dato, expresion.tipado)
+                if(dominante == TIPO_DATO.NULL):
                     return RetornoError("No se puede realizar la operacion 'SET {} = {}' debido a que no son tipos de datos similares".format(nombre_variable, expresion.valor))
-                elif simbolo_variable.tipo_dato in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) and (simbolo_variable.dimension < len(expresion.valor)):
+                elif dominante in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) and (simbolo_variable.dimension < len(expresion.valor)):
                     return RetornoError("No se puede realizar la operacion 'SET {} = {}' debido a que la cantidad de caracteres exceden lo que soporta la variable".format(nombre_variable, expresion.valor, nombre_variable))
 
                 # Se almacena la variable en la tabla de simbolos
-                simbolo_variable = Simbolo(nombre_variable, expresion.valor, simbolo_variable.tipo_dato, simbolo_variable.dimension, TIPO_ENTORNO.SENTENCIA_SSL)
-                entorno.agregar(simbolo_variable)
+                simbolo_variable = Simbolo(nombre_variable, expresion.valor, dominante, simbolo_variable.dimension, TIPO_ENTORNO.SENTENCIA_SSL)
+                entorno.actualizar(simbolo_variable)
 
             else:
 

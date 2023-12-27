@@ -33,10 +33,15 @@ class TablaDeSimbolos():
 
         return self.simbolos[id]
 
-    def actualizar(self, simbolo):
+    def actualizar(self, simbolo: Simbolo):
 
+        # Se busca el simbolo en el entorno actual
         if not simbolo.id in self.simbolos:
-            return False
-        else:
-            self.simbolos[simbolo.id] = simbolo
-            return True
+
+            # Caso contrario que no se encuentre se busca en un nivel superior
+            if self.padre is not None:
+                return self.padre.actualizar(simbolo)
+
+            return None
+
+        self.simbolos[simbolo.id] = simbolo
