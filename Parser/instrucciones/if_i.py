@@ -57,6 +57,7 @@ class If_I(Instruccion):
             # Variables para el retorno del If
             arreglo_mensajes = []
             arreglo_arreglos = []
+            nuevo_entorno = None
 
             # Se obtiene la expresion
             res_expresion = self.expresion.Ejecutar(base_datos, entorno)
@@ -66,7 +67,7 @@ class If_I(Instruccion):
 
                 # Se realiza las instrucciones THEN del IF
                 if res_expresion.valor == 1:
-                    nuevo_entorno = TablaDeSimbolos(entorno)
+                    nuevo_entorno = TablaDeSimbolos(entorno, [], "IF-THEN")
                     for instruccion in self.instrucciones_then:
                         res_instruccion_ejecutar = instruccion.Ejecutar(base_datos, nuevo_entorno)
                         if isinstance(res_instruccion_ejecutar, RetornoError):
@@ -79,6 +80,9 @@ class If_I(Instruccion):
                             arreglo_arreglos.append(res_instruccion_ejecutar)
                         elif isinstance(res_instruccion_ejecutar, RetornoLiteral):
                             return res_instruccion_ejecutar
+                        elif isinstance(res_instruccion_ejecutar, RetornoMultiplesInstrucciones):
+                            arreglo_mensajes += res_instruccion_ejecutar.arreglo_mensajes
+                            arreglo_arreglos += res_instruccion_ejecutar.arreglo_arreglos
                         else:
                             return RetornoError("Ha ocurrido un error al evaluar la instrucción If-Then")
 
@@ -88,7 +92,8 @@ class If_I(Instruccion):
                     if self.instrucciones_else is None:
                         return None
 
-                    nuevo_entorno = TablaDeSimbolos(entorno)
+                    nuevo_entorno = TablaDeSimbolos(entorno, [], "IF-ELSE")
+                    nuevo_entorno.realizado_en = "IF-ELSE"
                     for instruccion in self.instrucciones_else:
                         res_instruccion_ejecutar = instruccion.Ejecutar(base_datos, nuevo_entorno)
                         if isinstance(res_instruccion_ejecutar, RetornoError):
@@ -101,9 +106,14 @@ class If_I(Instruccion):
                             arreglo_arreglos.append(res_instruccion_ejecutar)
                         elif isinstance(res_instruccion_ejecutar, RetornoLiteral):
                             return res_instruccion_ejecutar
+                        elif isinstance(res_instruccion_ejecutar, RetornoMultiplesInstrucciones):
+                            arreglo_mensajes += res_instruccion_ejecutar.arreglo_mensajes
+                            arreglo_arreglos += res_instruccion_ejecutar.arreglo_arreglos
                         else:
                             return RetornoError("Ha ocurrido un error al evaluar la instrucción If-Else")
 
+                if nuevo_entorno is not None:
+                    entorno.agregar_hijo(nuevo_entorno)
                 return RetornoMultiplesInstrucciones(arreglo_mensajes, arreglo_arreglos)
             else:
                 return RetornoError("Ha ocurrido un error al evaluar la instrucción If")

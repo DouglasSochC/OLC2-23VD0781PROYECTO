@@ -13,9 +13,14 @@ class Simbolo():
 class TablaDeSimbolos():
     'Esta clase representa la tabla de simbolos'
 
-    def __init__(self, padre: 'TablaDeSimbolos' = None):
+    def __init__(self, padre: 'TablaDeSimbolos' = None, hijo: list['TablaDeSimbolos'] = [], realizado_en: str = ""):
         self.simbolos = {}
         self.padre = padre
+        self.hijo = hijo
+        self.realizado_en = realizado_en
+
+    def agregar_hijo(self, hijo: 'TablaDeSimbolos'):
+        self.hijo.append(hijo)
 
     def agregar(self, simbolo: Simbolo):
         self.simbolos[simbolo.id] = simbolo
