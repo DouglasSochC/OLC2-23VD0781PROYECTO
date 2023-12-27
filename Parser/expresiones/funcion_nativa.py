@@ -197,9 +197,15 @@ class Funcion_Nativa(Expresion):
 
         elif(self.accion == "hoy"):
 
-            fecha_hora_actual = datetime.datetime.now()
-            fecha_hora_formateada = fecha_hora_actual.strftime("%d-%m-%Y %H:%M:%S")
-            return RetornoLiteral(fecha_hora_formateada, TIPO_DATO.DATETIME)
+            # Se verifica que no se este construyendo un procedimiento o una funcion para realizar su funcionalidad
+            construccion = entorno.obtener("construir_procedimiento")
+            construccion = construccion if construccion is not None else entorno.obtener("construir_funcion")
+            if construccion is not None:
+                return RetornoCodigo("HOY()")
+            else:
+                fecha_hora_actual = datetime.datetime.now()
+                fecha_hora_formateada = fecha_hora_actual.strftime("%d-%m-%Y %H:%M:%S")
+                return RetornoLiteral(fecha_hora_formateada, TIPO_DATO.DATETIME)
 
         # Esto indica que es una funcion creada por el usuario
         else:
