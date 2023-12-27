@@ -39,7 +39,7 @@ class Relacional(Expresion):
             arreglo_izquierdo = None
             llave_izquierda = None
 
-            # Se basa en los arreglos exp_izq y exp_der para realizar la operacion aritmetica estos arreglos deben tener una misma dimension y deben de ser la misma tabla
+            # Se basa en los arreglos exp_izq y exp_der para realizar la operacion relacional estos arreglos deben tener una misma dimension y deben de ser la misma tabla
             simbolo = entorno.obtener("condicion")
             if simbolo is None:
                 # Se setean los valores que seran utilizados para realizar el calculo
@@ -82,7 +82,7 @@ class Relacional(Expresion):
                 try:
                     auxiliar = eval(f"valor_izquierdo['valor'] {self.operador} valor_derecho.valor")
                 except Exception as e:
-                    return RetornoError("No se puede realizar la operacion aritmetica '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
+                    return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a los valores de los operandos.".format(valor_izquierdo['valor'], self.operador, valor_derecho.valor))
 
                 if auxiliar:
                     tupla_homologacion = {}
@@ -97,12 +97,16 @@ class Relacional(Expresion):
 
         elif isinstance(exp_izq, RetornoLiteral) and isinstance(exp_der, RetornoLiteral):
 
-            if exp_izq.tipado != exp_der.tipado:
+            dominante = self.DominanteSuma(exp_izq.tipado, exp_der.tipado)
+            if dominante == TIPO_DATO.NULL:
                 return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a que no poseen el mismo tipo de dato.".format(exp_izq.valor, self.operador, ('"{}"'.format(exp_der.valor) if exp_der.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR) else exp_der.valor)))
 
-            resultado = eval(f"exp_izq.valor {self.operador} exp_der.valor")
-            resultado = 1 if resultado else 0
-            return RetornoLiteral(resultado, TIPO_DATO.BIT)
+            try:
+                resultado = eval(f"exp_izq.valor {self.operador} exp_der.valor")
+                resultado = 1 if resultado else 0
+                return RetornoLiteral(resultado, TIPO_DATO.BIT)
+            except Exception as e:
+                return RetornoError("No se puede realizar la operacion relacional '{} {} {}' debido a los valores de los operandos.".format(exp_izq.valor, self.operador, exp_der.valor))
 
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))

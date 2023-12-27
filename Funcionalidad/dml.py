@@ -258,7 +258,10 @@ class DML:
             contenido_xml = archivo.read()
 
         # Se formatea el XML a un diccionario para manejarlo de mejor forma
-        contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']['fila']
+        contenido = xmltodict.parse(contenido_xml)[nombre_tabla]['registros']
+        if contenido is None:
+            return Respuesta(True, None, [])
+        contenido = contenido['fila']
         estructura = xmltodict.parse(contenido_xml)[nombre_tabla]['estructura']['campo']
 
         if isinstance(contenido, dict):
