@@ -51,7 +51,7 @@ class Set(Instruccion):
 
                 # Se almacena la variable en la tabla de simbolos
                 simbolo_variable = Simbolo(nombre_variable, expresion.valor, simbolo_variable.tipo_dato, simbolo_variable.dimension, TIPO_ENTORNO.SENTENCIA_SSL)
-                entorno.agregar(simbolo_variable)
+                entorno.actualizar(simbolo_variable)
 
             else:
 
