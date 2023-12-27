@@ -9,8 +9,9 @@ from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebo
 import pygments.lexers
 from chlorophyll import CodeView
 
-# Para la exportacion de INSERTS
+# Para la exportacion de INSERTS y la creacion de tablas DUMP
 from .utils.insertTransform import xml_to_insert_statements
+from .utils.createTransform import create_table_sql
 
 # Para obtener las imagenes
 import os
@@ -584,6 +585,53 @@ def exportar():
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
 
+def crear_dump():
+    selected_item = treeview.selection()
+    if selected_item:
+        nombre_item = treeview.item(selected_item)["text"]
+    else:
+        messagebox.showinfo("Error", "Selecciona un item en el Treeview.")
+        return
+
+    carpeta_principal = f'data/{nombre_item}'
+    try:
+        # Buscar la carpeta que coincide
+        carpeta_coincidente = next((d for d in os.listdir('databases') if d == nombre_item), None)
+
+        if carpeta_coincidente:
+            # Construir la ruta completa de la carpeta principal
+            carpeta_principal = os.path.join('databases', carpeta_coincidente)
+
+            # Buscar archivos dentro de la carpeta "Tables"
+            carpeta_tables = os.path.join(carpeta_principal, 'Tablas')
+
+            if os.path.exists(carpeta_tables):
+                # Crear una carpeta con el nombre del item seleccionado para almacenar los archivos SQL
+                carpeta_sql = os.path.join(carpeta_principal, f'{nombre_item}_DUMP')
+                os.makedirs(carpeta_sql, exist_ok=True)
+
+                archivos_xml = [archivo for archivo in os.listdir(carpeta_tables) if archivo.endswith(".xml")]
+
+                for archivo_xml in archivos_xml:
+                    ruta_xml = os.path.join(carpeta_tables, archivo_xml)
+                    create_statements = create_table_sql(ruta_xml)
+                    print("create_statements", create_statements)
+
+                    # Escribir las sentencias INSERT en un archivo .sql
+                    ruta_sql = os.path.join(carpeta_sql, f'{os.path.splitext(archivo_xml)[0]}.sql')
+                    with open(ruta_sql, 'w') as sql_file:
+                        sql_file.write(create_statements)
+
+                    print(f"Archivo SQL creado: {ruta_sql}")
+
+                messagebox.showinfo("Éxito", f"Archivos SQL creados en {carpeta_sql}")
+            else:
+                messagebox.showwarning("Advertencia", "La carpeta 'Tables' no existe.")
+        else:
+            messagebox.showwarning("Advertencia", f"No se encontró la carpeta con el nombre {nombre_item}.")
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
 
 
@@ -633,7 +681,7 @@ tool_menu = tk.Menu(menubar)
 submenu_bd = tk.Menu(tool_menu)
 submenu_bd.add_command(label="Crear nuevo", command=crear_bd)
 submenu_bd.add_command(label="Eliminar", command=eliminar_bd)
-submenu_bd.add_command(label="Crear DUMP")
+submenu_bd.add_command(label="Crear DUMP", command=crear_dump)
 submenu_bd.add_command(label="Seleccionar", command=seleccionar_bd)
 submenu_bd.add_separator()
 submenu_bd.add_command(label="Actualizar", command=mostrar_componentes_del_lenguaje)
