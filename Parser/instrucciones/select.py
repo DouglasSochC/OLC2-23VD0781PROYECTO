@@ -29,7 +29,7 @@ class Select(Instruccion):
 
             # Cada vez que se construye un nuevo procedimiento hay que verificar que se haya seleccionado una base de datos
             if base_datos.valor == "":
-                return "Para ejecutar el comando 'SELECT', es necesario seleccionar una base de datos."
+                return RetornoError("Para ejecutar el comando 'SELECT', es necesario seleccionar una base de datos.")
 
             if self.lista_tablas is None and self.condicion is None:
 
@@ -100,7 +100,7 @@ class Select(Instruccion):
                             return RetornoError("Ha ocurrido un problema durante la ejecución del comando 'SELECT'")
 
             if base_datos.valor == "":
-                return "Para ejecutar el comando 'SELECT', es necesario seleccionar una base de datos."
+                return RetornoError("Para ejecutar el comando 'SELECT', es necesario seleccionar una base de datos.")
 
             dml = DML()
 
