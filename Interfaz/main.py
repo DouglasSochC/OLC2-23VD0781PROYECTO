@@ -639,6 +639,46 @@ def crear_dump():
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
+def importar():
+    selected_item = treeview.selection()
+    if selected_item:
+        nombre_item = treeview.item(selected_item)["text"]
+    else:
+        messagebox.showinfo("Error", "Selecciona un item en el Treeview.")
+        return
+
+    carpeta_principal = f'databases/{nombre_item}'
+    try:
+        carpeta_coincidente = next((d for d in os.listdir('databases') if d == nombre_item), None)
+        if carpeta_coincidente:
+            carpeta_principal = os.path.join('databases', carpeta_coincidente)
+            carpeta_hijo_coincidente = next((d for d in os.listdir(carpeta_principal) if d == f'{nombre_item}_SQL'), None)
+            if carpeta_hijo_coincidente:
+                carpeta_sql = os.path.join(carpeta_principal, f'{nombre_item}_SQL')
+                file_path = filedialog.askopenfilename(initialdir=carpeta_sql,filetypes=[("SQL (*.sql)", "*.sql"), ("Todos los archivos", "*.*")])
+                if file_path:
+                    ruta_archivo = file_path
+                    nombre_archivo = os.path.basename(ruta_archivo)
+                    with open(ruta_archivo, 'r') as archivo:
+                        se_creo_archivo = crear_tab_nuevo(nombre_archivo, ruta_archivo)
+                        if se_creo_archivo:
+                            contenido = archivo.read()
+                            indice_actual = notebook_central.index(notebook_central.select())
+                            setear_contenido_nuevo_tab(indice_actual, contenido)
+
+                            # Se agrega un escucha para verificar si ha modificado o no el archivo
+                            tab_actual = notebook_central.winfo_children()[indice_actual].winfo_children()[0]
+                            codeview = tab_actual.winfo_children()[0]
+                            codeview.bind("<KeyRelease>", lambda e: oyente_cambio_texto_tab(codeview, indice_actual, e))
+                
+                
+            else:
+                messagebox.showwarning("Advertencia", f"la bd aun no ha exportado datos:  {nombre_item}.")
+            
+        else:
+            messagebox.showwarning("Advertencia", f"no se encontro  de la bd:  {nombre_item}. en la carpeta databases")
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
 # OPCIONES PARA EL MENU DE REPORTES
 
 def generate_graph(dot_string):
@@ -843,7 +883,7 @@ tool_menu.add_cascade(label="SQL", menu=submenu_sql)
 
 # Otras opciones
 tool_menu.add_command(label="Exportar", command=exportar)
-tool_menu.add_command(label="Importar")
+tool_menu.add_command(label="Importar", command=importar)
 
 # Menu de reportes
 tool_reporte = tk.Menu(menubar)
