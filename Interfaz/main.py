@@ -14,6 +14,7 @@ from chlorophyll import CodeView
 # Para la exportacion de INSERTS y la creacion de tablas DUMP
 from .utils.insertTransform import xml_to_insert_statements
 from .utils.createTransform import create_table_sql
+from .utils.procedureTransform import generate_create_procedure
 
 # Para obtener las imagenes
 import os
@@ -632,9 +633,34 @@ def crear_dump():
 
                     print(f"Archivo SQL creado: {ruta_sql}")
 
-                messagebox.showinfo("Éxito", f"Archivos SQL creados en {carpeta_sql}")
+                messagebox.showinfo("Éxito", f"Archivos SQL tables creados en {carpeta_sql}")
             else:
                 messagebox.showwarning("Advertencia", "La carpeta 'Tables' no existe.")
+        
+            carpeta_proc = os.path.join(carpeta_principal, 'Procedimientos')
+            if os.path.exists(carpeta_proc):
+                # Crear una carpeta con el nombre del item seleccionado para almacenar los archivos SQL
+                carpeta_sql = os.path.join(carpeta_principal, f'{nombre_item}_DUMP')
+                os.makedirs(carpeta_sql, exist_ok=True)
+
+                archivos_xml = [archivo for archivo in os.listdir(carpeta_proc) if archivo.endswith(".xml")]
+
+                for archivo_xml in archivos_xml:
+                    ruta_xml = os.path.join(carpeta_proc, archivo_xml)
+                    create_statements = generate_create_procedure(ruta_xml)
+                   
+                    # Escribir las sentencias INSERT en un archivo .sql
+                    ruta_sql = os.path.join(carpeta_sql, f'{os.path.splitext(archivo_xml)[0]}.sql')
+                    with open(ruta_sql, 'w') as sql_file:
+                        sql_file.write(create_statements)
+
+                    print(f"Archivo SQL creado: {ruta_sql}")
+
+                messagebox.showinfo("Éxito", f"Archivos SQL creados para Procedimiento en {carpeta_sql}")
+            else:
+                messagebox.showwarning("Advertencia", "La carpeta 'Procedimientos no esite' no existe.")
+
+        
         else:
             messagebox.showwarning("Advertencia", f"No se encontró la carpeta con el nombre {nombre_item}.")
 
