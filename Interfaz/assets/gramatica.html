@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Rules</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+        code {
+            white-space: pre-wrap;
+        }
+        h1{
+                
+                color:rgb(62, 54, 54)
+        }
+    </style>
+</head>
+<body>
+
+<h1>Grammar Rules</h1>
+
+<pre><code>
+    inicio : instrucciones
+
+    instrucciones : instrucciones instruccion
+                    | instruccion
+    
+    
+    instruccion : declare
+                | set
+                | if
+                | while
+                | comando_sql
+                | RETURN expresion PUNTOYCOMA
+    
+    
+    comando_sql : sentencia_ddl
+            | sentencia_dml
+            | exec
+            | use
+    
+    
+    set : SET identificador IGUAL expresion PUNTOYCOMA
+    
+    
+    use : USE LVARCHAR PUNTOYCOMA
+    
+    
+    declare : DECLARE identificador tipo_dato PUNTOYCOMA
+            | DECLARE identificador AS tipo_dato PUNTOYCOMA
+    
+    
+    tipo_dato : seg_num
+            | seg_date
+            | seg_string
+    
+    seg_num : INT
+            | DECIMAL
+            | BIT
+    
+    seg_date : DATE
+            | DATETIME
+    
+    seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
+                | NCHAR IZQPAREN LNUMERO DERPAREN
+    
+    
+    sentencia_ddl : create
+                | alter
+                | truncate
+                | drop
+    
+    
+    create : CREATE DATABASE identificador PUNTOYCOMA
+            | CREATE TABLE identificador IZQPAREN campos_table DERPAREN PUNTOYCOMA
+            | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN instrucciones END PUNTOYCOMA
+            | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN instrucciones END PUNTOYCOMA
+    
+    
+    campos_table : campos_table COMA identificador tipo_dato constraint
+                | campos_table COMA identificador tipo_dato
+                | identificador tipo_dato constraint
+                | identificador tipo_dato
+    
+    
+    parametros : parametros COMA identificador AS tipo_dato
+                | identificador AS tipo_dato
+                | parametros COMA identificador tipo_dato
+                | identificador tipo_dato
+    
+    
+    constraint : PRIMARY KEY
+                | NOT NULL
+                | REFERENCES identificador IZQPAREN identificador DERPAREN
+    
+    
+    alter : ALTER TABLE identificador accion PUNTOYCOMA
+    
+    accion : ADD COLUMN campos_table
+           | DROP COLUMN identificador
+    
+    
+    drop : DROP DATABASE identificador PUNTOYCOMA
+        | DROP TABLE identificador PUNTOYCOMA
+        | DROP PROCEDURE identificador PUNTOYCOMA
+        | DROP FUNCTION identificador PUNTOYCOMA
+    
+    
+    truncate : TRUNCATE TABLE identificador PUNTOYCOMA
+    
+    
+    exec : EXEC identificador lista_expresiones PUNTOYCOMA
+    
+    
+    sentencia_dml : select
+                | insert
+                | update
+                | delete
+    
+    
+    select : SELECT POR FROM identificador PUNTOYCOMA
+        | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador PUNTOYCOMA
+        | SELECT lista_expresiones FROM identificador PUNTOYCOMA
+        | SELECT POR FROM identificador WHERE condicion PUNTOYCOMA
+        | SELECT IZQPAREN lista_expresiones DERPAREN FROM identificador WHERE condicion PUNTOYCOMA
+        | SELECT lista_expresiones FROM identificador WHERE condicion PUNTOYCOMA
+        | SELECT lista_expresiones PUNTOYCOMA
+    
+    
+    insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
+    
+    
+    update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
+    
+    
+    delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
+            | DELETE FROM identificador PUNTOYCOMA
+    
+    
+    if : IF expresion THEN instrucciones ELSE instrucciones END IF PUNTOYCOMA
+        | IF expresion THEN instrucciones END IF PUNTOYCOMA
+        | IF expresion BEGIN instrucciones END ELSE BEGIN instrucciones END
+        | IF expresion BEGIN instrucciones END
+    
+    
+    while : WHILE expresion BEGIN instrucciones END
+    
+    
+    condicion : condicion AND expresion
+            | expresion
+    
+    
+    lista_expresiones : lista_expresiones COMA expresion
+                        | expresion
+    
+    
+    expresion : aritmeticos
+            | relacionales
+            | logicos
+            | literal
+            | funcion_nativa
+            | IZQPAREN expresion DERPAREN
+            | asignacion
+            | identificador
+            | alias
+            | IF IZQPAREN lista_expresiones DERPAREN
+    
+    
+    alias : expresion AS ID
+            | expresion ID
+    
+    
+    
+    asignacion : identificador IGUAL expresion
+    
+    
+    
+    funcion_nativa : CONCATENA IZQPAREN lista_expresiones DERPAREN
+                    | SUBSTRAER IZQPAREN lista_expresiones DERPAREN
+                    | HOY IZQPAREN DERPAREN
+                    | CONTAR IZQPAREN POR DERPAREN
+                    | SUMA IZQPAREN expresion DERPAREN
+                    | CAST IZQPAREN expresion AS tipo_dato DERPAREN
+    
+    
+    
+    aritmeticos : expresion MAS expresion
+                | expresion MENOS expresion
+                | expresion POR expresion
+                | expresion DIVIDIDO expresion
+    
+    
+    
+    relacionales : expresion IGUALIGUAL expresion
+                | expresion DIFERENTE expresion
+                | expresion MENOR expresion
+                | expresion MAYOR expresion
+                | expresion MENORIGUAL expresion
+                | expresion MAYORIGUAL expresion
+                | BETWEEN expresion AND expresion
+    
+    
+    logicos : expresion AND_OP expresion
+            | expresion OR_OP expresion
+            | NOT_OP expresion
+    
+    
+    literal : LNUMERO
+            | LDECIMAL
+            | LFECHA
+            | LFECHAHORA
+            | LVARCHAR
+    
+    
+    identificador : ID
+    | ID PUNTO ID
+    | ARROBA ID
+</code></pre>
+
+</body>
+</html>
