@@ -1,6 +1,8 @@
 # Para realizar el analisis
 from Parser.parser import parse
 import graphviz
+import webbrowser
+
 # Para la construccion de la interfaz
 import tkinter as tk
 from tkinter import PanedWindow, PhotoImage, filedialog, simpledialog, messagebox, ttk
@@ -824,6 +826,17 @@ def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
 
     return cuerpo + enlace
 
+def open_reporte_gramatica():
+    try:
+        script_dir = os.path.dirname(__file__) 
+        html_path = os.path.join(script_dir, "assets/gramatica.html")
+        if os.path.exists(html_path):
+            webbrowser.open(f"file://{html_path}")
+        else:
+            messagebox.showerror("File Not Found", f"The file {html_path} does not exist.")
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
+
 # Creacion de ventana principal
 root = tk.Tk()
 root.title("MiSQL")
@@ -889,6 +902,7 @@ tool_menu.add_command(label="Importar", command=importar)
 tool_reporte = tk.Menu(menubar)
 tool_reporte.add_command(label="AST", command=graficar_arbol)
 tool_reporte.add_command(label="Tabla de Simbolos", command=graficar_tabla_simbolos)
+tool_reporte.add_command(label="Reporte Gramatical", command=open_reporte_gramatica)
 
 
 menubar.add_cascade(menu=file_menu, label="Archivo")
