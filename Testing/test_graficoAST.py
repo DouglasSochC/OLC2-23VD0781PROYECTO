@@ -13,23 +13,19 @@ ts_global = TablaDeSimbolos()
 base_datos = BaseDatosWrapper()
 instrucciones = parse(
 '''
-CREATE DATABASE db1;
-use "db1";
 
-CREATE TABLE producto (
-    id INT PRIMARY KEY,
-    esta_bueno BIT,
-    total DECIMAL,
-    fecha DATE,
-    fecha_hora DATETIME,
-    nombre NCHAR(200) NOT NULL,
-    descripcion NVARCHAR(1000),
-    id_tipo_producto INT REFERENCES tipo_producto (id)
-);
-
-DROP TABLE producto;
-
-
+CREATE FUNCTION impuesto(@total AS DECIMAL, @mensaje AS NVARCHAR(100))
+RETURN INT
+AS
+BEGIN
+    SET @total = @total * 0.12;
+    SET @mensaje = SUBSTRAER(@mensaje, 1, 3);
+    IF (@total > 100) THEN
+        RETURN concatena(@total);
+    ELSE
+        RETURN concatena(@mensaje, @total);
+    END IF;
+END;
 
 
 ''')

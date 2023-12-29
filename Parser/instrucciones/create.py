@@ -136,4 +136,28 @@ class Create(Instruccion):
                 label_tipo_dato = self.campos_table.GraficarArbol(self.id_nodo)
                 result += label_tipo_dato
 
+
+        if isinstance(self.parametros, list) and self.parametros:
+            primer_elemento = self.parametros[0]
+            if isinstance(primer_elemento, Parametro):
+                 for parametro in self.parametros:
+                    label_parametro = parametro.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_parametro = "\"{}\" -> \"{}\";\n".format(self.id_nodo, parametro.id_nodo)
+                    result += label_parametro + union_tipo_accion_parametro
+            else:
+                label_parametro = self.parametros.GraficarArbol(self.id_nodo)
+                result += label_parametro
+
+
+        if isinstance(self.instrucciones, list) and self.instrucciones:
+            primer_elemento = self.instrucciones[0]
+            if isinstance(primer_elemento, Instruccion):
+                 for instruccion in self.instrucciones:
+                    label_instruccion = instruccion.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                    result += label_instruccion + union_tipo_accion_instruccion
+            else:
+                label_instruccion = self.instrucciones.GraficarArbol(self.id_nodo)
+                result += label_instruccion
+
         return result

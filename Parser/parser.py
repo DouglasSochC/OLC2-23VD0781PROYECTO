@@ -401,10 +401,12 @@ def p_if(p):
            | IF expresion BEGIN instrucciones END ELSE BEGIN instrucciones END
            | IF expresion BEGIN instrucciones END
     '''
+
     global contador
     id_nodo = str(abs(hash(p[1])) + contador)
     contador += 1
     if len(p) == 10 and p[3].lower() == 'then':
+        print("entro al if")
         p[0] = If_I(id_nodo, p[2], p[4], p[6])
     elif len(p) == 8:
         p[0] = If_I(id_nodo, p[2], p[4], None)
