@@ -78,4 +78,21 @@ class While_I(Instruccion):
                 return RetornoError("Ha ocurrido un error al evaluar la condición del While")
 
     def GraficarArbol(self, id_padre):
-        return ""
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "WHILE")
+        label_expresion = self.expresion.GraficarArbol(self.id_nodo)
+        union_expresion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
+        result = label_encabezado + label_expresion + union_expresion
+
+        if isinstance(self.lista_instrucciones, list) and self.lista_instrucciones:
+            primer_elemento = self.lista_instrucciones[0]
+            if isinstance(primer_elemento, Instruccion):
+                for instruccion in self.lista_instrucciones:
+                    label_instruccion = instruccion.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                    result += label_instruccion + union_tipo_accion_instruccion
+            else:
+                label_instruccion = instruccion.GraficarArbol(self.id_nodo)
+                union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                result += label_instruccion + union_tipo_accion_instruccion
+        
+        return result

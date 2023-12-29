@@ -89,4 +89,19 @@ class Exec(Instruccion):
         return RetornoCorrecto("El procedimiento '{}' se ha ejecutado correctamente.".format(nombre_procedimiento))
 
     def GraficarArbol(self, id_padre):
-        pass
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "EXEC")
+        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        result = label_encabezado + label_identificador
+
+        if isinstance(self.lista_expresiones, list) and self.lista_expresiones:
+            primer_elemento = self.lista_expresiones[0]
+            if isinstance(primer_elemento, Expresion):
+                 for campo in self.lista_expresiones:
+                    label_campo = campo.GraficarArbol(self.id_nodo)
+                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
+                    result += label_campo + union_tipo_accion_campo
+            else:
+                label_tipo_dato = self.lista_expresiones.GraficarArbol(self.id_nodo)
+                result += label_tipo_dato
+
+        return result

@@ -126,11 +126,16 @@ class If_I(Instruccion):
 
         # Se grafica instrucciones_list
         if self.instrucciones_then is not None:
-            for instruccion in self.instrucciones_then:
-                instrucciones_then = instruccion.GraficarArbol(self.id_nodo)
-                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+            if isinstance(self.instrucciones_then, list):
+                for instruccion in self.instrucciones_then:
+                    instrucciones_then = instruccion.GraficarArbol(self.id_nodo)
+                    union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
+                    result += instrucciones_then + union_encabezado_instruccion
+            else:
+                instrucciones_then = self.instrucciones_then.GraficarArbol(self.id_nodo)
+                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.instrucciones_then.id_nodo)
                 result += instrucciones_then + union_encabezado_instruccion
-
+       
         # Se grafica instrucciones_else
         if self.instrucciones_else is not None:
             for instruccion in self.instrucciones_else:
