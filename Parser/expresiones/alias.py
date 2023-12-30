@@ -4,8 +4,7 @@ from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoArreglo
 
 class Alias(Expresion):
 
-    def __init__(self, id_nodo: str, expresion: Expresion_E, alias: str):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion: Expresion_E, alias: str):
         self.expresion = expresion
         self.alias = alias
 
@@ -32,15 +31,23 @@ class Alias(Expresion):
             else:
                 return RetornoArreglo(res_ejecutar.identificador, res_ejecutar.tabla_del_identificador, res_ejecutar.lista, self.alias)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALIAS")
-        resultado_exp = ""
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+        contador[0] += 1
+        id_nodo_alias = hash("CAMPO_TABLE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_alias, "ALIAS")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_alias)
+        result = label_encabezado + union
 
-        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-        resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
-        resultado_exp += union_hijo_izquierdo + resultado_izquierda
 
-        label_alias = "\"{}\"[label=\"{}\"];\n".format(self.alias, self.alias)
-        union_alias = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.alias)
+        result += self.expresion.GraficarArbol(id_nodo_alias, contador)
 
-        return label_encabezado+ resultado_exp+ label_alias+ union_alias
+        contador[0] += 1
+        id_nodo_IDENTIFICADOR = hash("TIPO_ELIMINACION" + str(contador[0]))
+        label_tipo_eliminacion = "\"{}\"[label=\"{}\"];\n".format(id_nodo_IDENTIFICADOR, self.alias)
+        union_tipo_eliminacion = "\"{}\"->\"{}\";\n".format(id_nodo_alias, id_nodo_IDENTIFICADOR)
+        result += label_tipo_eliminacion + union_tipo_eliminacion
+
+
+
+
+        return result

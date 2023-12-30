@@ -7,8 +7,7 @@ from Funcionalidad.ssl import SSL
 
 class Exec(Instruccion):
 
-    def __init__(self, id_nodo: str, identificador: Identificador, lista_expresiones: list[Expresion]):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, lista_expresiones: list[Expresion]):
         self.identificador = identificador
         self.lista_expresiones = lista_expresiones
 
@@ -88,20 +87,17 @@ class Exec(Instruccion):
         entorno.agregar_hijo(nuevo_entorno)
         return RetornoCorrecto("El procedimiento '{}' se ha ejecutado correctamente.".format(nombre_procedimiento))
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "EXEC")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        result = label_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+        contador[0] += 1
+        id_nodo_exec = hash("EXEC" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_exec, "EXEC")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_exec)
+        result = label_encabezado + union
+        
+        result+= self.identificador.GraficarArbol(id_nodo_exec, contador)
 
-        if isinstance(self.lista_expresiones, list) and self.lista_expresiones:
-            primer_elemento = self.lista_expresiones[0]
-            if isinstance(primer_elemento, Expresion):
-                 for campo in self.lista_expresiones:
-                    label_campo = campo.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
-                    result += label_campo + union_tipo_accion_campo
-            else:
-                label_tipo_dato = self.lista_expresiones.GraficarArbol(self.id_nodo)
-                result += label_tipo_dato
-
+        if self.lista_expresiones is not None:
+            for expresion in self.lista_expresiones:
+                result+= expresion.GraficarArbol(id_nodo_exec, contador)
+        
         return result
