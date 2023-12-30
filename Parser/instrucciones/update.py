@@ -8,8 +8,7 @@ from Funcionalidad.dml import DML
 
 class Update(Instruccion):
 
-    def __init__(self, id_nodo: str, identificador: Identificador, lista_expresiones: list[Expresion], condicion: Condicion):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, lista_expresiones: list[Expresion], condicion: Condicion):
         self.identificador = identificador
         self.lista_expresiones = lista_expresiones
         self.condicion = condicion
@@ -91,21 +90,23 @@ class Update(Instruccion):
             # Respuesta
             return RetornoCorrecto(res_actualizar.valor) if res_actualizar.success else RetornoError(res_actualizar.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "UPDATE")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        resultado = label_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        if self.lista_expresiones is not None:
-            for campo in self.lista_expresiones:
-                label_campo = campo.GraficarArbol(self.id_nodo)
-                unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, campo.id_nodo)
-                resultado += label_campo + unir_campo
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_update = hash("UPDATE" + str(contador[0]))
+        label_update = "\"{}\"[label=\"{}\"];\n".format(id_nodo_update, "UPDATE")
+        union_update = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_update)
+        result = label_update + union_update
 
-        if self.condicion is not None and isinstance(self.condicion, Condicion):
+        # Se obtiene el nombre de la tabla
+        result += self.identificador.GraficarArbol(id_nodo_update, contador)
 
-            label_condicion = self.condicion.GraficarArbol(self.id_nodo)
-            union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.condicion.id_nodo)
-            resultado += label_condicion + union_tipo_accion_campo
+        # Se obtiene la lista de expresiones
+        for expresion in self.lista_expresiones:
+            result += expresion.GraficarArbol(id_nodo_update, contador)
 
-        return resultado
+        # Se obtiene la condicion
+        result += self.condicion.GraficarArbol(id_nodo_update, contador)
+
+        return result

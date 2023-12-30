@@ -7,8 +7,7 @@ from Funcionalidad.dml import DML
 
 class Delete(Instruccion):
 
-    def __init__(self, id_nodo, identificador: Identificador, condicion: Condicion):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, condicion: Condicion):
         self.identificador = identificador
         self.condicion = condicion
 
@@ -81,15 +80,20 @@ class Delete(Instruccion):
             respuesta = dml.eliminar_filas(base_datos.valor, nombre_tabla, indices_a_eliminar)
             return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DELETE")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        result = label_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        if self.condicion is not None and isinstance(self.condicion, Condicion):
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_delete = hash("DELETE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_delete, "DELETE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_delete)
+        result = label_encabezado + union
 
-            label_condicion = self.condicion.GraficarArbol(self.id_nodo)
-            union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.condicion.id_nodo)
-            result += label_condicion + union_tipo_accion_campo
+        # Se crea el nodo del identificador y se une con el nodo de delete
+        result += self.identificador.GraficarArbol(id_nodo_delete, contador)
+
+        # Se crea el nodo de la condicion y se une con el nodo de delete
+        if self.condicion is not None:
+            result += self.condicion.GraficarArbol(id_nodo_delete, contador)
 
         return result

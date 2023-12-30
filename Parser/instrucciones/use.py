@@ -4,10 +4,8 @@ from Funcionalidad.administracion import Administracion
 
 class Use(Instruccion):
 
-    def __init__(self, id_nodo, texto: str):
-        self.id_nodo = id_nodo
+    def __init__(self, texto: str):
         self.texto = texto
-        pass
 
     def Ejecutar(self, base_datos, entorno):
 
@@ -29,15 +27,20 @@ class Use(Instruccion):
         else:
             return RetornoError(res_admin.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "USE")
-        label_base_datos = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "DB", self.removeQuotes(self.texto))
-        constr_identificador = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "DB")
-        return label_encabezado + label_base_datos + constr_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-    def removeQuotes(self, value):
-        if isinstance(value, str):
-            if value.startswith('"') and value.endswith('"'):
-                mundo_without_quotes = value.strip('"')
-                return mundo_without_quotes
-        return value
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_use = hash("USE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_use, "USE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_use)
+        result = label_encabezado + union
+
+        # Se crea el nodo del texto y se une con el nodo de use
+        contador[0] += 1
+        id_nodo_texto = hash("TEXTO" + str(contador[0]))
+        label_texto = "\"{}\"[label=\"{}\"];\n".format(id_nodo_texto, self.texto)
+        union_texto = "\"{}\"->\"{}\";\n".format(id_nodo_use, id_nodo_texto)
+        result += label_texto + union_texto
+
+        return result

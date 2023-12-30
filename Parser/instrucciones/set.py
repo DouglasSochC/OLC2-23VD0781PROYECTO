@@ -2,13 +2,11 @@ from ..abstract.instrucciones import Instruccion
 from ..expresiones.identificador import Identificador
 from ..expresiones.expresion import Expresion
 from ..tablas.tabla_simbolo import Simbolo
-from ..abstract.expresiones import Expresion
 from ..abstract.retorno import RetornoError, RetornoCorrecto, RetornoLiteral, RetornoCodigo, TIPO_DATO, TIPO_ENTORNO
 
 class Set(Instruccion):
 
-    def __init__(self, id_nodo: int, identificador: Identificador, expresion: Expresion):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, expresion: Expresion):
         self.identificador = identificador
         self.expresion = expresion
 
@@ -59,9 +57,19 @@ class Set(Instruccion):
 
             return RetornoCorrecto()
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "SET")
-        constr_tipo_dato = self.identificador.GraficarArbol(self.id_nodo)
-        unir_encabezado_tipo_dato = "\"{}\"->\"{}\"\n".format(self.id_nodo, self.expresion.id_nodo)
-        constr_identificador = self.expresion.GraficarArbol(self.id_nodo)
-        return label_encabezado + constr_identificador  + constr_tipo_dato + unir_encabezado_tipo_dato
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_set = hash("SET" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_set, "SET")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_set)
+        result = label_encabezado + union
+
+        # Se obtiene el cuerpo del nodo identificador
+        result += self.identificador.GraficarArbol(id_nodo_set, contador)
+
+        # Se obtiene el cuerpo del nodo expresion
+        result += self.expresion.GraficarArbol(id_nodo_set, contador)
+
+        return result

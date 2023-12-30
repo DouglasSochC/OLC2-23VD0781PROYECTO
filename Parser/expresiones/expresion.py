@@ -7,8 +7,7 @@ from Funcionalidad.dml import DML
 # Esta clase se encarga de retornar una instancia 'RetornoXYZ' y atraves de esto pueda validarse cada comando o instruccion del lenguaje
 class Expresion(Expresion):
 
-    def __init__(self, id_nodo: str, expresion: any, entre_parentesis: bool = False):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion: any, entre_parentesis: bool = False):
         self.expresion = expresion
         self.entre_parentesis = entre_parentesis
 
@@ -63,18 +62,21 @@ class Expresion(Expresion):
                 res_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
                 return res_ejecutar
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "EXPRESION")
-        resultado_exp = ""
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_expresion = hash("EXPRESION" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_expresion, "EXPRESION")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_expresion)
+        result = label_encabezado + union
+
+        # Se crea el nodo de la expresion y se une con el nodo de expresion
         if isinstance(self.expresion, list):
 
             for exp in self.expresion:
-                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-                resultado_exp += union_hijo_izquierdo + resultado_izquierda
+                result += exp.GraficarArbol(id_nodo_expresion, contador)
         else:
-            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-            resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
-            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+            result += self.expresion.GraficarArbol(id_nodo_expresion, contador)
 
-        return label_encabezado + resultado_exp
+        return result

@@ -4,8 +4,8 @@ from ..expresiones.expresion import Expresion
 from ..tablas.tabla_simbolo import TablaDeSimbolos
 
 class While_I(Instruccion):
-    def __init__(self, id_nodo: int, expresion: Expresion, lista_instrucciones: list):
-        self.id_nodo = id_nodo
+
+    def __init__(self, expresion: Expresion, lista_instrucciones: list):
         self.expresion = expresion
         self.lista_instrucciones = lista_instrucciones
 
@@ -77,22 +77,20 @@ class While_I(Instruccion):
             else:
                 return RetornoError("Ha ocurrido un error al evaluar la condición del While")
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "WHILE")
-        label_expresion = self.expresion.GraficarArbol(self.id_nodo)
-        union_expresion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-        result = label_encabezado + label_expresion + union_expresion
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        if isinstance(self.lista_instrucciones, list) and self.lista_instrucciones:
-            primer_elemento = self.lista_instrucciones[0]
-            if isinstance(primer_elemento, Instruccion):
-                for instruccion in self.lista_instrucciones:
-                    label_instruccion = instruccion.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
-                    result += label_instruccion + union_tipo_accion_instruccion
-            else:
-                label_instruccion = instruccion.GraficarArbol(self.id_nodo)
-                union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
-                result += label_instruccion + union_tipo_accion_instruccion
-        
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_while = hash("WHILE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_while, "WHILE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_while)
+        result = label_encabezado + union
+
+        # Se crea el nodo de la expresion y se une con el nodo de while
+        result += self.expresion.GraficarArbol(id_nodo_while, contador)
+
+        # Se crea el nodo de las instrucciones y se une con el nodo de while
+        for instruccion in self.lista_instrucciones:
+            result += instruccion.GraficarArbol(id_nodo_while, contador)
+
         return result

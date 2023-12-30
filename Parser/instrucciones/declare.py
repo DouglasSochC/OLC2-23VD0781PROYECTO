@@ -6,8 +6,7 @@ from ..abstract.retorno import RetornoError, RetornoCorrecto, RetornoCodigo
 
 class Declare(Instruccion):
 
-    def __init__(self, id_nodo: int, identificador: Identificador, tipo_dato: Tipo_Dato):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, tipo_dato: Tipo_Dato):
         self.identificador = identificador
         self.tipo_dato = tipo_dato
 
@@ -44,8 +43,17 @@ class Declare(Instruccion):
 
             return RetornoCorrecto()
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DECLARE")
-        constr_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
-        constr_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        return label_encabezado + constr_identificador + constr_tipo_dato
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_declare = hash("DECLARE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_declare, "DECLARE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_declare)
+        result = label_encabezado + union
+
+        # Se obtienen los nodos hijos que son el tipo de dato y el identificador
+        result += self.identificador.GraficarArbol(id_nodo_declare, contador)
+        result += self.tipo_dato.GraficarArbol(id_nodo_declare, contador)
+
+        return result

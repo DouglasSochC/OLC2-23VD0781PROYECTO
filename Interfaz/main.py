@@ -636,7 +636,7 @@ def crear_dump():
                 messagebox.showinfo("Éxito", f"Archivos SQL tables creados en {carpeta_sql}")
             else:
                 messagebox.showwarning("Advertencia", "La carpeta 'Tables' no existe.")
-        
+
             carpeta_proc = os.path.join(carpeta_principal, 'Procedimientos')
             if os.path.exists(carpeta_proc):
                 # Crear una carpeta con el nombre del item seleccionado para almacenar los archivos SQL
@@ -648,7 +648,7 @@ def crear_dump():
                 for archivo_xml in archivos_xml:
                     ruta_xml = os.path.join(carpeta_proc, archivo_xml)
                     create_statements = generate_create_procedure(ruta_xml)
-                   
+
                     # Escribir las sentencias INSERT en un archivo .sql
                     ruta_sql = os.path.join(carpeta_sql, f'{os.path.splitext(archivo_xml)[0]}.sql')
                     with open(ruta_sql, 'w') as sql_file:
@@ -671,7 +671,7 @@ def crear_dump():
                 for archivo_xml in archivos_xml:
                     ruta_xml = os.path.join(carpeta_proc, archivo_xml)
                     create_statements = generate_create_function(ruta_xml)
-                   
+
                     # Escribir las sentencias INSERT en un archivo .sql
                     ruta_sql = os.path.join(carpeta_sql, f'{os.path.splitext(archivo_xml)[0]}.sql')
                     with open(ruta_sql, 'w') as sql_file:
@@ -683,7 +683,7 @@ def crear_dump():
             else:
                 messagebox.showwarning("Advertencia", "La carpeta 'Funciones no existe' no existe.")
 
-        
+
         else:
             messagebox.showwarning("Advertencia", f"No se encontró la carpeta con el nombre {nombre_item}.")
 
@@ -721,11 +721,10 @@ def importar():
                             tab_actual = notebook_central.winfo_children()[indice_actual].winfo_children()[0]
                             codeview = tab_actual.winfo_children()[0]
                             codeview.bind("<KeyRelease>", lambda e: oyente_cambio_texto_tab(codeview, indice_actual, e))
-                
-                
+
             else:
                 messagebox.showwarning("Advertencia", f"la bd aun no ha exportado datos:  {nombre_item}.")
-            
+
         else:
             messagebox.showwarning("Advertencia", f"no se encontro  de la bd:  {nombre_item}. en la carpeta databases")
     except Exception as e:
@@ -784,10 +783,11 @@ def graficar_arbol():
         if isinstance(salida, str):
             mostrar_salida_como_texto(salida)
         else:
-            body_string=""
-
+            contador = [1]
+            id_nodo_padre = hash("INICIO" + str(contador[0]))
+            body_string="\"{}\"[label=\"{}\"];\n".format(id_nodo_padre, "INICIO")
             for instr in salida:
-                body_string+= instr.GraficarArbol(None)
+                body_string+= instr.GraficarArbol(id_nodo_padre, contador)
 
             header_string = "digraph G {\n"
             footer_string = "}"
@@ -877,7 +877,7 @@ def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
 
 def open_reporte_gramatica():
     try:
-        script_dir = os.path.dirname(__file__) 
+        script_dir = os.path.dirname(__file__)
         html_path = os.path.join(script_dir, "assets/gramatica.html")
         if os.path.exists(html_path):
             webbrowser.open(f"file://{html_path}")

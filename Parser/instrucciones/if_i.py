@@ -5,8 +5,7 @@ from ..tablas.tabla_simbolo import TablaDeSimbolos
 
 class If_I(Instruccion):
 
-    def __init__(self, id_nodo: str, expresion: Expresion, instrucciones_then: list, instrucciones_else: list):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion: Expresion, instrucciones_then: list, instrucciones_else: list):
         self.expresion = expresion
         self.instrucciones_then = instrucciones_then
         self.instrucciones_else = instrucciones_else
@@ -118,29 +117,28 @@ class If_I(Instruccion):
             else:
                 return RetornoError("Ha ocurrido un error al evaluar la instrucción If")
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "IF")
-        label_expresion = self.expresion.GraficarArbol(self.id_nodo)
-        union_encabezado_expresion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-        result = label_encabezado + label_expresion + union_encabezado_expresion
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        # Se grafica instrucciones_list
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_if = hash("IF" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_if, "IF")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_if)
+        result = label_encabezado + union
+
+        # Se crea el nodo de la expresion y se une con el nodo de if
+        result += self.expresion.GraficarArbol(id_nodo_if, contador)
+
+        # Se crea el nodo de las instrucciones then y se une con el nodo de if
         if self.instrucciones_then is not None:
-            if isinstance(self.instrucciones_then, list):
-                for instruccion in self.instrucciones_then:
-                    instrucciones_then = instruccion.GraficarArbol(self.id_nodo)
-                    union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
-                    result += instrucciones_then + union_encabezado_instruccion
-            else:
-                instrucciones_then = self.instrucciones_then.GraficarArbol(self.id_nodo)
-                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.instrucciones_then.id_nodo)
-                result += instrucciones_then + union_encabezado_instruccion
-       
-        # Se grafica instrucciones_else
+
+            for instruccion in self.instrucciones_then:
+                result += instruccion.GraficarArbol(id_nodo_if, contador)
+
+        # Se crea el nodo de las instrucciones else y se une con el nodo de if
         if self.instrucciones_else is not None:
+
             for instruccion in self.instrucciones_else:
-                instrucciones_else = instruccion.GraficarArbol(self.id_nodo)
-                union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
-                result += instrucciones_else + union_encabezado_instruccion
+                result += instruccion.GraficarArbol(id_nodo_if, contador)
 
         return result

@@ -4,8 +4,7 @@ from ..abstract.retorno import RetornoError, RetornoCodigo, RetornoArreglo, Reto
 
 class Aritmetica(Expresion):
 
-    def __init__(self,id_nodo, expresion_izquierda: Expresion_Normal, operador: str, expresion_derecha: Expresion_Normal):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion_izquierda: Expresion_Normal, operador: str, expresion_derecha: Expresion_Normal):
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
         self.expresion_derecha = expresion_derecha
@@ -425,17 +424,26 @@ class Aritmetica(Expresion):
 
         return RetornoError("Ha ocurrido un error al realizar la operación aritmetica ({}).".format(self.operador))
 
-    def GraficarArbol(self, id_padre):
-        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "ARITMETICA")
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_aritmetica = hash("ARITMETICA" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_aritmetica, "ARITMETICA")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_aritmetica)
+        result = label_encabezado + union
 
-        union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
+        # Se crea el nodo de la expresion izquierda y se une con el nodo de aritmetica
+        result += self.expresion_izquierda.GraficarArbol(id_nodo_aritmetica, contador)
 
-        resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
-        resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
+        # Se crea el nodo del operador y se une con el nodo de aritmetica
+        contador[0] += 1
+        id_nodo_operador = hash("OPERADOR" + str(contador[0]))
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_operador, self.operador)
+        union_operador = "\"{}\"->\"{}\";\n".format(id_nodo_aritmetica, id_nodo_operador)
+        result += label_operador + union_operador
 
-        return label_encabezado + union_hijo_izquierdo  + resultado_izquierda + label_operador +union_enca_operador +resultado_derecha + union_hijo_derecho
+        # Se crea el nodo de la expresion derecha y se une con el nodo de aritmetica
+        result += self.expresion_derecha.GraficarArbol(id_nodo_aritmetica, contador)
+
+        return result

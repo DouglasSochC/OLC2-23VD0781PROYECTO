@@ -5,8 +5,7 @@ from ..expresiones.constraint import Constraint
 
 class Campo_Table(Expresion):
 
-    def __init__(self, id_nodo: str, identificador: Identificador, tipo_dato: Tipo_Dato, constraint: Constraint):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, tipo_dato: Tipo_Dato, constraint: Constraint):
         self.identificador = identificador
         self.tipo_dato = tipo_dato
         self.constraint = constraint
@@ -34,14 +33,23 @@ class Campo_Table(Expresion):
 
         return respuesta
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CAMPOS_TABLE")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        label_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
-        result = label_encabezado + label_identificador + label_tipo_dato
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_campo_table = hash("CAMPO_TABLE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_campo_table, "CAMPO_TABLE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_campo_table)
+        result = label_encabezado + union
+
+        # Se obtiene el cuerpo del nodo identificador
+        result += self.identificador.GraficarArbol(id_nodo_campo_table, contador)
+
+        # Se obtiene el cuerpo del nodo tipo de dato
+        result += self.tipo_dato.GraficarArbol(id_nodo_campo_table, contador)
+
+        # Se obtiene el cuerpo del nodo constraint
         if self.constraint is not None:
-            label_constraint = self.constraint.GraficarArbol(self.id_nodo)
-            union_constrain = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.constraint.id_nodo)
-            result+= label_constraint + union_constrain
+            result += self.constraint.GraficarArbol(id_nodo_campo_table, contador)
 
         return result

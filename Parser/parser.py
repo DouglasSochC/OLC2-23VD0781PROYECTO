@@ -35,8 +35,6 @@ from .instrucciones.while_i import While_I
 from .instrucciones.return_i import Return_I
 from .instrucciones.listaGrafico.instruccionGeneral import InstruccionGeneral
 
-contador = 0
-
 # Operadores de precedencia
 precedence = (
     ('left', 'OR_OP'),
@@ -76,13 +74,10 @@ def p_instruccion(p):
                     | comando_sql
                     | RETURN expresion PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash("InstruccionRaiz")) + contador)
-    contador += 1
     if len(p) == 2:
-        p[0] = InstruccionGeneral(id_nodo, p[1])
+        p[0] = InstruccionGeneral(p[1])
     elif len(p) == 4:
-        p[0] = Return_I(id_nodo, p[2])
+        p[0] = Return_I(p[2])
 
 def p_comando_sql(p):
     '''
@@ -97,32 +92,23 @@ def p_set(p):
     '''
     set  : SET identificador IGUAL expresion PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Set(id_nodo, p[2], p[4])
+    p[0] = Set(p[2], p[4])
 
 def p_usar_db(p):
     '''
         use : USE LVARCHAR PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Use(id_nodo,p[2])
+    p[0] = Use(p[2])
 
 def p_declare(p):
     '''
         declare : DECLARE identificador tipo_dato PUNTOYCOMA
                 | DECLARE identificador AS tipo_dato PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 5:
-        p[0] = Declare(id_nodo, p[2], p[3])
+        p[0] = Declare(p[2], p[3])
     elif len(p) == 6:
-        p[0] = Declare(id_nodo, p[2], p[4])
+        p[0] = Declare(p[2], p[4])
 
 def p_tipo_dato(p):
     '''
@@ -138,50 +124,41 @@ def p_seg_num(p):
                 | DECIMAL
                 | BIT
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     p[1] = p[1].lower()
     if p[1] == 'int':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.INT, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.INT, -1)
     elif p[1] == 'decimal':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DECIMAL, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.DECIMAL, -1)
     elif p[1] == 'bit':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.BIT, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.BIT, -1)
     else:
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.NULL, -1)
 
 def p_seg_date(p):
     '''
         seg_date : DATE
                  | DATETIME
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     p[1] = p[1].lower()
     if p[1] == 'date':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATE, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.DATE, -1)
     elif p[1] == 'datetime':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.DATETIME, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.DATETIME, -1)
     else:
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.NULL, -1)
 
 def p_seg_string(p):
     '''
         seg_string : NVARCHAR IZQPAREN LNUMERO DERPAREN
                    | NCHAR IZQPAREN LNUMERO DERPAREN
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     p[1] = p[1].lower()
     if p[1] == 'nvarchar':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NVARCHAR, p[3])
+        p[0] = Tipo_Dato(TIPO_DATO.NVARCHAR, p[3])
     elif p[1] == 'nchar':
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NCHAR, p[3])
+        p[0] = Tipo_Dato(TIPO_DATO.NCHAR, p[3])
     else:
-        p[0] = Tipo_Dato(id_nodo, TIPO_DATO.NULL, -1)
+        p[0] = Tipo_Dato(TIPO_DATO.NULL, -1)
 
 def p_sentencia_ddl(p):
     '''
@@ -199,19 +176,16 @@ def p_create(p):
                | CREATE PROCEDURE identificador IZQPAREN parametros DERPAREN AS BEGIN instrucciones END PUNTOYCOMA
                | CREATE FUNCTION identificador IZQPAREN parametros DERPAREN RETURN tipo_dato AS BEGIN instrucciones END PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 5:
-        p[0] = Create(id_nodo, p[2].lower(), p[3], None, None, None, None)
+        p[0] = Create(p[2].lower(), p[3], None, None, None, None)
     elif len(p) == 8:
-        p[0] = Create(id_nodo, p[2].lower(), p[3], p[5], None, None, None)
+        p[0] = Create(p[2].lower(), p[3], p[5], None, None, None)
     elif len(p) == 12:
         #TODO: POR HACER GRAFICAMENTE
-        p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[9], None)
+        p[0] = Create(p[2].lower(), p[3], None, p[5], p[9], None)
     elif len(p) == 14:
         #TODO: POR HACER GRAFICAMENTE
-        p[0] = Create(id_nodo, p[2].lower(), p[3], None, p[5], p[11], p[8])
+        p[0] = Create(p[2].lower(), p[3], None, p[5], p[11], p[8])
 
 def p_campos_table(p):
     '''
@@ -220,20 +194,16 @@ def p_campos_table(p):
                     | identificador tipo_dato constraint
                     | identificador tipo_dato
     '''
-    global contador
-    elemento_hashable = p[3] if len(p) > 3 else p[1]
-    id_nodo = str(abs(hash(elemento_hashable)) + contador)
-    contador += 1
     if len(p) == 6:
-        p[1].append(Campo_Table(id_nodo,p[3], p[4], p[5]))
+        p[1].append(Campo_Table(p[3], p[4], p[5]))
         p[0] = p[1]
     elif len(p) == 5:
-        p[1].append(Campo_Table(id_nodo,p[3], p[4], None))
+        p[1].append(Campo_Table(p[3], p[4], None))
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = [Campo_Table(id_nodo,p[1], p[2], p[3])]
+        p[0] = [Campo_Table(p[1], p[2], p[3])]
     elif len(p) == 3:
-        p[0] = [Campo_Table(id_nodo,p[1], p[2], None)]
+        p[0] = [Campo_Table(p[1], p[2], None)]
 
 def p_parametros(p):
     '''
@@ -242,20 +212,16 @@ def p_parametros(p):
                    | parametros COMA identificador tipo_dato
                    | identificador tipo_dato
     '''
-    global contador
-    elemento_hashable = p[3] if len(p) > 3 else p[1]
-    id_nodo = str(abs(hash(elemento_hashable)) + contador)
-    contador += 1
     if len(p) == 6:
-        p[1].append(Parametro(id_nodo,p[3], p[5]))
+        p[1].append(Parametro(p[3], p[5]))
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = [Parametro(id_nodo,p[1], p[3])]
+        p[0] = [Parametro(p[1], p[3])]
     elif len(p) == 5:
-        p[1].append(Parametro(id_nodo,p[3], p[4]))
+        p[1].append(Parametro(p[3], p[4]))
         p[0] = p[1]
     elif len(p) == 3:
-        p[0] = [Parametro(id_nodo,p[1], p[2])]
+        p[0] = [Parametro(p[1], p[2])]
 
 def p_constraint(p):
     '''
@@ -263,35 +229,26 @@ def p_constraint(p):
                    | NOT NULL
                    | REFERENCES identificador IZQPAREN identificador DERPAREN
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     p[1] = p[1].lower()
     if p[1] == 'primary':
-        p[0] = Constraint(id_nodo,'primary key', None, None)
+        p[0] = Constraint('primary key', None, None)
     elif p[1] == 'not':
-        p[0] = Constraint(id_nodo,'not null', None, None)
+        p[0] = Constraint('not null', None, None)
     elif p[1] == 'references':
-        p[0] = Constraint(id_nodo,'references', p[2], p[4])
+        p[0] = Constraint('references', p[2], p[4])
 
 def p_alter(p):
     '''
         alter : ALTER TABLE identificador accion PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Alter(id_nodo,p[3], p[4])
+    p[0] = Alter(p[3], p[4])
 
 def p_accion(p):
     '''
         accion : ADD COLUMN campos_table
                | DROP COLUMN identificador
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Accion(id_nodo,p[1].lower(), p[3])
+    p[0] = Accion(p[1].lower(), p[3])
 
 def p_drop(p):
     '''
@@ -300,28 +257,19 @@ def p_drop(p):
              | DROP PROCEDURE identificador PUNTOYCOMA
              | DROP FUNCTION identificador PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Drop(id_nodo,p[2].lower(), p[3])
+    p[0] = Drop(p[2].lower(), p[3])
 
 def p_truncate(p):
     '''
         truncate : TRUNCATE TABLE identificador PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Truncate(id_nodo,p[3])
+    p[0] = Truncate(p[3])
 
 def p_exec(p):
     '''
         exec : EXEC identificador lista_expresiones PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Exec(id_nodo, p[2], p[3])
+    p[0] = Exec(p[2], p[3])
 
 def p_sentencia_dml(p):
     '''
@@ -345,54 +293,42 @@ def p_select(p):
                | SELECT lista_expresiones FROM lista_expresiones WHERE condicion PUNTOYCOMA
                | SELECT lista_expresiones PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 4:
-        p[0] = Select(id_nodo,None, p[2], None)
+        p[0] = Select(None, p[2], None)
     elif len(p) == 6 and p[2] == '*':
-        p[0] = Select(id_nodo,p[4], [p[2]], None)
+        p[0] = Select(p[4], [p[2]], None)
     elif len(p) == 6 and p[3].lower() == 'from':
-        p[0] = Select(id_nodo,p[4], p[2], None)
+        p[0] = Select(p[4], p[2], None)
     elif len(p) == 8 and p[2] == '(':
-        p[0] = Select(id_nodo,p[6], p[3], None)
+        p[0] = Select(p[6], p[3], None)
     elif len(p) == 8 and p[2] == '*':
-        p[0] = Select(id_nodo,p[4], [p[2]], p[6])
+        p[0] = Select(p[4], [p[2]], p[6])
     elif len(p) == 8 and p[3].lower() == 'from':
-        p[0] = Select(id_nodo,p[4], p[2], p[6])
+        p[0] = Select(p[4], p[2], p[6])
     elif len(p) == 10 and p[2] == '(':
-        p[0] = Select(id_nodo,p[6], p[3], p[8])
+        p[0] = Select(p[6], p[3], p[8])
 
 def p_insert(p):
     '''
         insert : INSERT INTO identificador IZQPAREN lista_expresiones DERPAREN VALUES IZQPAREN lista_expresiones DERPAREN PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Insert(id_nodo,p[3], p[5], p[9])
+    p[0] = Insert(p[3], p[5], p[9])
 
 def p_update(p):
     '''
         update : UPDATE identificador SET lista_expresiones WHERE condicion PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Update(id_nodo, p[2], p[4], p[6])
+    p[0] = Update(p[2], p[4], p[6])
 
 def p_delete(p):
     '''
         delete : DELETE FROM identificador WHERE condicion PUNTOYCOMA
                | DELETE FROM identificador PUNTOYCOMA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 7:
-        p[0] = Delete(id_nodo,p[3], p[5])
+        p[0] = Delete(p[3], p[5])
     elif len(p) == 5:
-        p[0] = Delete(id_nodo,p[3], None)
+        p[0] = Delete(p[3], None)
 
 def p_if(p):
     '''
@@ -402,40 +338,30 @@ def p_if(p):
            | IF expresion BEGIN instrucciones END
     '''
 
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 10 and p[3].lower() == 'then':
-        print("entro al if")
-        p[0] = If_I(id_nodo, p[2], p[4], p[6])
+        p[0] = If_I(p[2], p[4], p[6])
     elif len(p) == 8:
-        p[0] = If_I(id_nodo, p[2], p[4], None)
+        p[0] = If_I(p[2], p[4], None)
     elif len(p) == 10 and p[3].lower() == 'begin':
-        p[0] = If_I(id_nodo, p[2], p[4], p[8])
+        p[0] = If_I(p[2], p[4], p[8])
     elif len(p) == 6:
-        p[0] = If_I(id_nodo, p[2], p[4], None)
+        p[0] = If_I(p[2], p[4], None)
 
 def p_while(p):
     '''
         while : WHILE expresion BEGIN instrucciones END
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = While_I(id_nodo, p[2], p[4])
+    p[0] = While_I(p[2], p[4])
 
 def p_condicion(p):
     '''
         condicion : condicion AND expresion
                   | expresion
     '''
-    global contador
-    id_nodo = str(abs(hash("COND")) + contador)
-    contador += 1
     if len(p) == 4:
-        p[0] = Condicion(id_nodo, p[1], p[2], p[3])
+        p[0] = Condicion(p[1], p[2], p[3])
     else:
-        p[0] = Condicion(id_nodo, p[1], None, None)
+        p[0] = Condicion(p[1], None, None)
 
 def p_lista_expresiones(p):
     '''
@@ -461,38 +387,29 @@ def p_expresion(p):
                   | alias
                   | IF IZQPAREN lista_expresiones DERPAREN
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 2:
-        p[0] = Expresion(id_nodo, p[1])
+        p[0] = Expresion(p[1])
     elif len(p) == 4:
-        p[0] = Expresion(id_nodo, p[2], True)
+        p[0] = Expresion(p[2], True)
     elif len(p) == 5:
         #TODO: por probar se cambio 3 xx 4
-        p[0] = Expresion(id_nodo, p[3])
+        p[0] = Expresion(p[3])
 
 def p_alias(p):
     '''
         alias : expresion AS ID
               | expresion ID
     '''
-    global contador
-    id_nodo = str(abs(hash("AS")) + contador)
-    contador += 1
     if len(p) == 3:
-        p[0] = Alias(id_nodo, p[1], p[2])
+        p[0] = Alias(p[1], p[2])
     elif len(p) == 4:
-        p[0] = Alias(id_nodo, p[1], p[3])
+        p[0] = Alias(p[1], p[3])
 
 def p_asignacion(p):
     '''
         asignacion : identificador IGUAL expresion
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Asignacion(id_nodo, p[1], p[3])
+    p[0] = Asignacion(p[1], p[3])
 
 def p_funcion_nativa(p):
     '''
@@ -505,27 +422,24 @@ def p_funcion_nativa(p):
                        | identificador IZQPAREN lista_expresiones DERPAREN
                        | identificador IZQPAREN DERPAREN
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     p[1] = p[1].lower() if isinstance(p[1], str) else p[1]
     if p[1] == 'concatena':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
+        p[0] = Funcion_Nativa(p[1], p[3], None)
     elif p[1] == 'substraer':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
+        p[0] = Funcion_Nativa(p[1], p[3], None)
     elif p[1] == 'hoy':
-        p[0] = Funcion_Nativa(id_nodo,p[1], None, None)
+        p[0] = Funcion_Nativa(p[1], None, None)
     elif p[1] == 'contar':
-        p[0] = Funcion_Nativa(id_nodo,p[1], None, None)
+        p[0] = Funcion_Nativa(p[1], None, None)
     elif p[1] == 'suma':
-        p[0] = Funcion_Nativa(id_nodo,p[1], p[3], None)
+        p[0] = Funcion_Nativa(p[1], p[3], None)
     elif p[1] == 'cast':
-        p[0] = Funcion_Nativa(id_nodo, p[1], p[3], p[5])
+        p[0] = Funcion_Nativa(p[1], p[3], p[5])
     else:
         if len(p) == 5:
-            p[0] = Funcion_Nativa(id_nodo, p[1], p[3], None)
+            p[0] = Funcion_Nativa(p[1], p[3], None)
         elif len(p) == 4:
-            p[0] = Funcion_Nativa(id_nodo, p[1], None, None)
+            p[0] = Funcion_Nativa(p[1], None, None)
 
 def p_aritmeticos(p):
     '''
@@ -534,10 +448,7 @@ def p_aritmeticos(p):
                     | expresion POR expresion
                     | expresion DIVIDIDO expresion
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Aritmetica(id_nodo,p[1], p[2], p[3])
+    p[0] = Aritmetica(p[1], p[2], p[3])
 
 def p_relacionales(p):
     '''
@@ -549,13 +460,10 @@ def p_relacionales(p):
                      | expresion MAYORIGUAL expresion
                      | BETWEEN expresion AND expresion
     '''
-    global contador
-    id_nodo = str(abs(hash("relacionalesOLC2")) + contador)
-    contador += 1
     if len(p) == 4:
-        p[0] = Relacional(id_nodo,p[1], p[2], p[3])
+        p[0] = Relacional(p[1], p[2], p[3])
     elif len(p) == 5:
-        p[0] = Relacional(id_nodo,p[2], p[1], p[4])
+        p[0] = Relacional(p[2], p[1], p[4])
 
 def p_logicos(p):
     '''
@@ -563,62 +471,44 @@ def p_logicos(p):
                 | expresion OR_OP expresion
                 | NOT_OP expresion
     '''
-    global contador
-    id_nodo = str(abs(hash("logicosOLC2")) + contador)
-    contador += 1
     if len(p) == 4:
-        p[0] = Logico(id_nodo,p[1], p[2], p[3])
+        p[0] = Logico(p[1], p[2], p[3])
     elif len(p) == 3:
         #TODO: no funciona
-        p[0] = Logico(id_nodo,None, p[1],p[2])
+        p[0] = Logico(None, p[1],p[2])
 
 def p_literal1(p):
     '''
         literal : LNUMERO
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if((len(str(p[1])) == 1) and(str(p[1]) == "0" or str(p[1]) == "1")):
-        p[0] = Literal(id_nodo,p[1], TIPO_DATO.INT)
+        p[0] = Literal(p[1], TIPO_DATO.INT)
     else:
-        p[0] = Literal(id_nodo,p[1], TIPO_DATO.INT)
+        p[0] = Literal(p[1], TIPO_DATO.INT)
 
 def p_literal2(p):
     '''
         literal : LDECIMAL
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DECIMAL)
+    p[0] = Literal(p[1], TIPO_DATO.DECIMAL)
 
 def p_literal3(p):
     '''
         literal : LFECHA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DATE)
+    p[0] = Literal(p[1], TIPO_DATO.DATE)
 
 def p_literal4(p):
     '''
         literal : LFECHAHORA
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Literal(id_nodo,p[1], TIPO_DATO.DATETIME)
+    p[0] = Literal(p[1], TIPO_DATO.DATETIME)
 
 def p_literal5(p):
     '''
         literal : LVARCHAR
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
-    p[0] = Literal(id_nodo,p[1], TIPO_DATO.NCHAR or TIPO_DATO.NVARCHAR)
+    p[0] = Literal(p[1], TIPO_DATO.NCHAR or TIPO_DATO.NVARCHAR)
 
 def p_identificador(p):
     '''
@@ -626,15 +516,12 @@ def p_identificador(p):
                       | ID PUNTO ID
                       | ARROBA ID
     '''
-    global contador
-    id_nodo = str(abs(hash(p[1])) + contador)
-    contador += 1
     if len(p) == 2:
-        p[0] = Identificador(id_nodo, p[1])
+        p[0] = Identificador(p[1])
     elif len(p) == 3:
-        p[0] = Identificador(id_nodo, p[1] + p[2])
+        p[0] = Identificador(p[1] + p[2])
     elif len(p) == 4:
-        p[0] = Identificador(id_nodo, p[3], p[1])
+        p[0] = Identificador(p[3], p[1])
 
 def p_error(p):
     if p is None:

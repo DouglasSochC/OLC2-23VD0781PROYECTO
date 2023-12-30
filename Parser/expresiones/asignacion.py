@@ -6,8 +6,7 @@ from Funcionalidad.dml import DML
 
 class Asignacion(Expresion):
 
-    def __init__(self, id_nodo, identificador: Identificador, expresion: Expresion):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, expresion: Expresion):
         self.identificador = identificador
         self.expresion = expresion
 
@@ -132,25 +131,20 @@ class Asignacion(Expresion):
                 else:
                     return RetornoError("Ha ocurrido un error al realizar la condición (=).")
 
-    # TODO: Corregir el graficado del arbol debido a que se han modificado los parametros que se solicitan en la asignacion
-    def GraficarArbol(self, id_padre):
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ASIGNACION")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_asignacion = hash("ASIGNACION" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_asignacion, "ASIGNACION")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_asignacion)
+        result = label_encabezado + union
 
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "op", "=")
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "op")
-        resultado_exp = ""
+        # Se crea el nodo del identificador y se une con el nodo de asignacion
+        result += self.identificador.GraficarArbol(id_nodo_asignacion, contador)
 
-        if isinstance(self.expresion, list):
-            print("es lista")
-            for exp in self.expresion:
-                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-                resultado_exp += union_hijo_izquierdo + resultado_izquierda
-        else:
-            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion.id_nodo)
-            resultado_izquierda = self.expresion.GraficarArbol(self.id_nodo)
-            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        # Se crea el nodo de la expresion y se une con el nodo de asignacion
+        if self.expresion is not None:
+            result += self.expresion.GraficarArbol(id_nodo_asignacion, contador)
 
-        return label_encabezado+ label_identificador +label_operador + union_enca_operador+ resultado_exp
+        return result

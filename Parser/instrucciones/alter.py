@@ -6,8 +6,7 @@ from Funcionalidad.ddl import DDL
 
 class Alter(Instruccion):
 
-    def __init__(self, id_nodo,identificador: Identificador, accion: Accion):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, accion: Accion):
         self.identificador = identificador
         self.accion = accion
 
@@ -42,9 +41,17 @@ class Alter(Instruccion):
         else:
             return RetornoError("Ha ocurrido un error al realizar la instruccion 'ALTER'")
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ALTER")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        label_accion = self.accion.GraficarArbol(self.id_nodo)
-        union_encabezado_accion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.accion.id_nodo)
-        return label_encabezado + label_identificador + label_accion  + union_encabezado_accion
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_alter = hash("ALTER" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_alter, "ALTER")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_alter)
+        result = label_encabezado + union
+
+        # Se obtienen los nodos hijos que son el identificador y la accion
+        result += self.identificador.GraficarArbol(id_nodo_alter, contador)
+        result += self.accion.GraficarArbol(id_nodo_alter, contador)
+
+        return result

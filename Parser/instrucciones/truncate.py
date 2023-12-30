@@ -5,8 +5,7 @@ from Funcionalidad.ddl import DDL
 
 class Truncate(Instruccion):
 
-    def __init__(self, id_nodo, identificador: Identificador):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador):
         self.identificador = identificador
 
     def Ejecutar(self, base_datos, entorno):
@@ -29,7 +28,16 @@ class Truncate(Instruccion):
 
         return RetornoCorrecto(res_truncate.valor) if res_truncate.success else RetornoError(res_truncate.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TRUNCATE")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        return label_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_truncate = hash("TRUNCATE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_truncate, "TRUNCATE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_truncate)
+        result = label_encabezado + union
+
+        # Se obtiene el cuerpo del nodo identificador
+        result += self.identificador.GraficarArbol(id_nodo_truncate, contador)
+
+        return result

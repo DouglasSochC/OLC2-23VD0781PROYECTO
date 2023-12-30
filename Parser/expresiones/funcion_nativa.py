@@ -2,14 +2,14 @@ from Parser.abstract.retorno import TIPO_DATO, RetornoError, RetornoLiteral, Ret
 from ..abstract.expresiones import Expresion
 from ..expresiones.tipo_dato import Tipo_Dato
 from ..expresiones.identificador import Identificador
+from ..expresiones.expresion import Expresion
 from ..tablas.tabla_simbolo import TablaDeSimbolos
 from Funcionalidad.ssl import SSL
 import datetime
 
 class Funcion_Nativa(Expresion):
 
-    def __init__(self, id_nodo: str, accion: str | Identificador, expresiones: any, tipo_dato: Tipo_Dato | None):
-        self.id_nodo = id_nodo
+    def __init__(self, accion: str | Identificador, expresiones: list[Expresion] | Expresion, tipo_dato: Tipo_Dato | None):
         self.accion = accion
         self.expresiones = expresiones
         self.tipo_dato = tipo_dato
@@ -343,31 +343,45 @@ class Funcion_Nativa(Expresion):
                 arreglo = [{'auxiliar': res['valor']} for res in respuesta]
                 return RetornoArreglo("{}({})".format(nombre_funcion, alias[:-1]), None, arreglo)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "FUNCION NATIVA")
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "A", self.accion)
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "A")
-        resultado_exp = ""
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        if(self.expresiones is None):
-          return label_encabezado+ label_operador + union_enca_operador
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_funcion = hash("FUNCION" + str(contador[0]))
+        label_funcion =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_funcion, "FUNCION")
+        union_funcion = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_funcion)
+        result = label_funcion + union_funcion
 
-        if isinstance(self.expresiones, list):
-            print("es lista")
-            for exp in self.expresiones:
-                union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, exp.id_nodo)
-                resultado_izquierda = exp.GraficarArbol(self.id_nodo)
-                resultado_exp += union_hijo_izquierdo + resultado_izquierda
-        else:
-            union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresiones.id_nodo)
-            resultado_izquierda = self.expresiones.GraficarArbol(self.id_nodo)
-            resultado_exp += union_hijo_izquierdo + resultado_izquierda
+        # Se crea el nodo del identificador y se une con el nodo de la funcion
+        if isinstance(self.accion, Identificador):
+            result += self.accion.GraficarArbol(id_nodo_funcion, contador)
+        elif isinstance(self.accion, str):
+            contador[0] += 1
+            id_nodo_nativa = hash("NATIVA" + str(contador[0]))
+            label_accion = "\"{}\"[label=\"{}\"];\n".format(id_nodo_nativa, "NATIVA")
+            union_accion = "\"{}\"->\"{}\";\n".format(id_nodo_funcion, id_nodo_nativa)
+            result += label_accion + union_accion
 
+            contador[0] += 1
+            id_nodo_accion = hash("NATIVA" + str(contador[0]))
+            label_nombre_nativa = "\"{}\"[label=\"{}\"];\n".format(id_nodo_accion, self.accion)
+            union_nombre_nativa = "\"{}\"->\"{}\";\n".format(id_nodo_nativa, id_nodo_accion)
+            result += label_nombre_nativa + union_nombre_nativa
+
+        # Se crea el nodo de las expresiones y se une con el nodo de la funcion
+        if self.expresiones is not None:
+
+            if isinstance(self.expresiones, list):
+                for exp in self.expresiones:
+                    result += exp.GraficarArbol(id_nodo_funcion, contador)
+            else:
+                result += self.expresiones.GraficarArbol(id_nodo_funcion, contador)
+
+        # Se crea el nodo del tipo de dato y se une con el nodo de la funcion
         if self.tipo_dato is not None:
-            label_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
-            resultado_exp += label_tipo_dato
+            result += self.tipo_dato.GraficarArbol(id_nodo_funcion, contador)
 
-        return label_encabezado+ label_operador + union_enca_operador+ resultado_exp
+        return result
 
     def __EjecutarFuncion(sefl, base_datos: any, entorno: TablaDeSimbolos, nombre_funcion: str, lista_parametros: list) -> RetornoArreglo | RetornoLiteral:
 

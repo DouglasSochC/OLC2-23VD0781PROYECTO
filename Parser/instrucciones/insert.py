@@ -6,8 +6,7 @@ from Funcionalidad.dml import DML
 
 class Insert(Instruccion):
 
-    def __init__(self, id_nodo: str, identificador: Identificador, lista_campos: list[Expresion], lista_valores: list[Expresion]):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, lista_campos: list[Expresion], lista_valores: list[Expresion]):
         self.identificador = identificador
         self.lista_campos = lista_campos
         self.lista_valores = lista_valores
@@ -90,25 +89,38 @@ class Insert(Instruccion):
 
             return RetornoCorrecto(res_dml.valor) if res_dml.success else RetornoError(res_dml.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "INSERT")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        resultado = label_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_insert = hash("INSERT" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_insert, "INSERT")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_insert)
+        result = label_encabezado + union
+
+        # Se crea el nodo del nombre de la tabla y se une con el nodo de insert
+        result += self.identificador.GraficarArbol(id_nodo_insert, contador)
+
+        # Se crea el nodo de los campos y se une con el nodo de insert
         if self.lista_campos is not None:
+            contador[0] += 1
+            id_nodo_campos = hash("CAMPOS" + str(contador[0]))
+            label_campos = "\"{}\"[label=\"{}\"];\n".format(id_nodo_campos, "CAMPOS")
+            union_campos = "\"{}\"->\"{}\";\n".format(id_nodo_insert, id_nodo_campos)
+            result += label_campos + union_campos
+
             for campo in self.lista_campos:
-                label_campo = campo.GraficarArbol(self.id_nodo)
-                unir_campo = "\"{}\" -> \"{}\"\n".format(self.id_nodo, campo.id_nodo)
-                resultado += label_campo + unir_campo
+                result += campo.GraficarArbol(id_nodo_campos, contador)
 
-        label_values = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo+"c", "VALUES")
-        union_values = "\"{}\" -> \"{}\"\n".format(self.id_nodo, self.id_nodo+"c")
-        resultado += label_values + union_values
-
+        # Se crea el nodo de los valores y se une con el nodo de insert
         if self.lista_valores is not None:
-            for valor in self.lista_valores:
-                label_valor = valor.GraficarArbol(self.id_nodo)
-                unir_valor = "\"{}\" -> \"{}\"\n".format(self.id_nodo, valor.id_nodo)
-                resultado += label_valor + unir_valor
+            contador[0] += 1
+            id_nodo_valores = hash("VALUES" + str(contador[0]))
+            label_valores = "\"{}\"[label=\"{}\"];\n".format(id_nodo_valores, "VALUES")
+            union_valores = "\"{}\"->\"{}\";\n".format(id_nodo_insert, id_nodo_valores)
+            result += label_valores + union_valores
 
-        return resultado
+            for valor in self.lista_valores:
+                result += valor.GraficarArbol(id_nodo_valores, contador)
+
+        return result

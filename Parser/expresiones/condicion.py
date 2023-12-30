@@ -1,12 +1,11 @@
 from ..abstract.expresiones import Expresion
 from ..abstract.retorno import RetornoError, RetornoArreglo, RetornoCodigo, TIPO_DATO, TIPO_ENTORNO
 from ..tablas.tabla_simbolo import Simbolo, TablaDeSimbolos
-from ..expresiones.expresion import Expresion as Expresion_E
+from ..expresiones.expresion import Expresion as Expresion_Normal
 
 class Condicion(Expresion):
 
-    def __init__(self, id_nodo: str, expresion_izquierda: Expresion_E, tipo_operador: str, expresion_derecha: Expresion_E):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion_izquierda: Expresion_Normal, tipo_operador: str, expresion_derecha: Expresion_Normal):
         self.expresion_izquierda = expresion_izquierda
         self.tipo_operador = tipo_operador
         self.expresion_derecha = expresion_derecha
@@ -63,17 +62,28 @@ class Condicion(Expresion):
                 else:
                     RetornoError("Ha ocurrido un error al ejecutar la condicion.")
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CONDICION")
-        label_expresion_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
-        union_encabezado_expresion_izquierda = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion_izquierda.id_nodo)
-       
-        if self.tipo_operador is None and self.expresion_derecha is None:
-            return label_encabezado + label_expresion_izquierda + union_encabezado_expresion_izquierda
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "1", self.tipo_operador)
-        union_encabezado_operador = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "1")
-        label_expresion_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
-        label_union_encabezado_expresion_derecha = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.expresion_derecha.id_nodo)
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_condicion = hash("CONDICION" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_condicion, "CONDICION")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_condicion)
+        result = label_encabezado + union
 
-        return label_encabezado + label_expresion_izquierda + union_encabezado_expresion_izquierda + label_operador + union_encabezado_operador + label_expresion_derecha + label_union_encabezado_expresion_derecha
+        # Se crea el nodo de la expresion izquierda y se une con el nodo de condicion
+        result += self.expresion_izquierda.GraficarArbol(id_nodo_condicion, contador)
+
+        if self.expresion_derecha is not None:
+
+            # Se crea el nodo del operador y se une con el nodo de condicion
+            contador[0] += 1
+            id_nodo_operador = hash("OPERADOR" + str(contador[0]))
+            label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_operador, self.tipo_operador)
+            union_operador = "\"{}\"->\"{}\";\n".format(id_nodo_condicion, id_nodo_operador)
+            result += label_operador + union_operador
+
+            # Se crea el nodo de la expresion derecha y se une con el nodo de condicion
+            result += self.expresion_derecha.GraficarArbol(id_nodo_condicion, contador)
+
+        return result

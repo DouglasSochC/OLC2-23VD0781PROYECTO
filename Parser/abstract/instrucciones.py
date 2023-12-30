@@ -11,5 +11,5 @@ class Instruccion(metaclass=ABCMeta):
         pass
 
     @abstractclassmethod
-    def GraficarArbol(self, id_padre):
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
         pass

@@ -1,10 +1,10 @@
 from ..abstract.expresiones import Expresion
+from ..expresiones.expresion import Expresion as Expresion_Normal
 from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoCodigo, RetornoError, TIPO_DATO
 
 class Relacional(Expresion):
 
-    def __init__(self,id_nodo, expresion_izquierda: RetornoArreglo | RetornoLiteral, operador: str, expresion_derecha: RetornoArreglo | RetornoLiteral):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion_izquierda: Expresion_Normal, operador: str, expresion_derecha: Expresion_Normal):
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
         self.expresion_derecha = expresion_derecha
@@ -111,13 +111,26 @@ class Relacional(Expresion):
         else:
             return RetornoError("La operación relacional con '{}' es invalida".format(self.operador))
 
-    def GraficarArbol(self, id_padre):
-        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "RELACIONAL")
-        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
-        union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
-        resultado_izquierda = self.expresion_izquierda.GraficarArbol(self.id_nodo)
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
-        resultado_derecha = self.expresion_derecha.GraficarArbol(self.id_nodo)
-        return label_encabezado + union_hijo_izquierdo  + resultado_izquierda + label_operador +union_enca_operador +resultado_derecha + union_hijo_derecho
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_relacional = hash("RELACIONAL" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_relacional, "RELACIONAL")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_relacional)
+        result = label_encabezado + union
+
+        # Se crea el nodo de la expresion izquierda y se une con el nodo de relacional
+        result += self.expresion_izquierda.GraficarArbol(id_nodo_relacional, contador)
+
+        # Se crea el nodo del operador y se une con el nodo de relacional
+        contador[0] += 1
+        id_nodo_operador = hash("OPERADOR" + str(contador[0]))
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_operador, self.operador)
+        union_operador = "\"{}\"->\"{}\";\n".format(id_nodo_relacional, id_nodo_operador)
+        result += label_operador + union_operador
+
+        # Se crea el nodo de la expresion derecha y se une con el nodo de relacional
+        result += self.expresion_derecha.GraficarArbol(id_nodo_relacional, contador)
+
+        return result

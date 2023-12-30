@@ -4,9 +4,7 @@ from datetime import datetime
 
 class Literal(Expresion):
 
-    def __init__(self, id_nodo: str, value, tipado: TIPO_DATO, identificador: str = None):
-        super().__init__()
-        self.id_nodo = id_nodo
+    def __init__(self, value: any, tipado: TIPO_DATO, identificador: str = None):
         self.value = value
         self.tipado = tipado
         self.identificador = identificador
@@ -87,15 +85,27 @@ class Literal(Expresion):
             else:
                 return RetornoLiteral(self.value, TIPO_DATO.NULL, self.identificador)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "LITERAL")
-        label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "I", self.removeQuotes(self.value))
-        union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "I")
-        return label_encabezado + label_valor + union_hijo
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-    def removeQuotes(self, value):
-        if isinstance(value, str):
-            if value.startswith('"') and value.endswith('"'):
-                mundo_without_quotes = value.strip('"')
-                return mundo_without_quotes
-        return value
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_literal = hash("LITERAL" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_literal, "LITERAL")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_literal)
+        result = label_encabezado + union
+
+        # Se crea el nodo del valor del literal y se une con el nodo de literal
+        contador[0] += 1
+        id_nodo_valor_literal = hash("VALOR_LITERAL" + str(contador[0]))
+        label_valor_literal = "\"{}\"[label=\"{}\"];\n".format(id_nodo_valor_literal, self.value)
+        union_valor_literal = "\"{}\"->\"{}\";\n".format(id_nodo_literal, id_nodo_valor_literal)
+        result += label_valor_literal + union_valor_literal
+
+        # Se crea el nodo del tipado del literal y se une con el nodo de literal
+        contador[0] += 1
+        id_nodo_tipado_literal = hash("TIPADO_LITERAL" + str(contador[0]))
+        label_tipado_literal = "\"{}\"[label=\"{}\"];\n".format(id_nodo_tipado_literal, self.tipado.name)
+        union_tipado_literal = "\"{}\"->\"{}\";\n".format(id_nodo_literal, id_nodo_tipado_literal)
+        result += label_tipado_literal + union_tipado_literal
+
+        return result

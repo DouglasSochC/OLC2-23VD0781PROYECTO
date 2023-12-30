@@ -5,8 +5,7 @@ from Funcionalidad.ddl import DDL
 
 class Drop(Instruccion):
 
-    def __init__(self, id_nodo: str, tipo_eliminacion: str, identificador: Identificador):
-        self.id_nodo = id_nodo
+    def __init__(self, tipo_eliminacion: str, identificador: Identificador):
         self.tipo_eliminacion = tipo_eliminacion
         self.identificador = identificador
 
@@ -40,9 +39,23 @@ class Drop(Instruccion):
 
         return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "DROP")
-        label_tipo = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "C", self.tipo_eliminacion)
-        union_tipo_encabezado = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "C")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        return label_encabezado + label_tipo + union_tipo_encabezado + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_drop = hash("DROP" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_drop, "DROP")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_drop)
+        result = label_encabezado + union
+
+        # Se crea el nodo del tipo de eliminacion y se une con el nodo de drop
+        contador[0] += 1
+        id_nodo_tipo_eliminacion = hash("TIPO_ELIMINACION" + str(contador[0]))
+        label_tipo_eliminacion = "\"{}\"[label=\"{}\"];\n".format(id_nodo_tipo_eliminacion, self.tipo_eliminacion)
+        union_tipo_eliminacion = "\"{}\"->\"{}\";\n".format(id_nodo_drop, id_nodo_tipo_eliminacion)
+        result += label_tipo_eliminacion + union_tipo_eliminacion
+
+        # Se obtiene el cuerpo del nodo identificador
+        result += self.identificador.GraficarArbol(id_nodo_drop, contador)
+
+        return result

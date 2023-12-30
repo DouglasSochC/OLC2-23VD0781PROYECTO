@@ -1,9 +1,10 @@
 from ..abstract.expresiones import Expresion
-from ..abstract.retorno import RetornoArreglo, RetornoLiteral, RetornoError, TIPO_DATO
+from ..expresiones.expresion import Expresion as Expresion_Normal
+from ..abstract.retorno import RetornoLiteral, RetornoError, TIPO_DATO
 
 class Logico(Expresion):
-    def __init__(self, id_nodo, expresion_izquierda: any, operador: str, expresion_derecha: any):
-        self.id_nodo = id_nodo
+
+    def __init__(self, expresion_izquierda: Expresion_Normal, operador: str, expresion_derecha: Expresion_Normal):
         self.expresion_izquierda = expresion_izquierda
         self.operador = operador
         self.expresion_derecha = expresion_derecha
@@ -41,26 +42,27 @@ class Logico(Expresion):
             else:
                 return RetornoError("ERROR EN LA OPERACION LOGICA !")
         return RetornoLiteral(ret, TIPO_DATO.BIT, None)
-            
-    def GraficarArbol(self, id_padre):
-        id_nodo_actual = self.id_nodo if self.id_nodo is not None else id_padre
-        
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual, "LOGICO")
-        union_hijo_izquierdo = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_izquierda.id_nodo)
 
-        if self.expresion_derecha is not None:
-            union_hijo_derecho = "\"{}\"->\"{}\";\n".format(id_nodo_actual, self.expresion_derecha.id_nodo)
-            resultado_derecha = self.expresion_derecha.GraficarArbol(id_padre)
-        else:
-            union_hijo_derecho = ""
-            resultado_derecha = ""
-        
-        
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        resultado_izquierda = self.expresion_izquierda.GraficarArbol(id_padre)
-        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_actual + "Op", self.operador)
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_logico = hash("LOGICO" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_logico, "LOGICO")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_logico)
+        result = label_encabezado + union
 
-        union_enca_operador = "\"{}\"->\"{}\";\n".format(id_nodo_actual, id_nodo_actual + "Op")
+        # Se crea el nodo de la expresion izquierda y se une con el nodo de logico
+        result += self.expresion_izquierda.GraficarArbol(id_nodo_logico, contador)
 
-        return label_encabezado + union_hijo_izquierdo+resultado_izquierda +label_operador+union_enca_operador+ union_hijo_derecho  + resultado_derecha
-    
+        # Se crea el nodo del operador y se une con el nodo de logico
+        contador[0] += 1
+        id_nodo_operador = hash("OPERADOR" + str(contador[0]))
+        label_operador = "\"{}\"[label=\"{}\"];\n".format(id_nodo_operador, self.operador)
+        union_operador = "\"{}\"->\"{}\";\n".format(id_nodo_logico, id_nodo_operador)
+        result += label_operador + union_operador
+
+        # Se crea el nodo de la expresion derecha y se une con el nodo de logico
+        result += self.expresion_derecha.GraficarArbol(id_nodo_logico, contador)
+
+        return result

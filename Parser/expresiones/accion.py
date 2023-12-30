@@ -5,8 +5,7 @@ from ..expresiones.identificador import Identificador
 
 class Accion(Expresion):
 
-    def __init__(self, id_nodo, tipo_accion: str, accion: list[Campo_Table] | Identificador):
-        self.id_nodo = id_nodo
+    def __init__(self, tipo_accion: str, accion: list[Campo_Table] | Identificador):
         self.tipo_accion = tipo_accion
         self.accion = accion
 
@@ -35,24 +34,34 @@ class Accion(Expresion):
             nombre_columna = res_accion['identificador']
             return nombre_columna
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "ACCION")
-        label_tipo_accion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "C", self.tipo_accion)
-        union_encabezado_tipo_accion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "C")
-        result = label_encabezado + label_tipo_accion + union_encabezado_tipo_accion
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
 
-        if isinstance(self.accion, list) and self.accion:
-            primer_elemento = self.accion[0]
-            if isinstance(primer_elemento, Campo_Table):
-                for campo in self.accion:
-                    label_campo = campo.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
-                    result += label_campo + union_tipo_accion_campo
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_accion = hash("ACCION" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_accion, "ACCION")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_accion)
+        result = label_encabezado + union
+
+        # Se crea el nodo del tipo de accion y se une con el nodo de accion
+        contador[0] += 1
+        id_nodo_tipo_accion = hash("TIPO_ACCION" + str(contador[0]))
+        label_tipo_accion = "\"{}\"[label=\"{}\"];\n".format(id_nodo_tipo_accion, self.tipo_accion)
+        union_tipo_accion = "\"{}\"->\"{}\";\n".format(id_nodo_accion, id_nodo_tipo_accion)
+        result += label_tipo_accion + union_tipo_accion
+
+        # Se obtiene el cuerpo del nodo accion
+        if self.accion is not None:
+
+            # En el caso que sea campo_table
+            if isinstance(self.accion, list):
+                primer_elemento = self.accion[0]
+                if isinstance(primer_elemento, Campo_Table):
+                    for campo in self.accion:
+                        result += campo.GraficarArbol(id_nodo_accion, contador)
+
+            # En el caso que sea identificador
             else:
-                label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
-                result += label_tipo_dato
-        else:
-            label_tipo_dato = self.accion.GraficarArbol(self.id_nodo)
-            result += label_tipo_dato
+                result += self.accion.GraficarArbol(id_nodo_accion, contador)
 
         return result

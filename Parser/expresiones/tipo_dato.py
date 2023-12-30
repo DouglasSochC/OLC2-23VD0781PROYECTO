@@ -3,8 +3,7 @@ from ..abstract.retorno import TIPO_DATO
 
 class Tipo_Dato(Expresion):
 
-    def __init__(self, id_nodo: str, tipo_dato: TIPO_DATO, dimension: int):
-        self.id_nodo = id_nodo
+    def __init__(self, tipo_dato: TIPO_DATO, dimension: int):
         self.tipo_dato = tipo_dato
         self.dimension = dimension
 
@@ -28,9 +27,28 @@ class Tipo_Dato(Expresion):
 
         return {'tipo_dato': self.tipo_dato, 'representacion': representacion, 'dimension': self.dimension}
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "TIPO_DATO")
-        label_valor = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "T", self.tipo_dato.name)
-        union_hijo = "\"{}\"->\"{}\";\n".format(self.id_nodo, self.id_nodo + "T")
-        union_padre = "\"{}\"->\"{}\";\n".format(id_padre, self.id_nodo)
-        return label_encabezado + label_valor + union_hijo + union_padre
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+
+        # Se crea el nodo y se realiza la union con el padre
+        contador[0] += 1
+        id_nodo_tipo_dato = hash("TIPO_DATO" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_tipo_dato, "TIPO_DATO")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_tipo_dato)
+        result = label_encabezado + union
+
+        # Se obtiene el nombre del tipo de dato
+        contador[0] += 1
+        id_nodo_nombre_tipo_dato = hash("NOMBRE_TIPO_DATO" + str(contador[0]))
+        label_nombre_tipo_dato = "\"{}\"[label=\"{}\"];\n".format(id_nodo_nombre_tipo_dato, self.tipo_dato.name)
+        union_nombre_tipo_dato = "\"{}\"->\"{}\";\n".format(id_nodo_tipo_dato, id_nodo_nombre_tipo_dato)
+        result += label_nombre_tipo_dato + union_nombre_tipo_dato
+
+        # Se obtiene la dimension del tipo de dato
+        if self.tipo_dato != -1:
+            contador[0] += 1
+            id_nodo_dimension_tipo_dato = hash("DIMENSION_TIPO_DATO" + str(contador[0]))
+            label_dimension_tipo_dato = "\"{}\"[label=\"{}\"];\n".format(id_nodo_dimension_tipo_dato, self.dimension)
+            union_dimension_tipo_dato = "\"{}\"->\"{}\";\n".format(id_nodo_tipo_dato, id_nodo_dimension_tipo_dato)
+            result += label_dimension_tipo_dato + union_dimension_tipo_dato
+
+        return result
