@@ -209,22 +209,22 @@ class Funcion_Nativa(Expresion):
             #print("SIGUIENTE")
             if(dominante == TIPO_DATO.BIT):
                 if(valor_identificador == 1 or valor_identificador == 0 or valor_identificador == "1" or valor_identificador == "0"):
-                    #print(valor_identificador)
+                    print(valor_identificador)
                     return RetornoLiteral(valor_identificador, dominante, None)
                 else:
                     return RetornoError("Error, el tipo de dato valor de la expresion no puede convertirse en un BIT")
             elif(dominante == TIPO_DATO.INT):
                 new_int = self.transformar_valor_int(valor_identificador)
-                #print(new_int)
+                print(new_int)
                 return RetornoLiteral(new_int, dominante, None)
             elif(dominante == TIPO_DATO.DECIMAL):
                 new_decimal = self.convertir_a_decimal(valor_identificador)
-                #print(new_decimal)
+                print(new_decimal)
                 return RetornoLiteral(new_decimal, dominante, None)
             elif(dominante == TIPO_DATO.NCHAR or dominante == TIPO_DATO.NVARCHAR):
                 new_text = self.convertir_a_texto(valor_identificador)
                 if(new_text != None):
-                    #print(new_text)
+                    print(new_text)
                     return RetornoLiteral(new_text, dominante, None)    
                 else:
                     return RetornoError("Error, no es posible realizar el casting de INT a NVARCHAR O NCHAR con valores enteros mayores a 255")      
