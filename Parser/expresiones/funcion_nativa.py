@@ -453,3 +453,27 @@ class Funcion_Nativa(Expresion):
 
                 entorno.agregar_hijo(nuevo_entorno)
                 return RetornoError("La funcion '{}' no retorna ningun valor.".format(nombre_funcion))
+
+    def transformar_valor_int(self, parametro):
+        if isinstance(parametro, str):
+            # Verifica si es una letra
+            if len(parametro) == 1 and parametro.isalpha():
+                return ord(parametro)  # Retorna el valor ASCII de la letra
+            else:
+                # Si es una palabra, suma los valores ASCII de cada carácter
+                suma_ascii = sum(ord(caracter) for caracter in parametro)
+                return suma_ascii
+        elif isinstance(parametro, (int, float)):
+            # Si es un número decimal, retorna el entero más cercano
+            return round(parametro)
+        else:
+            return None  # Retorna None si el tipo de dato no es compatible
+        
+    def convertir_a_decimal(self, numero):
+        return float(numero)
+    
+    def convertir_a_texto(self, valor):
+        if isinstance(valor, int) and 0 <= valor <= 255:
+            return chr(valor)  # Devuelve el carácter ASCII correspondiente
+        else:
+            return None
