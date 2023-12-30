@@ -33,7 +33,7 @@ class Alias(Expresion):
 
     def GraficarArbol(self, id_nodo_padre: int, contador: list):
         contador[0] += 1
-        id_nodo_alias = hash("CAMPO_TABLE" + str(contador[0]))
+        id_nodo_alias = hash("ALIAS" + str(contador[0]))
         label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_alias, "ALIAS")
         union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_alias)
         result = label_encabezado + union
@@ -42,7 +42,7 @@ class Alias(Expresion):
         result += self.expresion.GraficarArbol(id_nodo_alias, contador)
 
         contador[0] += 1
-        id_nodo_IDENTIFICADOR = hash("TIPO_ELIMINACION" + str(contador[0]))
+        id_nodo_IDENTIFICADOR = hash("ID_ALIAS" + str(contador[0]))
         label_tipo_eliminacion = "\"{}\"[label=\"{}\"];\n".format(id_nodo_IDENTIFICADOR, self.alias)
         union_tipo_eliminacion = "\"{}\"->\"{}\";\n".format(id_nodo_alias, id_nodo_IDENTIFICADOR)
         result += label_tipo_eliminacion + union_tipo_eliminacion
