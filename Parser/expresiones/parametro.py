@@ -4,8 +4,7 @@ from ..expresiones.tipo_dato import Tipo_Dato
 
 class Parametro(Expresion):
 
-    def __init__(self, id_nodo, identificador: Identificador, tipo_dato: Tipo_Dato):
-        self.id_nodo = id_nodo
+    def __init__(self, identificador: Identificador, tipo_dato: Tipo_Dato):
         self.identificador = identificador
         self.tipo_dato = tipo_dato
 
@@ -26,9 +25,16 @@ class Parametro(Expresion):
 
         return respuesta
 
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "PARAMETRO")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        label_tipo_dato = self.tipo_dato.GraficarArbol(self.id_nodo)
-        result = label_encabezado + label_identificador + label_tipo_dato
+    def GraficarArbol(self,  id_nodo_padre: int, contador: list):
+        contador[0] += 1
+        id_nodo_parametro = hash("PARAMETROS" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_parametro, "PARAMETROS")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_parametro)
+        result = label_encabezado + union
+
+
+        result += self.identificador.GraficarArbol(id_nodo_parametro, contador)
+
+        result += self.tipo_dato.GraficarArbol(id_nodo_parametro, contador)
+
         return result

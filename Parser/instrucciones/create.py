@@ -9,8 +9,7 @@ from Funcionalidad.ddl import DDL
 
 class Create(Instruccion):
 
-    def __init__(self, id_nodo: str, instruccion: str, identificador: Identificador, campos_table: list[Campo_Table], parametros: list[Parametro], instrucciones: list, retorno: Tipo_Dato):
-        self.id_nodo = id_nodo
+    def __init__(self,  instruccion: str, identificador: Identificador, campos_table: list[Campo_Table], parametros: list[Parametro], instrucciones: list, retorno: Tipo_Dato):
         self.instruccion = instruccion
         self.identificador = identificador
         self.campos_table = campos_table
@@ -117,47 +116,28 @@ class Create(Instruccion):
     #TODO: Falta implementar lo siguiente
         # Graficar un procedimiento
         # Graficar una funcion
-    def GraficarArbol(self, id_padre):
-        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(self.id_nodo, "CREATE")
-        label_instruccion = "\"{}\"[label=\"{}\"];\n".format(self.id_nodo + "CR", self.instruccion)
-        union_encabezado_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, self.id_nodo + "CR")
-        label_identificador = self.identificador.GraficarArbol(self.id_nodo)
-        result = label_encabezado + label_instruccion + union_encabezado_instruccion + label_identificador
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+        contador[0] += 1
+        id_nodo_alias = hash("CREATE" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_alias, "CREATE")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_alias)
+        result = label_encabezado + union
 
+        result+= self.identificador.GraficarArbol(id_nodo_alias, contador)
 
-        if isinstance(self.campos_table, list) and self.campos_table:
-            primer_elemento = self.campos_table[0]
-            if isinstance(primer_elemento, Campo_Table):
-                 for campo in self.campos_table:
-                    label_campo = campo.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_campo = "\"{}\" -> \"{}\";\n".format(self.id_nodo, campo.id_nodo)
-                    result += label_campo + union_tipo_accion_campo
-            else:
-                label_tipo_dato = self.campos_table.GraficarArbol(self.id_nodo)
-                result += label_tipo_dato
+        if self.campos_table is not None:
+            for campo in self.campos_table:
+                result+= campo.GraficarArbol(id_nodo_alias, contador)
+        
+        if self.parametros is not None:
+            for parametro in self.parametros:
+                result+= parametro.GraficarArbol(id_nodo_alias, contador)
 
+        if self.instrucciones is not None:
+            for instr in self.instrucciones:
+                result+= instr.GraficarArbol(id_nodo_alias, contador)
 
-        if isinstance(self.parametros, list) and self.parametros:
-            primer_elemento = self.parametros[0]
-            if isinstance(primer_elemento, Parametro):
-                 for parametro in self.parametros:
-                    label_parametro = parametro.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_parametro = "\"{}\" -> \"{}\";\n".format(self.id_nodo, parametro.id_nodo)
-                    result += label_parametro + union_tipo_accion_parametro
-            else:
-                label_parametro = self.parametros.GraficarArbol(self.id_nodo)
-                result += label_parametro
-
-
-        if isinstance(self.instrucciones, list) and self.instrucciones:
-            primer_elemento = self.instrucciones[0]
-            if isinstance(primer_elemento, Instruccion):
-                 for instruccion in self.instrucciones:
-                    label_instruccion = instruccion.GraficarArbol(self.id_nodo)
-                    union_tipo_accion_instruccion = "\"{}\" -> \"{}\";\n".format(self.id_nodo, instruccion.id_nodo)
-                    result += label_instruccion + union_tipo_accion_instruccion
-            else:
-                label_instruccion = self.instrucciones.GraficarArbol(self.id_nodo)
-                result += label_instruccion
+        if self.retorno is not None:
+            result+= self.retorno.GraficarArbol(id_nodo_alias, contador)
 
         return result

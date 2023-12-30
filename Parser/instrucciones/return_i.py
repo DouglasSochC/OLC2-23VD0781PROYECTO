@@ -4,8 +4,7 @@ from ..abstract.retorno import RetornoCodigo, RetornoError
 
 class Return_I(Instruccion):
 
-    def __init__(self, id_nodo: str, expresion: Expresion):
-        self.id_nodo = id_nodo
+    def __init__(self, expresion: Expresion):
         self.expresion = expresion
 
     def Ejecutar(self, base_datos, entorno):
@@ -29,5 +28,14 @@ class Return_I(Instruccion):
             res_expresion_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
             return res_expresion_ejecutar
 
-    def GraficarArbol(self, id_padre):
-        return ""
+    def GraficarArbol(self, id_nodo_padre: int, contador: list):
+        contador[0] += 1
+        id_nodo_return = hash("RETURN" + str(contador[0]))
+        label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_return, "RETURN")
+        union = "\"{}\"->\"{}\";\n".format(id_nodo_padre, id_nodo_return)
+        result = label_encabezado + union
+
+        if self.expresion is not None:
+            result+= self.expresion.GraficarArbol(id_nodo_return, contador)
+
+        return result
