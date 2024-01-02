@@ -43,7 +43,7 @@ TablaDivision = [
 TablaAsignacion = [
     #bit                    #int                   #decimal             #date        #datetime         #nchar                #nvarchar
     [TIPO_DATO.BIT,       TIPO_DATO.BIT,        TIPO_DATO.NULL,     TIPO_DATO.NULL, TIPO_DATO.NULL,     TIPO_DATO.NULL,     TIPO_DATO.NULL],
-    [TIPO_DATO.INT,       TIPO_DATO.INT,        TIPO_DATO.NULL,     TIPO_DATO.NULL, TIPO_DATO.NULL,     TIPO_DATO.NULL,     TIPO_DATO.NULL],
+    [TIPO_DATO.INT,       TIPO_DATO.INT,        TIPO_DATO.DECIMAL,  TIPO_DATO.NULL, TIPO_DATO.NULL,     TIPO_DATO.NULL,     TIPO_DATO.NULL],
     [TIPO_DATO.NULL,      TIPO_DATO.NULL,       TIPO_DATO.DECIMAL,  TIPO_DATO.NULL, TIPO_DATO.NULL,     TIPO_DATO.NULL,     TIPO_DATO.NULL],
     [TIPO_DATO.NULL,      TIPO_DATO.NULL,       TIPO_DATO.NULL,     TIPO_DATO.DATE, TIPO_DATO.NULL,     TIPO_DATO.NULL,     TIPO_DATO.NULL],
     [TIPO_DATO.NULL,      TIPO_DATO.NULL,       TIPO_DATO.NULL,     TIPO_DATO.NULL, TIPO_DATO.DATETIME, TIPO_DATO.NULL,     TIPO_DATO.NULL],

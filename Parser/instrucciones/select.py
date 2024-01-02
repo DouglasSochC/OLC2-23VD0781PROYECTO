@@ -196,8 +196,15 @@ class Select(Instruccion):
 
         # Se crea el nodo de los campos y se une con el nodo de select
         if self.lista_campos is not None:
-            for campo in self.lista_campos:
-                result += campo.GraficarArbol(id_nodo_select, contador)
+            if self.lista_campos[0] == '*':
+                contador[0] += 1
+                id_nodo_campos = hash("CAMPOS" + str(contador[0]))
+                label_encabezado =  "\"{}\"[label=\"{}\"];\n".format(id_nodo_campos, "*")
+                union = "\"{}\"->\"{}\";\n".format(id_nodo_select, id_nodo_campos)
+                result += label_encabezado + union
+            else:
+                for campo in self.lista_campos:
+                    result += campo.GraficarArbol(id_nodo_select, contador)
 
         # Se crea el nodo de la condicion y se une con el nodo de select
         if self.condicion is not None:
