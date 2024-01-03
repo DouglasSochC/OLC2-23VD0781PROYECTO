@@ -25,6 +25,8 @@ class Expresion(Expresion):
                 return RetornoCodigo(con_sin_parentesis)
             elif isinstance(self.expresion, Literal):
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
+                if isinstance(res_expresion, RetornoError):
+                    return res_expresion
                 if self.expresion.tipado in (TIPO_DATO.NCHAR, TIPO_DATO.NVARCHAR):
                     con_sin_parentesis = "({})".format(res_expresion.valor) if self.entre_parentesis else res_expresion.valor
                     return RetornoCodigo("'{}'".format(con_sin_parentesis))
@@ -33,6 +35,8 @@ class Expresion(Expresion):
                     return RetornoCodigo(str(con_sin_parentesis))
             else:
                 res_expresion = self.expresion.Ejecutar(base_datos, entorno)
+                if isinstance(res_expresion, RetornoError):
+                    return res_expresion
                 con_sin_parentesis = "({})".format(res_expresion.codigo) if self.entre_parentesis else res_expresion.codigo
                 return RetornoCodigo(con_sin_parentesis)
         else:
@@ -57,7 +61,7 @@ class Expresion(Expresion):
                         else:
                             return RetornoError(datos.valor)
                 else:
-                    return Literal(None, simbolo.valor, simbolo.tipo_dato, simbolo.id).Ejecutar(base_datos, entorno)
+                    return Literal(simbolo.valor, simbolo.tipo_dato, simbolo.id).Ejecutar(base_datos, entorno)
             else:
                 res_ejecutar = self.expresion.Ejecutar(base_datos, entorno)
                 return res_ejecutar

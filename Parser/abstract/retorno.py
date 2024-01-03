@@ -11,6 +11,8 @@ class TIPO_DATO(Enum):
     NVARCHAR = 6,
     NULL = 7,
     BOOLEAN = 8
+    PROCEDURE = 9
+    FUNCTION = 10
 
 @unique
 class TIPO_ENTORNO(Enum) :

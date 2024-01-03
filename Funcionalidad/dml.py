@@ -24,6 +24,9 @@ class DML:
         tree = ET.parse(path_tabla)
         root = tree.getroot()
 
+        # Se verifica la cantidad de llaves primarias que tiene la tabla
+        llaves_primarias = root.findall(".//estructura/campo[@pk]")
+
         # Buscar la definicion de los campos de la tabla en la estructura
         campos = root.findall(".//estructura/campo")
 
@@ -56,7 +59,7 @@ class DML:
                 # Si es una llave primaria se valida que no se repita su valor
                 if 'pk' in campo.attrib:
                     encontrado = root.findall(".//registros/fila[{}='{}']".format(campo_nombre, tupla[campo_nombre]))
-                    if len(encontrado) > 0:
+                    if len(encontrado) > 0 and len(llaves_primarias) == 1:
                         return "No se pueden duplicar valores en la clave primaria"
 
                 # Si es una llave foranea se valida que exista su valor en la tabla de referencia

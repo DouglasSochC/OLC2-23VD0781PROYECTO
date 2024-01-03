@@ -81,6 +81,8 @@ class Create(Instruccion):
                         return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion del PROCEDURE")
 
                 respuesta = ddl.crear_procedimiento(base_datos.valor, nombre, lista_parametros, query)
+                simbolo_procedure = Simbolo(nombre, -1, TIPO_DATO.PROCEDURE, -1, TIPO_ENTORNO.SENTENCIA_SSL)
+                entorno.agregar(simbolo_procedure)
                 return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
             elif self.instruccion == 'function':
@@ -111,6 +113,8 @@ class Create(Instruccion):
                         return RetornoError("Ha ocurrido un error al definir la(s) instruccion(es) dentro de la creacion del FUNCTION")
 
                 respuesta = ddl.crear_funcion(base_datos.valor, nombre, lista_parametros, query)
+                simbolo_funcion = Simbolo(nombre, -1, TIPO_DATO.FUNCTION, -1, TIPO_ENTORNO.SENTENCIA_SSL)
+                entorno.agregar(simbolo_funcion)
                 return RetornoCorrecto(respuesta.valor) if respuesta.success else RetornoError(respuesta.valor)
 
     #TODO: Falta implementar lo siguiente
@@ -128,7 +132,7 @@ class Create(Instruccion):
         if self.campos_table is not None:
             for campo in self.campos_table:
                 result+= campo.GraficarArbol(id_nodo_alias, contador)
-        
+
         if self.parametros is not None:
             for parametro in self.parametros:
                 result+= parametro.GraficarArbol(id_nodo_alias, contador)

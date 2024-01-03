@@ -57,6 +57,7 @@ CARPETA_PARA_TABLAS = str(os.environ.get("CARPETA_PARA_TABLAS"))
 CARPETA_PARA_FUNCIONES = str(os.environ.get("CARPETA_PARA_FUNCIONES"))
 CARPETA_PARA_PROCEDIMIENTOS = str(os.environ.get("CARPETA_PARA_PROCEDIMIENTOS"))
 BD_SELECCIONADA=""
+TS_GLOBAL = None
 
 def obtener_contenido_tab(indice_actual):
     # Obtener el widget CodeView del tab seleccionado
@@ -90,11 +91,11 @@ def ejecutar_query():
     if len(TABS_ACTUALES) <= 0:
         return
 
-    global BD_SELECCIONADA
+    global BD_SELECCIONADA, TS_GLOBAL
 
     indice_actual = notebook_central.index(notebook_central.select())
     texto = obtener_contenido_tab(indice_actual)
-    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
+    TS_GLOBAL = TablaDeSimbolos(None, [], "GLOBAL")
     base_datos = BaseDatosWrapper(BD_SELECCIONADA)
     salida = parse(texto)
 
@@ -109,7 +110,7 @@ def ejecutar_query():
         else:
             # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
             for elemento in salida:
-                respuesta = elemento.Ejecutar(base_datos, ts_global)
+                respuesta = elemento.Ejecutar(base_datos, TS_GLOBAL)
                 if isinstance(respuesta, RetornoError):
                     mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
                 elif isinstance(respuesta, RetornoCorrecto) and respuesta.msg is not None:
@@ -275,7 +276,9 @@ def mostrar_salida_como_tabla(data: dict):
 
     encabezados = data['encabezado']
     columnas = encabezados.copy()
-    columnas.pop()
+
+    if len(columnas) > 0:
+        columnas.pop()
 
     # Crear el Treeview (tabla) y lo agrega al tab_salida_tabla
     tree = ttk.Treeview(tab_salida_tabla, columns=(columnas))
@@ -796,36 +799,15 @@ def graficar_arbol():
 
 def graficar_tabla_simbolos():
 
-    if len(TABS_ACTUALES) <= 0:
+    global TS_GLOBAL
+
+    if TS_GLOBAL is None:
+        messagebox.showinfo("Informacion", "No se ha ejecutado ningun query")
         return
 
-    global BD_SELECCIONADA
-
-    indice_actual = notebook_central.index(notebook_central.select())
-    texto = obtener_contenido_tab(indice_actual)
-    ts_global = TablaDeSimbolos(None, [], "GLOBAL")
-    base_datos = BaseDatosWrapper(BD_SELECCIONADA)
-    salida = parse(texto)
-
-    # Se revisa que se haya obtenido una salida
-    if salida is not None:
-
-        # Se setea la salida para los errores lexicos y sintacticos
-        if isinstance(salida, str):
-            mostrar_salida_como_texto(salida)
-        else:
-            # Se realiza el analisis semantico y se muestra el resultado en la consola de la interfaz
-            for elemento in salida:
-                respuesta = elemento.Ejecutar(base_datos, ts_global)
-                if isinstance(respuesta, RetornoError):
-                    mostrar_salida_como_texto("ERROR: {}".format(respuesta.msg))
-                elif isinstance(respuesta, RetornoMultiplesInstrucciones):
-                    for mensaje in respuesta.arreglo_mensajes:
-                        mostrar_salida_como_texto(mensaje)
-
-        dot_string = ""
-        dot_string += "digraph G { rankdir=TB node [shape=plaintext] \n" + construir_tabla_simbolo(ts_global, [0]) + " \n}"
-        generate_graph(dot_string)
+    dot_string = ""
+    dot_string += "digraph G { rankdir=TB node [shape=plaintext] \n" + construir_tabla_simbolo(TS_GLOBAL, [0]) + " \n}"
+    generate_graph(dot_string)
 
 def construir_tabla_simbolo(tabla_simbolo: TablaDeSimbolos, indice: list):
 
